@@ -20,6 +20,10 @@ export default function RootLayout() {
         <Stack.Screen name="memo/create" options={{ title: 'メモ作成' }} />
         <Stack.Screen name="memo/[id]/index" options={{ title: 'メモ詳細' }} />
         <Stack.Screen name="memo/[id]/edit" options={{ title: 'メモ編集' }} />
+        <Stack.Screen name="notes/index" options={{ title: 'メモ管理' }} />
+        <Stack.Screen name="notes/create" options={{ title: 'メモ作成' }} />
+        <Stack.Screen name="notes/[id]/index" options={{ title: 'メモ詳細' }} />
+        <Stack.Screen name="notes/[id]/edit" options={{ title: 'メモ編集' }} />
       </Stack>
     </SQLiteProvider>
   );

@@ -2,6 +2,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import {
   CREATE_MEMOS_TABLE,
   CREATE_AI_OUTPUTS_TABLE,
+  CREATE_NOTES_TABLE,
   CREATE_SETTINGS_TABLE,
   SCHEMA_VERSION,
 } from './schema';
@@ -19,6 +20,13 @@ export async function runMigrations(db: SQLiteDatabase): Promise<void> {
   if (currentVersion < 1) {
     await db.execAsync(CREATE_MEMOS_TABLE);
     await db.execAsync(CREATE_AI_OUTPUTS_TABLE);
+  }
+
+  if (currentVersion < 2) {
+    await db.execAsync(CREATE_NOTES_TABLE);
+  }
+
+  if (currentVersion < SCHEMA_VERSION) {
     await db.runAsync(
       "INSERT OR REPLACE INTO settings (key, value) VALUES ('schema_version', ?)",
       [String(SCHEMA_VERSION)]

@@ -35,9 +35,14 @@ export default function MemoListScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>メモ一覧</Text>
-        <TouchableOpacity onPress={() => router.push('/settings')} style={styles.settingsBtn}>
-          <Text style={styles.settingsBtnText}>設定</Text>
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity onPress={() => router.push('/notes')} style={styles.settingsBtn}>
+            <Text style={styles.settingsBtnText}>メモ管理</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/settings')} style={styles.settingsBtn}>
+            <Text style={styles.settingsBtnText}>設定</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {loading ? (
@@ -100,6 +105,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E5E7EB',
   },
   headerTitle: { fontSize: 20, fontWeight: '700', color: '#111827' },
+  headerActions: { flexDirection: 'row', gap: 8 },
   settingsBtn: {
     paddingHorizontal: 12,
     paddingVertical: 6,

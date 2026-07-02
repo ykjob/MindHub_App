@@ -1,6 +1,6 @@
 export const DB_NAME = 'flowdock.db';
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const CREATE_MEMOS_TABLE = `
   CREATE TABLE IF NOT EXISTS memos (
@@ -30,6 +30,27 @@ export const CREATE_AI_OUTPUTS_TABLE = `
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     FOREIGN KEY (memo_id) REFERENCES memos(id)
+  );
+`;
+
+export const CREATE_NOTES_TABLE = `
+  CREATE TABLE IF NOT EXISTS notes (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL DEFAULT '',
+    body TEXT NOT NULL DEFAULT '',
+    project TEXT NOT NULL DEFAULT '',
+    type TEXT NOT NULL DEFAULT 'thought',
+    tags TEXT NOT NULL DEFAULT '',
+    source TEXT NOT NULL DEFAULT 'manual',
+    visibility TEXT NOT NULL DEFAULT 'private',
+    is_git_candidate INTEGER NOT NULL DEFAULT 0,
+    export_dir TEXT,
+    export_filename TEXT,
+    export_path TEXT,
+    exported_at TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    archived_at TEXT
   );
 `;
 
