@@ -40,10 +40,19 @@ export default function NoteDetailScreen() {
   const [copied, setCopied] = useState(false);
 
   const loadNote = useCallback(async () => {
-    if (!id) return;
-    const result = await getNoteById(db, id);
-    setNote(result);
-    setLoading(false);
+    if (!id) {
+      setNote(null);
+      setLoading(false);
+      return;
+    }
+    try {
+      const result = await getNoteById(db, id);
+      setNote(result);
+    } catch {
+      setNote(null);
+    } finally {
+      setLoading(false);
+    }
   }, [id, db]);
 
   useFocusEffect(

@@ -13,6 +13,7 @@ import {
 // 絞った軽量レンダラーとして実装する（採用理由は docs/memo-app/11-open-issues.md）。
 
 const MONO_FONT = Platform.OS === 'ios' ? 'Courier' : 'monospace';
+const ALLOWED_LINK_PROTOCOLS = new Set(['http:', 'https:', 'mailto:']);
 
 interface Props {
   markdown: string;
@@ -83,6 +84,22 @@ function parseBlocks(markdown: string): Block[] {
 }
 
 // インライン記法：**強調**、`コード`、[リンク](url)
+function isAllowedLinkUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return ALLOWED_LINK_PROTOCOLS.has(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
+
+function openSafeUrl(url: string): void {
+  if (!isAllowedLinkUrl(url)) {
+    return;
+  }
+  Linking.openURL(url).catch(() => undefined);
+}
+
 function renderInline(text: string, baseStyle?: TextStyle): React.ReactNode[] {
   const nodes: React.ReactNode[] = [];
   const pattern = /(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g;
@@ -119,7 +136,7 @@ function renderInline(text: string, baseStyle?: TextStyle): React.ReactNode[] {
           <Text
             key={key++}
             style={[baseStyle, styles.link]}
-            onPress={() => Linking.openURL(url).catch(() => undefined)}
+            onPress={() => openSafeUrl(url)}
           >
             {link[1]}
           </Text>

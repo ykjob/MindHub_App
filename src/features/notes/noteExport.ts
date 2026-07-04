@@ -3,6 +3,7 @@ import type { Note } from './noteTypes';
 import { parseTags } from './noteTypes';
 
 const MAX_SLUG_LENGTH = 50;
+const MAX_PROJECT_LENGTH = 80;
 
 export function slugify(title: string): string {
   const slug = title
@@ -16,6 +17,26 @@ export function slugify(title: string): string {
   return slug || 'untitled';
 }
 
+export function sanitizeProjectSegment(project: string): string {
+  const safe = project
+    .trim()
+    .replace(/[\s　]+/g, '-')
+    .replace(/[\\/:*?"<>|]+/g, '-')
+    .replace(/\.+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, MAX_PROJECT_LENGTH);
+  return safe || 'general';
+}
+
+function yamlString(value: string): string {
+  return JSON.stringify(value);
+}
+
+function yamlStringArray(values: string[]): string {
+  return `[${values.map(yamlString).join(', ')}]`;
+}
+
 export interface ExportInfo {
   dir: string;
   filename: string;
@@ -23,7 +44,7 @@ export interface ExportInfo {
 }
 
 export function buildExportInfo(note: Note): ExportInfo {
-  const project = note.project.trim() || 'general';
+  const project = sanitizeProjectSegment(note.project);
   const date = note.created_at.slice(0, 10);
   const dir = `docs/notes/${project}`;
   const filename = `${date}_${note.type}_${slugify(note.title)}.md`;
@@ -32,15 +53,16 @@ export function buildExportInfo(note: Note): ExportInfo {
 
 export function buildNoteMarkdown(note: Note): string {
   const tags = parseTags(note.tags);
+  const project = sanitizeProjectSegment(note.project);
   const frontMatter = [
     '---',
-    `title: ${note.title || 'untitled'}`,
-    `project: ${note.project.trim() || 'general'}`,
-    `type: ${note.type}`,
-    `tags: [${tags.join(', ')}]`,
-    `createdAt: ${note.created_at}`,
-    `updatedAt: ${note.updated_at}`,
-    `source: MindHub_App`,
+    `title: ${yamlString(note.title || 'untitled')}`,
+    `project: ${yamlString(project)}`,
+    `type: ${yamlString(note.type)}`,
+    `tags: ${yamlStringArray(tags)}`,
+    `createdAt: ${yamlString(note.created_at)}`,
+    `updatedAt: ${yamlString(note.updated_at)}`,
+    `source: ${yamlString('MindHub_App')}`,
     '---',
   ].join('\n');
 

@@ -15,11 +15,21 @@ export default function NoteEditScreen() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!id) return;
-    getNoteById(db, id).then((result) => {
-      setNote(result);
+    if (!id) {
+      setNote(null);
       setLoading(false);
-    });
+      return;
+    }
+    getNoteById(db, id)
+      .then((result) => {
+        setNote(result);
+      })
+      .catch(() => {
+        setNote(null);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [id, db]);
 
   async function handleSave(input: NoteInput) {
