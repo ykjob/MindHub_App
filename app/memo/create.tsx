@@ -5,15 +5,18 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
   ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { createMemo } from '../../src/features/memos/memoService';
 import CategorySelector from '../../src/components/CategorySelector';
+import FormFooterBar, {
+  inputAccessoryProps,
+} from '../../src/components/FormFooterBar';
 import type { CategoryKey } from '../../src/features/memos/memoCategories';
+
+const FOOTER_ACCESSORY_ID = 'memo-create-footer';
 
 export default function MemoCreateScreen() {
   const db = useSQLiteContext();
@@ -35,10 +38,7 @@ export default function MemoCreateScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <View style={styles.container}>
       <View style={styles.toolbar}>
         <CategorySelector selected={category} onChange={setCategory} />
       </View>
@@ -47,18 +47,19 @@ export default function MemoCreateScreen() {
         ref={inputRef}
         style={styles.input}
         multiline
-        autoFocus
         placeholder="メモを入力..."
         placeholderTextColor="#9CA3AF"
         value={body}
         onChangeText={setBody}
         textAlignVertical="top"
+        {...inputAccessoryProps(FOOTER_ACCESSORY_ID)}
       />
 
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.cancelBtn} onPress={() => router.back()}>
-          <Text style={styles.cancelText}>キャンセル</Text>
-        </TouchableOpacity>
+      <FormFooterBar
+        accessoryId={FOOTER_ACCESSORY_ID}
+        // autoFocusの代替。キーボード直上バーの準備完了後にフォーカスする
+        onAccessoryReady={() => inputRef.current?.focus()}
+      >
         <TouchableOpacity
           style={[styles.saveBtn, !body.trim() && styles.saveBtnDisabled]}
           onPress={handleSave}
@@ -70,8 +71,11 @@ export default function MemoCreateScreen() {
             <Text style={styles.saveText}>保存</Text>
           )}
         </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+        <TouchableOpacity style={styles.cancelBtn} onPress={() => router.back()}>
+          <Text style={styles.cancelText}>キャンセル</Text>
+        </TouchableOpacity>
+      </FormFooterBar>
+    </View>
   );
 }
 
@@ -88,15 +92,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#111827',
     lineHeight: 26,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    padding: 12,
-    gap: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
   },
   cancelBtn: {
     paddingHorizontal: 16,

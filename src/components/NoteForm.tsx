@@ -9,6 +9,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
+import FormFooterBar, { inputAccessoryProps } from './FormFooterBar';
 import { useSQLiteContext } from 'expo-sqlite';
 import type {
   NoteInput,
@@ -39,6 +40,9 @@ interface Props {
   onSave: (input: NoteInput) => void;
   onCancel: () => void;
 }
+
+const FOOTER_ACCESSORY_ID = 'note-form-footer';
+const textInputAccessoryProps = inputAccessoryProps(FOOTER_ACCESSORY_ID);
 
 export default function NoteForm({
   initial,
@@ -121,9 +125,34 @@ export default function NoteForm({
 
   const canSave = title.trim().length > 0 || body.trim().length > 0;
 
+  const footerButtons = (
+    <>
+      <TouchableOpacity
+        style={[styles.saveBtn, !canSave && styles.saveBtnDisabled]}
+        onPress={handleSave}
+        disabled={!canSave || saving}
+      >
+        {saving ? (
+          <ActivityIndicator color="#FFFFFF" size="small" />
+        ) : (
+          <Text style={styles.saveText}>{saveLabel}</Text>
+        )}
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.cancelBtn} onPress={onCancel}>
+        <Text style={styles.cancelText}>キャンセル</Text>
+      </TouchableOpacity>
+    </>
+  );
+
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        // キーボード表示中でもボタン・チップの1タップ目を反応させる
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
         <Text style={styles.label}>タイトル</Text>
         <TextInput
           style={styles.input}
@@ -131,6 +160,7 @@ export default function NoteForm({
           onChangeText={setTitle}
           placeholder="タイトル"
           placeholderTextColor="#9CA3AF"
+          {...textInputAccessoryProps}
         />
 
         <Text style={styles.label}>カテゴリ</Text>
@@ -158,6 +188,7 @@ export default function NoteForm({
           onChangeText={setProject}
           placeholder="例：memo_app（空ならgeneral扱い）"
           placeholderTextColor="#9CA3AF"
+          {...textInputAccessoryProps}
         />
         <View style={styles.chipWrap}>
           {projectSuggestions.map((p) => (
@@ -178,6 +209,7 @@ export default function NoteForm({
           onChangeText={setTags}
           placeholder="例：sqlite,expo,調査"
           placeholderTextColor="#9CA3AF"
+          {...textInputAccessoryProps}
         />
         {tagSuggestions.length > 0 ? (
           <View style={styles.chipWrap}>
@@ -211,6 +243,7 @@ export default function NoteForm({
             placeholderTextColor="#9CA3AF"
             multiline
             textAlignVertical="top"
+            {...textInputAccessoryProps}
           />
         )}
 
@@ -252,22 +285,9 @@ export default function NoteForm({
         </Text>
       </ScrollView>
 
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.cancelBtn} onPress={onCancel}>
-          <Text style={styles.cancelText}>キャンセル</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.saveBtn, !canSave && styles.saveBtnDisabled]}
-          onPress={handleSave}
-          disabled={!canSave || saving}
-        >
-          {saving ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
-          ) : (
-            <Text style={styles.saveText}>{saveLabel}</Text>
-          )}
-        </TouchableOpacity>
-      </View>
+      <FormFooterBar accessoryId={FOOTER_ACCESSORY_ID}>
+        {footerButtons}
+      </FormFooterBar>
     </View>
   );
 }
@@ -382,15 +402,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 8,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    padding: 12,
-    gap: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
   },
   cancelBtn: {
     paddingHorizontal: 16,
