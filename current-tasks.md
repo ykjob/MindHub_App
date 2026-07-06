@@ -17,6 +17,14 @@ MindHub_Appのメモ管理機能拡張について、
 
 ## 完了したこと
 
+### プロンプト集HTML先行生成の実装（2026-07-06、未コミット）
+
+* scripts/generate_prompt_hub.mjs 新規作成。`npm run generate:prompt-hub` で docs/mobile-view/prompts.html を生成（カテゴリ整理プロンプト10個収録）
+* データ取得層と描画層を分離し、将来のnote_templates（DB）切替はloadPromptEntries()差し替えのみで対応可能
+* 新規ライブラリなし（既存TypeScriptコンパイラAPIを利用）。アプリ本体（app/ / src/）は無変更
+* 検証：生成成功・HTML構造検証合格・インラインJS構文合格・tsc / Web export合格。ブラウザとスマホでの実操作確認はユーザー確認待ち
+* 14 §1.3の不足5プロンプト（時間帯別タスク化・Googleタスク整形・カレンダー整形・優先順位整理・Codexレビュー依頼）は本文未作成のため後続対応
+
 ### 端末別運用方針の決定・仕様書反映（2026-07-06）
 
 * 方針決定：自分（Android）はAndroid APK版をアプリとしてインストールして使う（メモ作成・編集・テンプレート管理・JSONインポート・オフライン利用の確認）。家族（iPhone）は編集・管理をしない想定のため、アプリ配布・EAS iOSビルドは行わず、閲覧専用Webページ（スマホ閲覧用HTML/JSON）で確認してもらう。PC/Android/iPhone間の自動同期は今回の対象外

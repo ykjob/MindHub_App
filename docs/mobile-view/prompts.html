@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>プロンプト集 | MindHub_App</title>
+<style>
+  :root {
+    --accent: #2563EB;
+    --bg: #F3F4F6;
+    --card-bg: #FFFFFF;
+    --text: #111827;
+    --sub: #6B7280;
+    --border: #E5E7EB;
+    --pre-bg: #F9FAFB;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111827;
+      --card-bg: #1F2937;
+      --text: #F9FAFB;
+      --sub: #9CA3AF;
+      --border: #374151;
+      --pre-bg: #111827;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 16px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, sans-serif;
+    line-height: 1.6;
+  }
+  header h1 {
+    font-size: 20px;
+    margin: 0 0 4px;
+  }
+  header p {
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: var(--sub);
+  }
+  #search {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  .card.hidden { display: none; }
+  .card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .card-title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+  }
+  .card-title h2 {
+    font-size: 16px;
+    margin: 0;
+  }
+  .type {
+    font-size: 11px;
+    color: var(--sub);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+  .badge {
+    font-size: 11px;
+    color: #B91C1C;
+    background: #FEE2E2;
+    border-radius: 4px;
+    padding: 1px 6px;
+    white-space: nowrap;
+  }
+  .copy-btn {
+    flex-shrink: 0;
+    background: var(--accent);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .copy-btn.done { background: #16A34A; }
+  details { margin-top: 8px; }
+  summary {
+    font-size: 13px;
+    color: var(--accent);
+    cursor: pointer;
+  }
+  pre {
+    background: var(--pre-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 8px 0 0;
+  }
+  footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: var(--sub);
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>プロンプト集</h1>
+    <p>コピーしてChatGPTに貼り付け、続けて整理したい内容を貼ってください。</p>
+    <input type="search" id="search" placeholder="カテゴリ名で絞り込み">
+  </header>
+  <main>
+      <section class="card" data-search="作業ログ worklog">
+        <div class="card-head">
+          <div class="card-title">
+            <h2>作業ログ</h2>
+            <span class="type">worklog</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-worklog">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-worklog">以下の内容を、作業ログとしてMarkdown形式で整理してください。
+
+指定した見出しを使ってください。
+不明な項目は無理に埋めず「未記載」または「該当なし」としてください。
+推奨タグを最後に出してください。
+
+出力形式：
+
+# 作業ログ：タイトル
+
+## 今回の目的
+
+## 今回やったこと
+
+## 決まったこと
+
+## 変更したファイル
+
+## 確認したこと
+
+## 未完了事項
+
+## 次にやること
+
+## Claude Codeに渡すなら
+
+## 次回再開メモ
+
+## 推奨タグ
+
+整理対象：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="調査メモ research">
+        <div class="card-head">
+          <div class="card-title">
+            <h2>調査メモ</h2>
+            <span class="type">research</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-research">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-research">以下の内容を、調査メモとしてMarkdown形式で整理してください。
+
+指定した見出しを使ってください。
+不明な項目は無理に埋めず「未記載」または「該当なし」としてください。
+推奨タグを最後に出してください。
+
+出力形式：
+
+# 調査メモ：タイトル
+
+## 調べた目的
+
+## 結論
+
+## 重要ポイント
+
+## 比較・選択肢
+
+## 採用した方針
+
+## 採用しない方針
+
+## 注意点
+
+## 未確認事項
+
+## 次に調べること
+
+## 参考情報
+
+## 推奨タグ
+
+整理対象：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="コマンド・手順 command">
+        <div class="card-head">
+          <div class="card-title">
+            <h2>コマンド・手順</h2>
+            <span class="type">command</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-command">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-command">以下の内容を、コマンド・手順としてMarkdown形式で整理してください。
+
+指定した見出しを使ってください。
+不明な項目は無理に埋めず「未記載」または「該当なし」としてください。
+推奨タグを最後に出してください。
+
+出力形式：
+
+# コマンド手順：タイトル
+
+## 目的
+
+## 前提条件
+
+## 実行環境
+
+## 実行場所
+
+## 手順
+
+## 確認コマンド
+
+## 成功時の状態
+
+## 失敗時の確認ポイント
+
+## 注意点
+
+## 関連メモ
+
+## 推奨タグ
+
+整理対象：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="設計メモ design">
+        <div class="card-head">
+          <div class="card-title">
+            <h2>設計メモ</h2>
+            <span class="type">design</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-design">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-design">以下の内容を、設計メモとしてMarkdown形式で整理してください。
+
+指定した見出しを使ってください。
+不明な項目は無理に埋めず「未記載」または「該当なし」としてください。
+推奨タグを最後に出してください。
+
+出力形式：
+
+# 設計メモ：タイトル
+
+## 背景
+
+## 目的
+
+## 解決したい課題
+
+## 決定事項
+
+## 未確定事項
+
+## 画面設計
+
+## データ設計
+
+## 処理フロー
+
+## 初期実装範囲
+
+## 初期実装でやらないこと
+
+## 実装ロードマップ
+
+## Claude Codeに渡す要点
+
+## 次に決めること
+
+## 推奨タグ
+
+整理対象：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="思考メモ thought">
+        <div class="card-head">
+          <div class="card-title">
+            <h2>思考メモ</h2>
+            <span class="type">thought</span>
+            <span class="badge">個人情報注意</span>
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-thought">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-thought">以下の内容を、思考メモとしてMarkdown形式で整理してください。
+
+指定した見出しを使ってください。
+不明な項目は無理に埋めず「未記載」または「該当なし」としてください。
+推奨タグを最後に出してください。
+
+出力形式：
+
+# 思考メモ：タイトル
+
+## 今の状態
+
+- 眠気：
+- 体調：
+- 気分：
+- 頭の切り替わり：
+
+## ダーッと書く
+
+## 整理すると
+
+## 気になっていること
+
+## 今やりたいこと
+
+## 後で考えたいこと
+
+## 決める必要があること
+
+## 今日やらなくていいこと
+
+## 次に見るメモ
+
+## 推奨タグ
+
+整理対象：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="chatgpt保存ログ chatgpt_log">
+        <div class="card-head">
+          <div class="card-title">
+            <h2>ChatGPT保存ログ</h2>
+            <span class="type">chatgpt_log</span>
+            <span class="badge">個人情報注意</span>
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-chatgpt_log">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-chatgpt_log">以下の内容を、ChatGPT保存ログとしてMarkdown形式で整理してください。
+
+指定した見出しを使ってください。
+不明な項目は無理に埋めず「未記載」または「該当なし」としてください。
+推奨タグを最後に出してください。
+個人情報や非公開情報が含まれる場合は「Gitに上げる場合の注意」に明記してください。
+
+出力形式：
+
+# ChatGPT保存ログ：タイトル
+
+## 今回の会話テーマ
+
+## 今回の内容
+
+## 決まったこと
+
+## 変更された方針
+
+## 次にやること
+
+## 未決事項
+
+## 保存しておくべき要点
+
+## Claude Codeに渡せる内容
+
+## Gitに上げる場合の注意
+
+## 次回再開メモ
+
+## 推奨タグ
+
+整理対象：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="claude code用プロンプト claude_prompt">
+        <div class="card-head">
+          <div class="card-title">
+            <h2>Claude Code用プロンプト</h2>
+            <span class="type">claude_prompt</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-claude_prompt">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-claude_prompt">以下の内容を、Claude Code用プロンプトとしてMarkdown形式で整理してください。
+
+指定した見出しを使ってください。
+不明な項目は無理に埋めず「未記載」または「該当なし」としてください。
+推奨タグを最後に出してください。
+
+出力形式：
+
+# Claude Code用プロンプト：タイトル
+
+## 作業目的
+
+## 対象リポジトリ
+
+## 作業前に確認するファイル
+
+## やってほしいこと
+
+## やらないでほしいこと
+
+## 変更範囲
+
+## 完了条件
+
+## 確認してほしいこと
+
+## テスト・検証方法
+
+## 作業ログ記録ルール
+
+## 注意点
+
+## Claude Codeに渡す本文
+
+## 実行後の結果メモ
+
+## 推奨タグ
+
+整理対象：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="就活メモ jobsearch">
+        <div class="card-head">
+          <div class="card-title">
+            <h2>就活メモ</h2>
+            <span class="type">jobsearch</span>
+            <span class="badge">個人情報注意</span>
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-jobsearch">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-jobsearch">以下の内容を、就活メモとしてMarkdown形式で整理してください。
+
+指定した見出しを使ってください。
+不明な項目は無理に埋めず「未記載」または「該当なし」としてください。
+推奨タグを最後に出してください。
+個人情報（氏名、住所、連絡先、応募先の非公開情報など）が含まれる場合は「個人情報の有無」に明記してください。
+
+出力形式：
+
+# 就活メモ：タイトル
+
+## 用途
+
+## 関連求人・企業
+
+## 自分の経験
+
+## アピールできる点
+
+## 不安点
+
+## 相談した内容
+
+## 決まった方針
+
+## 次にやること
+
+## 応募書類に使える表現
+
+## 面接で話せる内容
+
+## 公開してよい内容か
+
+## 個人情報の有無
+
+## 推奨タグ
+
+整理対象：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="エラー対応メモ error_note">
+        <div class="card-head">
+          <div class="card-title">
+            <h2>エラー対応メモ</h2>
+            <span class="type">error_note</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-error_note">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-error_note">以下の内容を、エラー対応メモとしてMarkdown形式で整理してください。
+
+指定した見出しを使ってください。
+不明な項目は無理に埋めず「未記載」または「該当なし」としてください。
+推奨タグを最後に出してください。
+
+出力形式：
+
+# エラー対応メモ：タイトル
+
+## 発生したエラー
+
+## エラー全文
+
+## 発生した状況
+
+## 再現手順
+
+## 原因
+
+## 試したこと
+
+## 効果がなかったこと
+
+## 解決方法
+
+## 修正したファイル
+
+## 確認方法
+
+## 再発防止メモ
+
+## 関連コマンド
+
+## 推奨タグ
+
+整理対象：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="テンプレート template">
+        <div class="card-head">
+          <div class="card-title">
+            <h2>テンプレート</h2>
+            <span class="type">template</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-template">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-template">以下の内容を、テンプレートとしてMarkdown形式で整理してください。
+
+指定した見出しを使ってください。
+不明な項目は無理に埋めず「未記載」または「該当なし」としてください。
+推奨タグを最後に出してください。
+
+出力形式：
+
+# テンプレート：タイトル
+
+## 用途
+
+## 使う場面
+
+## テンプレート本文
+
+## 使い方の注意
+
+## 関連メモ
+
+## 推奨タグ
+
+整理対象：</pre>
+        </details>
+      </section>
+  </main>
+  <footer>
+    <p>生成日時：2026/07/06 21:23</p>
+    <p>コード固定定義（chatgptPrompts.ts）から生成。将来はnote_templates（DB）へ出力元を切り替え予定。</p>
+    <p>再生成コマンド：npm run generate:prompt-hub</p>
+  </footer>
+  <script>
+    // コピー：Clipboard APIが使えない環境では選択＋execCommandへフォールバック
+    function fallbackCopy(text) {
+      var textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      var ok = false;
+      try {
+        ok = document.execCommand('copy');
+      } catch (e) {
+        ok = false;
+      }
+      document.body.removeChild(textarea);
+      return ok;
+    }
+
+    function markDone(btn, ok) {
+      var original = 'コピー';
+      btn.textContent = ok ? 'コピーしました' : 'コピー失敗';
+      if (ok) btn.classList.add('done');
+      setTimeout(function () {
+        btn.textContent = original;
+        btn.classList.remove('done');
+      }, 1500);
+    }
+
+    document.querySelectorAll('.copy-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var pre = document.getElementById(btn.getAttribute('data-copy'));
+        var text = pre ? pre.textContent : '';
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(
+            function () { markDone(btn, true); },
+            function () { markDone(btn, fallbackCopy(text)); }
+          );
+        } else {
+          markDone(btn, fallbackCopy(text));
+        }
+      });
+    });
+
+    document.getElementById('search').addEventListener('input', function (e) {
+      var keyword = e.target.value.trim().toLowerCase();
+      document.querySelectorAll('.card').forEach(function (card) {
+        var hit = !keyword || card.getAttribute('data-search').indexOf(keyword) !== -1;
+        card.classList.toggle('hidden', !hit);
+      });
+    });
+  </script>
+</body>
+</html>

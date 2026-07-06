@@ -1,6 +1,46 @@
 # 最新作業ログ
 
-最終更新：2026-07-06（運用方針の詳細確定の仕様反映）
+最終更新：2026-07-06（プロンプト集HTML先行生成の実装）
+
+## プロンプト集HTML先行生成（Phase 11短期分）の実装（2026-07-06）
+
+### 今回の目的
+
+note_templatesのDB化を待たず、コード固定のプロンプト定義（chatgptPrompts.ts）からスマホ閲覧用プロンプト集HTMLをdocs配下へ生成する（14 §1.6の短期方針）。スマホでプロンプトを見てコピーできることの先行検証が目的。
+
+### 実装内容
+
+* `scripts/generate_prompt_hub.mjs` を新規作成。`npm run generate:prompt-hub` で `docs/mobile-view/prompts.html` を生成する
+* データ取得層 `loadPromptEntries()` と描画層 `renderHtml(entries)` を分離。PromptEntryの形はnote_templatesのカラム（category_type / name / prompt_body / sort_order）に対応させており、将来のDB切替はloadPromptEntries()の差し替えのみ
+* 技術方式：既存コードの拡張子なしimportによりNode 24のTS直接実行が使えないため、既存devDependencyのTypeScriptコンパイラAPIで `node_modules/.cache/prompt-hub/` へCommonJSコンパイルしてからrequireする。**新規ライブラリ追加なし**
+* HTML仕様：単一ファイル完結（CSS/JSインライン・外部リソースなし・noindex）、#2563EB基調、ライト/ダーク対応、カテゴリ別カード10枚（カテゴリ名・typeチップ・個人情報注意バッジ・コピーボタン・detailsで折りたたみの全文pre）、カテゴリ名絞り込み、コピーはClipboard API＋execCommandフォールバック、生成日時と「コード固定定義から生成・将来DB切替予定」の注記
+* v1収録：カテゴリ整理プロンプト10個（chatgptPrompts.ts由来）。14 §1.3の不足5本（時間帯別タスク化・Googleタスク整形・カレンダー整形・優先順位整理・Codexレビュー依頼）は本文未作成のため後続対応
+* package.jsonに `generate:prompt-hub` スクリプトを追加（アプリ依存関係は無変更）
+
+### 変更したファイル
+
+* scripts/generate_prompt_hub.mjs（新規）
+* docs/mobile-view/prompts.html（新規・生成物。Git管理に含める方針）
+* package.json（scriptsに1行追加）
+* docs/memo-app/10-tasks.md、11-open-issues.md、current-tasks.md、docs/worklog/current.md
+
+アプリ本体（app/ / src/）・保存処理・FlowDock・SDK設定は無変更。
+
+### 検証結果
+
+* `npm run generate:prompt-hub` 成功（10プロンプト、約17KB）
+* 生成HTML構造検証：カード10・コピーボタン10・pre10、個人情報注意バッジ3（thought / chatgpt_log / jobsearch）、ID一意・ボタンとpreの紐付け完全、viewportあり、外部リソース参照なし
+* インラインJSの構文チェック（node --check）合格
+* `npx tsc --noEmit` エラーなし、`npx expo export --platform web` 成功（アプリ非破壊を確認）
+* ブラウザでの表示・コピーボタンのタップ動作・スマホ幅での見え方はユーザー確認待ち
+
+### 未完了・次にやること
+
+* ユーザーによるブラウザ・スマホでの表示/コピー確認 → 問題なければcommit（ユーザー判断）
+* GitHub Pages有効化（main / docsフォルダ）とリポジトリ公開可否の判断（11-open-issues.md 10章）
+* 14 §1.3の不足5プロンプトの本文作成と追加方法の決定
+
+---
 
 ## 運用方針の詳細確定と仕様書反映（2026-07-06）
 

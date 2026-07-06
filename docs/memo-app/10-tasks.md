@@ -148,10 +148,10 @@
 
 生成方式は決定済み（2026-07-06、14-mobile-prompt-hub-and-inbox.md §1.6）：短期はコード固定プロンプト定義（chatgptPrompts.ts）からdocs配下へ生成し、note_templates実装後に出力元をDBへ切り替える。Phase 8〜9への依存がなくなったため先行着手できる。
 
-* [ ] スマホ用プロンプト集HTML設計（出力先ファイル名・生成の起動方法は未確定。11-open-issues.md 10章）
-* [ ] コード固定プロンプト定義（chatgptPrompts.ts）からのHTML生成実装（短期方針）
-* [ ] 初期10プロンプト本文作成
-* [ ] note_templates実装後の出力元DB切り替え（将来。Phase 8〜9完了後）
+* [x] スマホ用プロンプト集HTML設計（2026-07-06実装：出力先 docs/mobile-view/prompts.html、生成は npm run generate:prompt-hub）
+* [x] コード固定プロンプト定義（chatgptPrompts.ts）からのHTML生成実装（短期方針。scripts/generate_prompt_hub.mjs）
+* [ ] 初期10プロンプト本文作成（v1はカテゴリ整理プロンプト10個を収録。14 §1.3の不足5本＝時間帯別タスク化・Googleタスク整形・カレンダー整形・優先順位整理・Codexレビュー依頼は本文未作成のため後続対応）
+* [ ] note_templates実装後の出力元DB切り替え（将来。Phase 8〜9完了後。loadPromptEntries()の差し替えのみで対応可能な構造にしてある）
 
 ## 14. Phase 12：Android APK版ビルド（2026-07-06 端末別運用方針）
 
