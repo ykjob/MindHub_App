@@ -28,7 +28,7 @@ familyカテゴリの扱い。
 * 公開GitHub Pagesには出さない（スマホ閲覧用HTMLの除外カテゴリに含める。`13-mobile-view-export.md` 3.2〜3.3参照）
 * 公開可否はカテゴリだけで判定せず、visibilityを併用する。category = family でも visibility = private / family のものは公開しない
 * visibilityに `family` 値を追加する（`03-data-model.md` 参照）
-* 実装タイミング（コード固定定義への追加か、note_categories（Phase 8）実装時か）は `11-open-issues.md` 13章参照
+* 2026-07-07実装済み：noteCategories.ts / noteTypes.ts / chatgptPrompts.ts（家族共有テンプレート）に反映した。note_categories（Phase 8）実装時はこの定義をseed元にする
 
 ## 2. Git候補初期値の考え方
 

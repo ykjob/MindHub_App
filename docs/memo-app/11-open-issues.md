@@ -112,12 +112,18 @@
 * APKのビルド方式：初回はEASクラウドビルドで進める（profile: preview / internal distribution / APK形式）。ローカルビルド（Android Studio / Gradle / Java環境整備）は重いため後回し
 * ビルド対象のSDKバージョン：SDK 54を正式採用候補のまま進める（SDK 56固有機能は未使用。SDK 54でtsc・Webバンドル・expo-doctor合格）。SDK 56へ戻す・上げる判断はSDK 56固有機能が必要になった時に再検討
 
+決定済み・整理済み（2026-07-07追加分）。
+
+* JSONインポートの仕様：`18-json-import-export.md` で具体化済み（形式・schemaVersion・重複ID処理・件数表示・責務分担）。実装は未着手
+* APK初版の機能範囲：現行機能のみで作る。テンプレート管理・JSONインポートは初版に含めない。確認チェックリストと既知の制約（アプリ内コピー・Markdown書き出しはWeb専用実装のためAPKでは動かない想定）は16 §2.5に整理済み
+* eas.json / app.json整備済み。Androidパッケージ名は `com.ykjob.flowdock` を仮置き（初回ビルド前まで変更可。変更する場合はapp.jsonのandroid.packageを修正）
+
 残る未確定。
 
-* JSONインポートの仕様：何をインポートするか（PC Web版のnotesデータをAndroid APK版へ移すためのエクスポート/インポートか、notes-data.jsonの取り込みか）、ファイル形式、ID重複時の扱い（上書き / スキップ / 複製）、インポート画面の場所。PC側に対応するJSONエクスポート機能も未実装
-* Android APK版初版に含める機能範囲：テンプレート管理（Phase 8〜9）とJSONインポートを初版に含めるか、まず現行機能のみでAPK化して動作確認を先行するか
-* EASアカウントの準備状況（Expoアカウントでのログインが必要）、Androidパッケージ名
-* check-expo-sdk54ブランチのmainへのマージタイミング（SDK 54正式採用候補の決定を受けて）
+* EASアカウントの準備（Expoアカウントでの `npx eas-cli login`、`eas build:configure` によるprojectId付与はユーザー操作待ち）
+* Androidパッケージ名の仮置き（com.ykjob.flowdock）を確定するか
+* JSONインポートの実装時期と、Android側ファイル選択の依存（expo-document-picker等）導入判断（18 §7参照）
+* check-expo-sdk54ブランチはmainへマージ済み（2026-07-06解消）
 
 ## 13. 配布・共有方針（2026-07-06 追加）
 
@@ -130,9 +136,13 @@
 * 配布用は別リポジトリに分ける。汎用テンプレート・汎用知識データ・サンプルデータ・説明書だけを含め、個人情報・家族情報・家庭内ルール・自分用の完全DBは含めない
 * 配布物の範囲：まずWeb / PWA・JSON・説明書を優先する。配布用APK・ソース公開は将来候補とし、初期必須にはしない
 
+決定済み・整理済み（2026-07-07追加分）。
+
+* familyカテゴリ・visibility = family値はコード固定定義へ先行追加済み（noteTypes.ts / noteCategories.ts / chatgptPrompts.ts。DBマイグレーション不要を確認）。note_categories（Phase 8）実装時はこの定義をseed元にする
+* 公開GitHub Pages出力可否の判定は mobileViewPolicy.ts に先行実装済み（Phase 10で使用予定）
+
 残る未確定。
 
 * 家庭内情報の共有手段をどれから着手するか：非公開配置先、ローカルHTML共有、PDF、JSONインポート、将来のprivate向けPWA
-* familyカテゴリ・visibility = family値の実装タイミング：コード固定定義（noteCategories.ts等）へ先行追加するか、note_categories（Phase 8）実装時に合わせるか
 * 配布用リポジトリの名称・構成・作成タイミング
 * 配布用データエクスポート機能の仕様（将来候補。当面は手動選別）

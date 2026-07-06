@@ -1,6 +1,60 @@
 # 最新作業ログ
 
-最終更新：2026-07-06（プロンプト集への追加31プロンプト実装）
+最終更新：2026-07-07（配布・実機運用前の土台整備）
+
+## 配布・実機運用前の土台整備（2026-07-07）
+
+### 今回の目的
+
+Android APK運用・家族用/配布用データ分離・スマホ用プロンプト閲覧・将来のJSONインポートに向けて、小〜中規模の実装と仕様整理をまとめて行う。
+
+### 実装したもの
+
+1. **familyカテゴリ / visibility=family のコード反映**（コミット 40b3aed）
+   * noteTypes.ts：NoteType / NoteVisibilityに'family'追加
+   * noteCategories.ts：NOTE_CATEGORIES末尾に家族共有（Git候補初期値false。fallbackのNOTE_CATEGORIES[4]=thoughtを維持するため末尾固定）、NOTE_VISIBILITIESにfamily追加
+   * chatgptPrompts.ts：家族共有メモの整理テンプレート・注意書き追加
+   * mobileViewPolicy.ts新設：公開Pages出力可否判定（judgeMobileViewExport。除外理由つき。13 §3準拠。family / private / internal / アーカイブ / 非Git候補を除外）。アプリ画面からは未import、Phase 10で使用予定
+   * notes列はTEXT型のため**DBマイグレーション不要**を確認。作成・編集画面はNOTE_CATEGORIES / NOTE_VISIBILITIESの動的描画のため自動で選択肢に出る
+2. **EASビルド準備**（コミット 98ec741）
+   * eas.json新規（preview / production とも internal distribution・APK形式）
+   * app.json：android.package=com.ykjob.flowdock（**仮置き**。初回ビルド前まで変更可）、versionCode=1。`npx expo config` で解析確認
+   * eas build / login / build:configure は未実行（Expoアカウントのユーザー操作待ち）
+3. **prompts.html軽微改善**（コミット c9f7210）
+   * セクション見出しに件数表示、検索欄下に「全42件／表示中 n / 42件」表示
+   * familyカテゴリカード追加で計42本。familyカードは「private / family用」バッジ
+
+### 仕様整理だけに留めたもの（実装していない）
+
+* JSONインポート・エクスポート：docs/memo-app/18-json-import-export.md 新規作成（形式=format+schemaVersion+notes全カラム、v1はnotesのみ、重複IDはupdated_at比較で上書き/スキップ、結果は追加/更新/スキップ/失敗の件数表示、PC=エクスポート・Android=インポートの責務分担、自動同期は対象外のまま）
+* APK初版の機能範囲・確認チェックリスト：16 §2.5に整理。現行機能のみで作る。既知の制約として、アプリ内コピー（clipboard.tsがWeb専用）とMarkdown書き出し（Blob+アンカー方式）はAPK上で動かない想定を明記
+* Phase 8（テンプレートDB管理）本体・JSONインポート実装・GitHub Pages有効化・リポジトリ公開設定・PWA化・配布用リポジトリ作成は行っていない
+
+### 未決定として残したもの
+
+* Androidパッケージ名仮置きの確定、EASアカウント準備（ユーザー操作）
+* JSONインポートの実装時期・Android側ファイル選択の依存（expo-document-picker等）導入判断
+* 家庭内情報の共有手段の着手順、配布用リポジトリの名称・構成・タイミング
+
+### 変更したファイル
+
+* コード：src/features/notes/noteTypes.ts / noteCategories.ts / chatgptPrompts.ts / mobileViewPolicy.ts（新規）、scripts/generate_prompt_hub.mjs、eas.json（新規）、app.json、docs/mobile-view/prompts.html（再生成）
+* ドキュメント：docs/memo-app/03 / 04 / 09 / 10 / 11 / 13 / 14 / 16 / 18（新規）、CLAUDE.md、00_START_HERE.md、current-tasks.md、docs/worklog/current.md
+* app/ 配下・保存処理・DB処理（schema / migrations）・FlowDock・SDK設定は無変更。依存関係の追加なし
+
+### 検証結果
+
+* コミット1後：`npx tsc --noEmit` エラーなし、`npx expo export --platform web` 成功（769モジュール）
+* コミット2後：`npx expo config --type public` 正常（SDK 54認識）
+* コミット3後：生成成功（7セクション・42プロンプト）、構造チェック全OK（カード42・familyバッジ6・個人情報注意3・ID一意）、インラインJS構文OK
+
+### 次にやること
+
+* ドキュメントコミット（4コミット目）→ ユーザー確認後にpush
+* EASアカウント準備（ユーザー操作）→ 初回APKビルド
+* prompts.htmlのスマホ実機確認
+
+---
 
 ## プロンプト集への追加31プロンプト実装（2026-07-06）
 

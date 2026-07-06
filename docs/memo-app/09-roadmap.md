@@ -197,13 +197,15 @@
 
 ビルド方式は決定済み（2026-07-06）：EASクラウドビルド（profile: preview / internal distribution / APK形式）、SDK 54を正式採用候補として進める（`16-platform-and-distribution.md` 2.3〜2.4）。
 
-やること。
+やること（2026-07-07更新：eas.json / app.json整備・確認項目整理・JSONインポート仕様確定まで完了）。
 
-* EASアカウント準備・eas-cli導入・eas.json作成（previewプロファイル / APK形式）
-* app.json等のビルド設定整備（Androidパッケージ名・アイコン等）
+* [完了] eas.json作成・app.json整備（パッケージ名は仮置き com.ykjob.flowdock）
+* [完了] APK初版の機能範囲・確認チェックリスト整理（`16-platform-and-distribution.md` 2.5）
+* [完了] JSONインポートの仕様確定（`18-json-import-export.md`）
+* EASアカウント準備（ユーザー操作：eas-cli login / build:configure）
 * EASクラウドビルドでAPK生成、Android実機へのインストール
-* オフライン利用の確認（メモ作成・編集・保存・再起動後の保持）
-* JSONインポートの仕様確定と実装（`11-open-issues.md` 12章）
+* 確認チェックリスト実施（オフライン利用・再起動後保持含む）
+* JSONインポート実装（実装時期は未定）
 * テンプレート管理の動作確認（Phase 8〜9実装後）
 
 完了条件。

@@ -123,7 +123,8 @@
 * [ ] schema_versionマイグレーション設計
 * [ ] DB優先・コード固定定義fallback実装
 * [ ] 既存コード固定定義（noteCategories.ts / chatgptPrompts.ts）からの移行方法確定
-* [ ] familyカテゴリ・visibility=family値の追加（2026-07-06決定。コード定義へ先行追加するかPhase 8実装時に合わせるかは11-open-issues.md 13章）
+* [x] familyカテゴリ・visibility=family値の追加（2026-07-07完了：コード定義へ先行追加。noteTypes.ts / noteCategories.ts / chatgptPrompts.ts。DBマイグレーション不要。Phase 8実装時はこの定義をseed元にする）
+* [x] 公開GitHub Pages出力可否判定の先行実装（2026-07-07完了：mobileViewPolicy.ts。Phase 10で使用予定）
 
 ## 11. Phase 9：テンプレート管理画面
 
@@ -167,14 +168,15 @@
 
 * [x] ビルド方式確定（2026-07-06決定：EASクラウドビルド。profile: preview / internal distribution / APK形式。ローカルビルドは後回し）
 * [x] 対象SDKバージョン確定（2026-07-06決定：SDK 54を正式採用候補のまま進める。SDK 56固有機能が必要になった時に再検討）
-* [ ] check-expo-sdk54ブランチのmainマージ判断（SDK 54正式採用候補の決定を受けて。ユーザー判断）
-* [ ] EASアカウント準備・eas-cli導入
-* [ ] eas.json作成（previewプロファイル / internal distribution / APK形式）
-* [ ] app.json等のビルド設定整備（Androidパッケージ名・アイコン等）
-* [ ] EASクラウドビルドでAPK生成
-* [ ] Android実機インストール・オフライン動作確認（メモ作成・編集・保存・再起動後の保持）
-* [ ] JSONインポートの仕様確定（11-open-issues.md 12章）
-* [ ] JSONインポート実装
+* [x] check-expo-sdk54ブランチのmainマージ（2026-07-06完了。push済み）
+* [x] eas.json作成（2026-07-07完了：preview / production とも internal distribution / APK形式）
+* [x] app.json整備（2026-07-07完了：android.package=com.ykjob.flowdock仮置き、versionCode=1）
+* [x] APK初版の機能範囲・確認チェックリスト整理（2026-07-07完了：16 §2.5。現行機能のみ、既知の制約つき）
+* [x] JSONインポートの仕様確定（2026-07-07完了：18-json-import-export.md。実装は未着手）
+* [ ] EASアカウント準備（`npx eas-cli login`・`eas build:configure`。Expoアカウントログインが必要なためユーザー操作待ち）
+* [ ] EASクラウドビルドでAPK生成（`eas build --platform android --profile preview`）
+* [ ] Android実機インストール・確認チェックリスト実施（16 §2.5）
+* [ ] JSONインポート実装（PC側エクスポート＋Android側インポート。18参照。実装時期は未定）
 * [ ] テンプレート管理の動作確認（Phase 8〜9実装後）
 
 家族用iPhone閲覧はPhase 10（スマホ閲覧用HTML/JSON）で対応するため、Phase 12にiOS向けタスクはない。

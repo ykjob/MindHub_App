@@ -17,7 +17,16 @@ MindHub_Appのメモ管理機能拡張について、
 
 ## 完了したこと
 
-### プロンプト集への追加31プロンプト実装（2026-07-06、未コミット）
+### 配布・実機運用前の土台整備（2026-07-07、未push）
+
+* familyカテゴリ・visibility=family値をコード反映（noteTypes / noteCategories / chatgptPrompts。DBマイグレーション不要。作成・編集画面に自動表示）。公開Pages出力可否判定 mobileViewPolicy.ts を先行実装（Phase 10で使用予定）
+* EASビルド準備：eas.json新規（preview / internal / APK）、app.jsonにandroid.package（com.ykjob.flowdock仮置き）とversionCode追加。eas build実行・loginはユーザー操作待ち
+* APK初版の機能範囲・確認チェックリストを16 §2.5に整理（現行機能のみ。既知の制約：アプリ内コピーとMarkdown書き出しはWeb専用実装のためAPKでは動かない想定）
+* JSONインポート仕様を18-json-import-export.mdとして具体化（形式・schemaVersion・重複ID処理・件数表示・責務分担。実装は未着手）
+* prompts.html軽微改善：セクション件数・絞り込み中の表示件数・familyカテゴリカード追加（計42本）
+* 検証：tsc / expo export / expo config / 生成HTML構造チェックすべて合格
+
+### プロンプト集への追加31プロンプト実装（2026-07-06、push済み）
 
 * src/features/notes/mobilePrompts.ts 新規作成（データ専用モジュール。アプリ画面からはimportしない）。不足5本＋追加26本の計31本を定義
 * prompts.htmlを7セクション・41プロンプト構成に拡張（メモ整理カテゴリ別10／タスク・予定整理4／開発・AI作業8／思考整理・行動化5／就活5／生活・家庭共有5／投資・検証4）
@@ -123,13 +132,13 @@ MindHub_Appのメモ管理機能拡張について、
 
 残る確認待ち。
 
-* check-expo-sdk54ブランチをmainへマージするタイミング（SDK 54正式採用候補の決定を受けて。ユーザー判断）
+* EASアカウント準備（`npx eas-cli login`・`eas build:configure`。ユーザー操作）とAndroidパッケージ名仮置き（com.ykjob.flowdock）の確定
 * 既存memosデータをnotesへ統合するか（docs/memo-app/11-open-issues.md 参照）
 * File System Access APIによるフォルダ指定書き出し対応の要否
 * note_categories / note_templates の実装タイミング（11-open-issues.md 9章）
 * スマホ閲覧HTMLの生成方式・notes-data.json形式・GitHub Pages配置方法（11-open-issues.md 10章）
-* JSONインポートの仕様、APK初版に含める機能範囲、EASアカウント準備・Androidパッケージ名（11-open-issues.md 12章）
-* 家庭内情報の共有手段をどれから着手するか、familyカテゴリの実装タイミング、配布用リポジトリの名称・構成・作成タイミング（11-open-issues.md 13章）
+* JSONインポートの実装時期とファイル選択の依存導入判断（18-json-import-export.md §7）
+* 家庭内情報の共有手段をどれから着手するか、配布用リポジトリの名称・構成・作成タイミング（11-open-issues.md 13章）
 
 ## 後回し・将来候補（詳細：docs/memo-app/15-future-and-rejected-policies.md）
 

@@ -41,6 +41,7 @@ npx expo start --web   # PC用Webアプリとして起動
 | 将来候補・不採用方針の確認 | `docs/memo-app/15-future-and-rejected-policies.md` |
 | Android APK版・iPhone Web閲覧版・端末別運用 | `docs/memo-app/16-platform-and-distribution.md`、`13-mobile-view-export.md` |
 | 配布・共有の区分（自分用・家族用・配布用） | `docs/memo-app/17-distribution-and-sharing.md`、`16-platform-and-distribution.md` |
+| JSONエクスポート・インポート（PC⇔Android移行） | `docs/memo-app/18-json-import-export.md`、`03-data-model.md` |
 | 実装順の確認 | `docs/memo-app/09-roadmap.md`、`10-tasks.md` |
 | 判断に迷った | `docs/memo-app/01-decisions-and-scope.md`、`11-open-issues.md`、`docs/worklog/current.md` |
 

@@ -64,6 +64,7 @@ family
 * 家庭内の決まり事・マニュアルは公開GitHub Pagesに出さないため、familyカテゴリは初期の除外カテゴリに含める
 * 公開可否はカテゴリだけで判定せず、visibilityを併用する。category = family でも、visibility = private または visibility = family のものは公開GitHub Pagesには出さない
 * 家族向けの非公開な閲覧手段（非公開配置先、ローカルHTML共有、PDF、JSONインポート、private向けPWA等）は別途検討する（`11-open-issues.md` 13章）
+* 2026-07-07実装済み：本節の判定ロジックを `src/features/notes/mobileViewPolicy.ts`（judgeMobileViewExport。除外理由つき）として先行実装した。Phase 10のエクスポート実装時にこれを使う
 
 ## 4. 出力前確認画面
 
