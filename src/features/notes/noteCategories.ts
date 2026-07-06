@@ -17,6 +17,9 @@ export const NOTE_CATEGORIES: NoteCategory[] = [
   { type: 'jobsearch', label: '就活メモ', gitCandidateDefault: false },
   { type: 'error_note', label: 'エラー対応メモ', gitCandidateDefault: true },
   { type: 'template', label: 'テンプレート', gitCandidateDefault: true },
+  // 家庭内情報用（2026-07-06決定）。末尾に追加すること
+  // （getNoteCategoryのfallbackがNOTE_CATEGORIES[4]=thoughtを指すため、途中挿入禁止）
+  { type: 'family', label: '家族共有', gitCandidateDefault: false },
 ];
 
 export const DEFAULT_NOTE_TYPE: NoteType = 'thought';
@@ -53,6 +56,11 @@ export const NOTE_VISIBILITIES: {
   { value: 'private', label: 'private', description: '個人的メモ。Gitに出さない' },
   { value: 'internal', label: 'internal', description: 'アプリ内管理用。必要なら後で整理' },
   { value: 'git_candidate', label: 'git_candidate', description: 'Git書き出し候補' },
+  {
+    value: 'family',
+    label: 'family',
+    description: '家族に見せてよいメモ。公開GitHub Pagesには出さない',
+  },
 ];
 
 export const SUGGESTED_PROJECTS: string[] = [

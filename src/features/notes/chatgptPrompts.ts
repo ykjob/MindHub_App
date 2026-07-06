@@ -253,6 +253,20 @@ const TEMPLATE_BODIES: Record<NoteType, string> = {
 ## 関連メモ
 
 ## 推奨タグ`,
+
+  family: `# 家族共有メモ：タイトル
+
+## これは何のメモか
+
+## いつ見るか
+
+## 内容（見出し＋短い説明）
+
+## 困った時は
+
+## 更新した日と変えたこと
+
+## 推奨タグ`,
 };
 
 const EXTRA_NOTES: Partial<Record<NoteType, string>> = {
@@ -260,6 +274,8 @@ const EXTRA_NOTES: Partial<Record<NoteType, string>> = {
     '個人情報や非公開情報が含まれる場合は「Gitに上げる場合の注意」に明記してください。',
   jobsearch:
     '個人情報（氏名、住所、連絡先、応募先の非公開情報など）が含まれる場合は「個人情報の有無」に明記してください。',
+  family:
+    '家庭内の情報を含むメモです。公開の場に出さない前提で、家族が読んで分かる言葉に整理してください。',
 };
 
 export function buildChatGptPrompt(type: NoteType): string {

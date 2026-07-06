@@ -8,7 +8,8 @@ export type NoteType =
   | 'claude_prompt'
   | 'jobsearch'
   | 'error_note'
-  | 'template';
+  | 'template'
+  | 'family';
 
 export type NoteSource =
   | 'manual'
@@ -17,7 +18,8 @@ export type NoteSource =
   | 'imported_file'
   | 'system';
 
-export type NoteVisibility = 'private' | 'internal' | 'git_candidate';
+// family：家族に見せてよいメモ。公開GitHub Pagesには出さない
+export type NoteVisibility = 'private' | 'internal' | 'git_candidate' | 'family';
 
 export interface Note {
   id: string;
