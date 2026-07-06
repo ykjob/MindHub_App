@@ -18,7 +18,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.ykjob.flowdock",
+      "package": "com.ykjob.mindhub",
       "versionCode": 1
     },
     "web": {

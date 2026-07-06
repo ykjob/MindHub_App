@@ -2,6 +2,15 @@
 
 最終更新：2026-07-07（配布・実機運用前の土台整備）
 
+## Androidパッケージ名の確定（2026-07-07）
+
+* android.package を `com.ykjob.flowdock`（仮置き）→ **`com.ykjob.mindhub` で確定**（app.json変更）
+* 理由：アプリ全体がFlowDock単体ではなく、メモ管理・プロンプト集・家族共有・配布用データ・Android APK・将来のJSONインポートまで含む方向のため。パッケージ名は初回インストール後に変えにくい
+* 表示名（FlowDock）・slug・schemeは変更しない（今回の変更はandroid.packageの1行のみ）
+* 11-open-issues.md 12章の仮置き項目を決定済みへ移動
+* 検証：`npx expo config` で正常に読めることを確認
+* EAS buildは未実行。pushはユーザー確認待ち
+
 ## 配布・実機運用前の土台整備（2026-07-07）
 
 ### 今回の目的

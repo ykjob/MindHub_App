@@ -132,7 +132,7 @@ MindHub_Appのメモ管理機能拡張について、
 
 残る確認待ち。
 
-* EASアカウント準備（`npx eas-cli login`・`eas build:configure`。ユーザー操作）とAndroidパッケージ名仮置き（com.ykjob.flowdock）の確定
+* EASアカウント準備（`npx eas-cli login`・`eas build:configure`。ユーザー操作）。※Androidパッケージ名は com.ykjob.mindhub で確定済み（2026-07-07）
 * 既存memosデータをnotesへ統合するか（docs/memo-app/11-open-issues.md 参照）
 * File System Access APIによるフォルダ指定書き出し対応の要否
 * note_categories / note_templates の実装タイミング（11-open-issues.md 9章）

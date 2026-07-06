@@ -116,12 +116,12 @@
 
 * JSONインポートの仕様：`18-json-import-export.md` で具体化済み（形式・schemaVersion・重複ID処理・件数表示・責務分担）。実装は未着手
 * APK初版の機能範囲：現行機能のみで作る。テンプレート管理・JSONインポートは初版に含めない。確認チェックリストと既知の制約（アプリ内コピー・Markdown書き出しはWeb専用実装のためAPKでは動かない想定）は16 §2.5に整理済み
-* eas.json / app.json整備済み。Androidパッケージ名は `com.ykjob.flowdock` を仮置き（初回ビルド前まで変更可。変更する場合はapp.jsonのandroid.packageを修正）
+* eas.json / app.json整備済み
+* Androidパッケージ名は `com.ykjob.mindhub` で確定（2026-07-07決定。アプリ全体がFlowDock単体でなくメモ管理・プロンプト集・家族共有・配布用データ等を含む方向のため。表示名 / slug / scheme はFlowDockのまま変更しない）
 
 残る未確定。
 
 * EASアカウントの準備（Expoアカウントでの `npx eas-cli login`、`eas build:configure` によるprojectId付与はユーザー操作待ち）
-* Androidパッケージ名の仮置き（com.ykjob.flowdock）を確定するか
 * JSONインポートの実装時期と、Android側ファイル選択の依存（expo-document-picker等）導入判断（18 §7参照）
 * check-expo-sdk54ブランチはmainへマージ済み（2026-07-06解消）
 
