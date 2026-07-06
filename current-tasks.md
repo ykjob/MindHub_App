@@ -17,6 +17,14 @@ MindHub_Appのメモ管理機能拡張について、
 
 ## 完了したこと
 
+### プロンプト集への追加31プロンプト実装（2026-07-06、未コミット）
+
+* src/features/notes/mobilePrompts.ts 新規作成（データ専用モジュール。アプリ画面からはimportしない）。不足5本＋追加26本の計31本を定義
+* prompts.htmlを7セクション・41プロンプト構成に拡張（メモ整理カテゴリ別10／タスク・予定整理4／開発・AI作業8／思考整理・行動化5／就活5／生活・家庭共有5／投資・検証4）
+* 生活・家庭共有系5本に「private / family用」バッジ＋公開Pagesに載せない前提の注記を追加。本文に個人情報・家庭内情報は含めていない
+* 今回見送り：Claude Code報告確認・リポジトリ状況整理・検証結果レビュー
+* 検証：生成成功・構造検証合格・tsc / Web export合格（バンドルにmobilePrompts.tsは含まれずアプリ非影響）。ブラウザ実操作はユーザー確認待ち
+
 ### プロンプト集HTML先行生成の実装（2026-07-06、未コミット）
 
 * scripts/generate_prompt_hub.mjs 新規作成。`npm run generate:prompt-hub` で docs/mobile-view/prompts.html を生成（カテゴリ整理プロンプト10個収録）

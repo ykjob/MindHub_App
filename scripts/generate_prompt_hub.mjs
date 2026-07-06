@@ -26,8 +26,12 @@ const outFile = path.join(projectRoot, 'docs', 'mobile-view', 'prompts.html');
 
 function compilePromptModules() {
   const ts = require('typescript');
-  const entryFile = path.join(projectRoot, 'src', 'features', 'notes', 'chatgptPrompts.ts');
-  const program = ts.createProgram([entryFile], {
+  const notesDir = path.join(projectRoot, 'src', 'features', 'notes');
+  const entryFiles = [
+    path.join(notesDir, 'chatgptPrompts.ts'),
+    path.join(notesDir, 'mobilePrompts.ts'),
+  ];
+  const program = ts.createProgram(entryFiles, {
     module: ts.ModuleKind.CommonJS,
     target: ts.ScriptTarget.ES2020,
     outDir: cacheDir,
@@ -45,29 +49,64 @@ function compilePromptModules() {
 
 /**
  * @typedef {object} PromptEntry
- * @property {string} categoryType  note_templates.category_type に対応
- * @property {string} name          note_templates.name に対応（カテゴリ表示名）
+ * @property {string} id            コピー対象の一意ID（note_templates.name相当のキー）
+ * @property {string} name          表示名
+ * @property {string} groupKey      セクションのキー
  * @property {string} promptBody    note_templates.prompt_body に対応
- * @property {boolean} caution      個人情報が混ざりやすいカテゴリ（Git候補初期値false）
- * @property {number} sortOrder     note_templates.sort_order に対応
+ * @property {string} [badge]       カードに表示するバッジ文言
+ * @property {string} [note]        カードに表示する補足注記（公開範囲の注意など）
  */
 
 /**
- * プロンプト一覧を返す。現在はコード固定定義から構築する。
+ * @typedef {object} PromptGroup
+ * @property {string} key
+ * @property {string} label
+ * @property {PromptEntry[]} entries
+ */
+
+/**
+ * セクション別のプロンプト一覧を返す。現在はコード固定定義から構築する。
  * 将来 note_templates（DB）へ切り替える場合はこの関数だけを差し替える。
- * @returns {PromptEntry[]}
+ * @returns {PromptGroup[]}
  */
 function loadPromptEntries() {
   compilePromptModules();
   const { NOTE_CATEGORIES } = require(path.join(cacheDir, 'noteCategories.js'));
   const { buildChatGptPrompt } = require(path.join(cacheDir, 'chatgptPrompts.js'));
-  return NOTE_CATEGORIES.map((category, index) => ({
-    categoryType: category.type,
-    name: category.label,
-    promptBody: buildChatGptPrompt(category.type),
-    caution: !category.gitCandidateDefault,
-    sortOrder: index,
-  }));
+  const { MOBILE_PROMPTS, MOBILE_PROMPT_GROUP_LABELS } = require(
+    path.join(cacheDir, 'mobilePrompts.js')
+  );
+
+  // 既存のメモ整理プロンプト（カテゴリ別）
+  const categoryGroup = {
+    key: 'category',
+    label: 'メモ整理プロンプト（カテゴリ別）',
+    entries: NOTE_CATEGORIES.map((category) => ({
+      id: category.type,
+      name: category.label,
+      groupKey: 'category',
+      promptBody: buildChatGptPrompt(category.type),
+      badge: category.gitCandidateDefault ? undefined : '個人情報注意',
+    })),
+  };
+
+  // 追加プロンプト（mobilePrompts.ts）。定義順を保ったままグループ分けする
+  const extraGroups = Object.entries(MOBILE_PROMPT_GROUP_LABELS).map(
+    ([key, label]) => ({
+      key,
+      label,
+      entries: MOBILE_PROMPTS.filter((p) => p.group === key).map((p) => ({
+        id: p.id,
+        name: p.name,
+        groupKey: p.group,
+        promptBody: p.promptBody,
+        badge: p.group === 'family' ? 'private / family用' : undefined,
+        note: p.note,
+      })),
+    })
+  );
+
+  return [categoryGroup, ...extraGroups].filter((g) => g.entries.length > 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -83,33 +122,49 @@ function escapeHtml(text) {
 }
 
 /**
- * @param {PromptEntry[]} entries
+ * @param {PromptEntry} entry
+ * @param {string} groupLabel
+ * @returns {string}
+ */
+function renderCard(entry, groupLabel) {
+  const badge = entry.badge
+    ? `<span class="badge">${escapeHtml(entry.badge)}</span>`
+    : '';
+  const note = entry.note
+    ? `\n        <p class="note">${escapeHtml(entry.note)}</p>`
+    : '';
+  return `      <section class="card" data-search="${escapeHtml(
+    `${entry.name} ${entry.id} ${groupLabel}`.toLowerCase()
+  )}">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>${escapeHtml(entry.name)}</h3>
+            <span class="type">${escapeHtml(entry.id)}</span>
+            ${badge}
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-${escapeHtml(entry.id)}">コピー</button>
+        </div>${note}
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-${escapeHtml(entry.id)}">${escapeHtml(entry.promptBody)}</pre>
+        </details>
+      </section>`;
+}
+
+/**
+ * @param {PromptGroup[]} groups
  * @param {string} generatedAt
  * @returns {string}
  */
-function renderHtml(entries, generatedAt) {
-  const cards = entries
-    .map((entry) => {
-      const badge = entry.caution
-        ? '<span class="badge">個人情報注意</span>'
-        : '';
-      return `      <section class="card" data-search="${escapeHtml(
-        `${entry.name} ${entry.categoryType}`.toLowerCase()
-      )}">
-        <div class="card-head">
-          <div class="card-title">
-            <h2>${escapeHtml(entry.name)}</h2>
-            <span class="type">${escapeHtml(entry.categoryType)}</span>
-            ${badge}
-          </div>
-          <button type="button" class="copy-btn" data-copy="prompt-${escapeHtml(entry.categoryType)}">コピー</button>
-        </div>
-        <details>
-          <summary>プロンプトを表示</summary>
-          <pre id="prompt-${escapeHtml(entry.categoryType)}">${escapeHtml(entry.promptBody)}</pre>
-        </details>
-      </section>`;
-    })
+function renderHtml(groups, generatedAt) {
+  const total = groups.reduce((sum, g) => sum + g.entries.length, 0);
+  const sections = groups
+    .map(
+      (group) => `    <div class="group">
+    <h2 class="section-title">${escapeHtml(group.label)}</h2>
+${group.entries.map((entry) => renderCard(entry, group.label)).join('\n')}
+    </div>`
+    )
     .join('\n');
 
   return `<!DOCTYPE html>
@@ -175,7 +230,7 @@ function renderHtml(entries, generatedAt) {
     padding: 12px;
     margin-bottom: 12px;
   }
-  .card.hidden { display: none; }
+  .card.hidden, .group.hidden { display: none; }
   .card-head {
     display: flex;
     align-items: flex-start;
@@ -189,9 +244,21 @@ function renderHtml(entries, generatedAt) {
     gap: 6px;
     min-width: 0;
   }
-  .card-title h2 {
+  .card-title h3 {
     font-size: 16px;
     margin: 0;
+  }
+  .section-title {
+    font-size: 15px;
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 4px;
+    margin: 20px 0 10px;
+  }
+  .note {
+    font-size: 12px;
+    color: #B45309;
+    margin: 6px 0 0;
   }
   .type {
     font-size: 11px;
@@ -245,14 +312,14 @@ function renderHtml(entries, generatedAt) {
 <body>
   <header>
     <h1>プロンプト集</h1>
-    <p>コピーしてChatGPTに貼り付け、続けて整理したい内容を貼ってください。</p>
-    <input type="search" id="search" placeholder="カテゴリ名で絞り込み">
+    <p>コピーして ChatGPT / Gemini / Claude Code / Codex に貼り付けて使ってください。</p>
+    <input type="search" id="search" placeholder="プロンプト名・分類で絞り込み">
   </header>
   <main>
-${cards}
+${sections}
   </main>
   <footer>
-    <p>生成日時：${escapeHtml(generatedAt)}</p>
+    <p>生成日時：${escapeHtml(generatedAt)}（収録 ${total} プロンプト）</p>
     <p>コード固定定義（chatgptPrompts.ts）から生成。将来はnote_templates（DB）へ出力元を切り替え予定。</p>
     <p>再生成コマンド：npm run generate:prompt-hub</p>
   </footer>
@@ -307,6 +374,11 @@ ${cards}
         var hit = !keyword || card.getAttribute('data-search').indexOf(keyword) !== -1;
         card.classList.toggle('hidden', !hit);
       });
+      // ヒットするカードが1枚もないセクションは見出しごと隠す
+      document.querySelectorAll('.group').forEach(function (group) {
+        var visible = group.querySelectorAll('.card:not(.hidden)').length > 0;
+        group.classList.toggle('hidden', !visible);
+      });
     });
   </script>
 </body>
@@ -318,7 +390,8 @@ ${cards}
 // メイン
 // ---------------------------------------------------------------------------
 
-const entries = loadPromptEntries();
+const groups = loadPromptEntries();
+const total = groups.reduce((sum, g) => sum + g.entries.length, 0);
 const generatedAt = new Date().toLocaleString('ja-JP', {
   timeZone: 'Asia/Tokyo',
   year: 'numeric',
@@ -328,5 +401,7 @@ const generatedAt = new Date().toLocaleString('ja-JP', {
   minute: '2-digit',
 });
 mkdirSync(path.dirname(outFile), { recursive: true });
-writeFileSync(outFile, renderHtml(entries, generatedAt), 'utf8');
-console.log(`生成完了: ${path.relative(projectRoot, outFile)}（${entries.length}プロンプト）`);
+writeFileSync(outFile, renderHtml(groups, generatedAt), 'utf8');
+console.log(
+  `生成完了: ${path.relative(projectRoot, outFile)}（${groups.length}セクション・${total}プロンプト）`
+);

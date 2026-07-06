@@ -1,6 +1,50 @@
 # 最新作業ログ
 
-最終更新：2026-07-06（プロンプト集HTML先行生成の実装）
+最終更新：2026-07-06（プロンプト集への追加31プロンプト実装）
+
+## プロンプト集への追加31プロンプト実装（2026-07-06）
+
+### 今回の目的
+
+prompts.htmlを、ChatGPT / Gemini / Claude Code / Codexへ貼り付けやすい実用プロンプト集にする。14 §1.3の不足5本に加え、利用傾向から必要性が高い26本を追加する。
+
+### 実装内容
+
+* `src/features/notes/mobilePrompts.ts` 新規作成（計31本）
+  * データ専用モジュール。アプリ画面からはimportしない（Metroバンドル非対象を確認済み）。NOTE_CATEGORIESには追加せず、メモ作成画面のカテゴリ選択肢には混ざらない
+  * 構造：`{ id, name, group, promptBody, note? }` ＋ グループ見出し定義。将来はnote_templates（category_type='template'の複数テンプレート）としてseed予定
+* `scripts/generate_prompt_hub.mjs` 拡張
+  * chatgptPrompts.tsとmobilePrompts.tsの両方をコンパイル・読み込み
+  * セクション別描画（7セクション）、グループ見出し、絞り込みで空になったセクションは見出しごと非表示
+  * 生活・家庭共有系に「private / family用」バッジと注記を表示
+* 収録内訳（計41本）：メモ整理カテゴリ別10／タスク・予定整理4（time_slot_tasks, google_tasks, google_calendar, daily_priority）／開発・AI作業8（codex_review, chat_handoff_summary, claude_work_start, spec_update_request, bug_report, implementation_review_request, device_checklist, worklog_close_summary）／思考整理・行動化5（brain_dump_to_action, stuck_reason, one_day_plan, stop_overthinking, next_one_action）／就活5（career_experience, interview_answer_draft, ses_application_adjust, job_posting_match, plain_talk_training）／生活・家庭共有5（family_manual, household_rule, wife_schedule, outing_plan, shopping_memo）／投資・検証4（pead_result_summary, trading_rule_check, validation_log, release_note_draft）
+* 今回見送り（ユーザー指定）：Claude Code報告確認・リポジトリ状況整理・検証結果レビュー
+* プロンプト本文に個人情報・家庭内情報は含めていない（店名等も一般名詞の例示のみ）
+
+### 変更したファイル
+
+* src/features/notes/mobilePrompts.ts（新規・データ専用）
+* scripts/generate_prompt_hub.mjs
+* docs/mobile-view/prompts.html（再生成）
+* docs/memo-app/14-mobile-prompt-hub-and-inbox.md（§1.2追記・§1.7追加）
+* docs/memo-app/10-tasks.md、current-tasks.md、docs/worklog/current.md
+
+app/ 配下・保存処理・DB処理・FlowDock・SDK設定は無変更。依存関係の追加なし。
+
+### 検証結果
+
+* `npm run generate:prompt-hub` 成功（7セクション・41プロンプト）
+* HTML構造検証：カード41・コピーボタン41・pre41、ID一意・紐付け完全、個人情報注意バッジ3、private/familyバッジ5＋注記5、外部リソース参照なし
+* インラインJS構文チェック合格
+* `npx tsc --noEmit` エラーなし、`npx expo export --platform web` 成功（748モジュール。mobilePrompts.tsはバンドルに含まれず、アプリ本体への影響なし）
+* ブラウザでの表示・コピー・絞り込みの実操作はユーザー確認待ち
+
+### 次にやること
+
+* ユーザーの表示・コピー確認 → 問題なければcommit（ユーザー判断。pushは別途指示待ち）
+* 見送り3本の追加要否は将来判断
+
+---
 
 ## プロンプト集HTML先行生成（Phase 11短期分）の実装（2026-07-06）
 

@@ -61,7 +61,7 @@
     padding: 12px;
     margin-bottom: 12px;
   }
-  .card.hidden { display: none; }
+  .card.hidden, .group.hidden { display: none; }
   .card-head {
     display: flex;
     align-items: flex-start;
@@ -75,9 +75,21 @@
     gap: 6px;
     min-width: 0;
   }
-  .card-title h2 {
+  .card-title h3 {
     font-size: 16px;
     margin: 0;
+  }
+  .section-title {
+    font-size: 15px;
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 4px;
+    margin: 20px 0 10px;
+  }
+  .note {
+    font-size: 12px;
+    color: #B45309;
+    margin: 6px 0 0;
   }
   .type {
     font-size: 11px;
@@ -131,14 +143,16 @@
 <body>
   <header>
     <h1>プロンプト集</h1>
-    <p>コピーしてChatGPTに貼り付け、続けて整理したい内容を貼ってください。</p>
-    <input type="search" id="search" placeholder="カテゴリ名で絞り込み">
+    <p>コピーして ChatGPT / Gemini / Claude Code / Codex に貼り付けて使ってください。</p>
+    <input type="search" id="search" placeholder="プロンプト名・分類で絞り込み">
   </header>
   <main>
-      <section class="card" data-search="作業ログ worklog">
+    <div class="group">
+    <h2 class="section-title">メモ整理プロンプト（カテゴリ別）</h2>
+      <section class="card" data-search="作業ログ worklog メモ整理プロンプト（カテゴリ別）">
         <div class="card-head">
           <div class="card-title">
-            <h2>作業ログ</h2>
+            <h3>作業ログ</h3>
             <span class="type">worklog</span>
             
           </div>
@@ -179,10 +193,10 @@
 整理対象：</pre>
         </details>
       </section>
-      <section class="card" data-search="調査メモ research">
+      <section class="card" data-search="調査メモ research メモ整理プロンプト（カテゴリ別）">
         <div class="card-head">
           <div class="card-title">
-            <h2>調査メモ</h2>
+            <h3>調査メモ</h3>
             <span class="type">research</span>
             
           </div>
@@ -225,10 +239,10 @@
 整理対象：</pre>
         </details>
       </section>
-      <section class="card" data-search="コマンド・手順 command">
+      <section class="card" data-search="コマンド・手順 command メモ整理プロンプト（カテゴリ別）">
         <div class="card-head">
           <div class="card-title">
-            <h2>コマンド・手順</h2>
+            <h3>コマンド・手順</h3>
             <span class="type">command</span>
             
           </div>
@@ -271,10 +285,10 @@
 整理対象：</pre>
         </details>
       </section>
-      <section class="card" data-search="設計メモ design">
+      <section class="card" data-search="設計メモ design メモ整理プロンプト（カテゴリ別）">
         <div class="card-head">
           <div class="card-title">
-            <h2>設計メモ</h2>
+            <h3>設計メモ</h3>
             <span class="type">design</span>
             
           </div>
@@ -323,10 +337,10 @@
 整理対象：</pre>
         </details>
       </section>
-      <section class="card" data-search="思考メモ thought">
+      <section class="card" data-search="思考メモ thought メモ整理プロンプト（カテゴリ別）">
         <div class="card-head">
           <div class="card-title">
-            <h2>思考メモ</h2>
+            <h3>思考メモ</h3>
             <span class="type">thought</span>
             <span class="badge">個人情報注意</span>
           </div>
@@ -372,10 +386,10 @@
 整理対象：</pre>
         </details>
       </section>
-      <section class="card" data-search="chatgpt保存ログ chatgpt_log">
+      <section class="card" data-search="chatgpt保存ログ chatgpt_log メモ整理プロンプト（カテゴリ別）">
         <div class="card-head">
           <div class="card-title">
-            <h2>ChatGPT保存ログ</h2>
+            <h3>ChatGPT保存ログ</h3>
             <span class="type">chatgpt_log</span>
             <span class="badge">個人情報注意</span>
           </div>
@@ -419,10 +433,10 @@
 整理対象：</pre>
         </details>
       </section>
-      <section class="card" data-search="claude code用プロンプト claude_prompt">
+      <section class="card" data-search="claude code用プロンプト claude_prompt メモ整理プロンプト（カテゴリ別）">
         <div class="card-head">
           <div class="card-title">
-            <h2>Claude Code用プロンプト</h2>
+            <h3>Claude Code用プロンプト</h3>
             <span class="type">claude_prompt</span>
             
           </div>
@@ -471,10 +485,10 @@
 整理対象：</pre>
         </details>
       </section>
-      <section class="card" data-search="就活メモ jobsearch">
+      <section class="card" data-search="就活メモ jobsearch メモ整理プロンプト（カテゴリ別）">
         <div class="card-head">
           <div class="card-title">
-            <h2>就活メモ</h2>
+            <h3>就活メモ</h3>
             <span class="type">jobsearch</span>
             <span class="badge">個人情報注意</span>
           </div>
@@ -522,10 +536,10 @@
 整理対象：</pre>
         </details>
       </section>
-      <section class="card" data-search="エラー対応メモ error_note">
+      <section class="card" data-search="エラー対応メモ error_note メモ整理プロンプト（カテゴリ別）">
         <div class="card-head">
           <div class="card-title">
-            <h2>エラー対応メモ</h2>
+            <h3>エラー対応メモ</h3>
             <span class="type">error_note</span>
             
           </div>
@@ -572,10 +586,10 @@
 整理対象：</pre>
         </details>
       </section>
-      <section class="card" data-search="テンプレート template">
+      <section class="card" data-search="テンプレート template メモ整理プロンプト（カテゴリ別）">
         <div class="card-head">
           <div class="card-title">
-            <h2>テンプレート</h2>
+            <h3>テンプレート</h3>
             <span class="type">template</span>
             
           </div>
@@ -608,9 +622,1098 @@
 整理対象：</pre>
         </details>
       </section>
+    </div>
+    <div class="group">
+    <h2 class="section-title">タスク・予定整理</h2>
+      <section class="card" data-search="時間帯別タスク化 time_slot_tasks タスク・予定整理">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>時間帯別タスク化</h3>
+            <span class="type">time_slot_tasks</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-time_slot_tasks">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-time_slot_tasks">以下の雑メモを、今日動きやすい時間帯別のタスクリストに整理してください。
+
+指定した見出しを使ってください。
+不明な項目は無理に埋めず「未記載」または「該当なし」としてください。
+時間帯が決められないものは「時間帯未定」に入れてください。
+
+出力形式：
+
+# 今日のタスク（時間帯別）
+
+## 朝
+
+## 昼
+
+## 夕方
+
+## 夜
+
+## 時間帯未定
+
+## 後でやる（今日でなくてよい）
+
+## やらなくていいこと
+
+## メモ・気づき
+
+整理対象：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="googleタスク整形 google_tasks タスク・予定整理">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>Googleタスク整形</h3>
+            <span class="type">google_tasks</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-google_tasks">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-google_tasks">以下の内容を、Googleタスクに登録しやすい形に整形してください。
+
+指定した見出しと形式を使ってください。
+1タスク1ブロックにしてください。
+期限が分からないものは「期限未定のタスク」にまとめてください。
+優先度は 高・中・低 の3段階にしてください。
+
+出力形式：
+
+# Googleタスク登録用リスト
+
+## タスク
+
+- タスク名：
+  - 期限：
+  - 優先度：
+  - メモ：
+
+（タスクの数だけ繰り返してください）
+
+## 期限未定のタスク
+
+## 登録前に確認したいこと
+
+整理対象：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="カレンダー整形 google_calendar タスク・予定整理">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>カレンダー整形</h3>
+            <span class="type">google_calendar</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-google_calendar">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-google_calendar">以下の内容を、Googleカレンダーに登録しやすい予定リストに整形してください。
+
+指定した見出しと形式を使ってください。
+1予定1ブロックにしてください。
+日付や時刻が曖昧なものは「時間確認が必要な予定」にまとめてください。
+
+出力形式：
+
+# カレンダー登録用リスト
+
+## 予定
+
+- 予定名：
+  - 日付：
+  - 開始時刻：
+  - 終了時刻：
+  - 場所：
+  - メモ：
+
+（予定の数だけ繰り返してください）
+
+## 時間確認が必要な予定
+
+## 登録前に確認したいこと
+
+整理対象：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="優先順位整理 daily_priority タスク・予定整理">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>優先順位整理</h3>
+            <span class="type">daily_priority</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-daily_priority">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-daily_priority">以下のやることリストを、今日の優先順位に整理してください。
+
+指定した見出しを使ってください。
+今日やるべきことは多くても5個までに絞ってください。
+迷ったものは「判断待ち」に入れ、決めるために必要な材料も書いてください。
+
+出力形式：
+
+# 今日の優先順位
+
+## 今日やるべきこと（最大5個・順番付き）
+
+1.
+
+## 後日でいいこと
+
+## 今はやらないこと
+
+## 判断待ち（決めるための材料つき）
+
+## 今日の進め方ひとこと
+
+整理対象：</pre>
+        </details>
+      </section>
+    </div>
+    <div class="group">
+    <h2 class="section-title">開発・AI作業</h2>
+      <section class="card" data-search="codexレビュー依頼 codex_review 開発・ai作業">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>Codexレビュー依頼</h3>
+            <span class="type">codex_review</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-codex_review">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-codex_review">実装済みの変更をレビューしてください。レビュー専用です。コードの修正・commit・pushは行わないでください。
+
+## 依頼内容
+
+- 対象ブランチ・差分：
+- 変更の目的：
+- 特に見てほしい点：
+
+## レビュー観点
+
+- 既存機能への影響（壊していないか）
+- DB・マイグレーションの安全性（破壊的変更がないか）
+- 型エラー・型の不整合
+- エラーハンドリングの漏れ
+- セキュリティ（秘密情報の混入、入力値の扱い）
+- 仕様書・タスクリストとの食い違い
+
+## 出力形式
+
+- 指摘は重要度順（高・中・低）に並べる
+- 各指摘に、対象ファイル・行、問題点、修正案を付ける
+- 問題がなければ「指摘なし」と明記する
+
+## 禁止事項
+
+- レビュー以外の作業をしない
+- 勝手にコードを修正しない
+- commit / pushしない
+
+レビュー対象の補足：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="チャット引き継ぎメモ化 chat_handoff_summary 開発・ai作業">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>チャット引き継ぎメモ化</h3>
+            <span class="type">chat_handoff_summary</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-chat_handoff_summary">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-chat_handoff_summary">このチャットの内容を、次の作業に引き継ぐためのメモに整理してください。
+
+指定した見出しを使ってください。
+不明な項目は無理に埋めず「未記載」または「該当なし」としてください。
+
+出力形式：
+
+# チャット引き継ぎメモ：タイトル
+
+## 今回決まったこと
+
+## 未決定事項
+
+## 次にやること
+
+## Claude Codeに渡す内容
+
+## 次回再開メモ
+
+## 推奨タグ
+
+整理対象（同じチャット内で使う場合は空欄でよい）：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="claude code作業開始依頼 claude_work_start 開発・ai作業">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>Claude Code作業開始依頼</h3>
+            <span class="type">claude_work_start</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-claude_work_start">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-claude_work_start">次の作業を開始してください。実装に入る前に、必ず以下を行ってください。
+
+## 作業前の確認
+
+- CLAUDE.md、00_START_HERE.md、current-tasks.md、docs/worklog/current.md を読む
+- 作業内容に関係する仕様書（docs/memo-app/）を読む
+
+## 着手前に整理して報告すること
+
+- 作業の目的
+- 変更範囲（触るファイル）
+- やらないこと
+- 完了条件
+- 検証方法
+
+## 注意
+
+- 未確定事項は勝手に決めず、11-open-issues.md に記録する
+- 指示のないcommit / pushはしない
+
+## 今回の作業内容
+
+</pre>
+        </details>
+      </section>
+      <section class="card" data-search="仕様書反映依頼 spec_update_request 開発・ai作業">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>仕様書反映依頼</h3>
+            <span class="type">spec_update_request</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-spec_update_request">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-spec_update_request">以下の方針変更・決定事項をドキュメントに反映してください。今回はコード実装には入らないでください。
+
+## 反映先
+
+- 関係する仕様書（docs/memo-app/）
+- ロードマップ（09-roadmap.md）
+- タスクリスト（10-tasks.md）
+- 未確定事項（11-open-issues.md）
+- current-tasks.md、docs/worklog/current.md
+
+## 注意
+
+- 決定済みと未確定を分けて記録する
+- 未確定事項は勝手に決めない
+- 反映後、変更ファイルと差分の概要を報告する
+
+## 反映する内容
+
+</pre>
+        </details>
+      </section>
+      <section class="card" data-search="バグ報告整理 bug_report 開発・ai作業">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>バグ報告整理</h3>
+            <span class="type">bug_report</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-bug_report">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-bug_report">以下の不具合報告を、修正依頼に使える形に整理してください。
+
+指定した見出しを使ってください。
+分からない項目は「未確認」としてください。
+
+出力形式：
+
+# バグ報告：タイトル
+
+## 発生した問題
+
+## 再現手順
+
+## 期待する動作
+
+## 実際の動作
+
+## 発生環境（端末・OS・ブラウザなど）
+
+## 疑わしい箇所
+
+## 修正方針の案
+
+## 修正後に確認する項目
+
+整理対象：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="実装前確認依頼 implementation_review_request 開発・ai作業">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>実装前確認依頼</h3>
+            <span class="type">implementation_review_request</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-implementation_review_request">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-implementation_review_request">実装に入る前の事前確認をお願いします。まだコードは変更しないでください。
+
+## 整理して報告してほしいこと
+
+- 対象ファイルと現在の構造
+- 影響範囲（壊れる可能性がある既存機能）
+- 実装方法の候補と推奨案
+- リスクと注意点
+- 検証方法
+- 完了条件
+
+## 注意
+
+- 報告を確認してから実装に進むかを判断します
+- 未確定事項があれば挙げてください
+
+## 実装したい内容
+
+</pre>
+        </details>
+      </section>
+      <section class="card" data-search="実機確認チェックリスト化 device_checklist 開発・ai作業">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>実機確認チェックリスト化</h3>
+            <span class="type">device_checklist</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-device_checklist">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-device_checklist">以下の変更内容について、端末別の動作確認チェックリストを作ってください。
+
+指定した見出しを使ってください。
+確認手順は、1項目1操作で書いてください。
+
+出力形式：
+
+# 実機確認チェックリスト：タイトル
+
+## 共通の準備
+
+## PC（ブラウザ）
+
+- [ ]
+
+## iPhone
+
+- [ ]
+
+## Android
+
+- [ ]
+
+## 確認NGだった時に記録すること
+
+整理対象（変更内容・確認したい機能）：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="作業区切りログ化 worklog_close_summary 開発・ai作業">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>作業区切りログ化</h3>
+            <span class="type">worklog_close_summary</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-worklog_close_summary">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-worklog_close_summary">今日の作業をここで区切ります。この内容を作業ログ用に整理してください。
+
+指定した見出しを使ってください。
+
+出力形式：
+
+# 作業ログ：タイトル
+
+## 今回やったこと
+
+## 決まったこと
+
+## 残タスク
+
+## 未決定事項
+
+## 次回再開メモ（最初にやること・読むファイル）
+
+## 推奨タグ
+
+整理対象（同じチャット内で使う場合は空欄でよい）：</pre>
+        </details>
+      </section>
+    </div>
+    <div class="group">
+    <h2 class="section-title">思考整理・行動化</h2>
+      <section class="card" data-search="だーっと書いたメモの行動化 brain_dump_to_action 思考整理・行動化">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>だーっと書いたメモの行動化</h3>
+            <span class="type">brain_dump_to_action</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-brain_dump_to_action">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-brain_dump_to_action">以下のだーっと書いたメモを、行動に移せる形に分けてください。
+
+指定した見出しを使ってください。
+1件1行で短くまとめてください。
+
+出力形式：
+
+# メモの行動化
+
+## 今日やる
+
+## 後日やる
+
+## 保留（今は決めない）
+
+## やらなくていい
+
+## 確認が必要（誰に・何を）
+
+整理対象：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="詰まり原因の整理 stuck_reason 思考整理・行動化">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>詰まり原因の整理</h3>
+            <span class="type">stuck_reason</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-stuck_reason">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-stuck_reason">作業が進んでいません。以下の状況から、進まない原因を整理してください。
+
+原因は次の5つに分類してください。
+情報不足／決断待ち／作業量過多／不安・気分／優先順位不明
+
+出力形式：
+
+# 詰まり原因の整理
+
+## 原因の分類と内訳
+
+## 一番大きい原因
+
+## 原因を小さくする方法
+
+## 今から15分でできること
+
+整理対象（今の状況・気持ち・進んでいない作業）：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="今日の現実的な予定作成 one_day_plan 思考整理・行動化">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>今日の現実的な予定作成</h3>
+            <span class="type">one_day_plan</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-one_day_plan">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-one_day_plan">以下の予定と体調をふまえて、無理のない今日1日の流れを作ってください。
+
+詰め込みすぎないでください。
+移動・食事・休憩の時間も入れてください。
+体調に不安がある場合は、削ってよい予定も示してください。
+
+出力形式：
+
+# 今日の予定
+
+## 今日の前提（体調・外せない用事）
+
+## 1日の流れ（時間帯つき）
+
+## 削ってよいもの
+
+## 今日はやらないこと
+
+整理対象（体調・用事・移動・家事・やりたい作業）：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="考えすぎ停止メモ stop_overthinking 思考整理・行動化">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>考えすぎ停止メモ</h3>
+            <span class="type">stop_overthinking</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-stop_overthinking">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-stop_overthinking">同じことを考え続けて疲れています。以下の内容を、考えを止められる形に整理してください。
+
+出力形式：
+
+# 考えすぎ停止メモ
+
+## 考えていること（要約）
+
+## 今決めること（決め方の案つき）
+
+## 後で考えてよいこと（いつ考えるか）
+
+## 放置でよいこと（理由つき）
+
+## 今日はここまでにする宣言
+
+整理対象：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="次の一手だけ決める next_one_action 思考整理・行動化">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>次の一手だけ決める</h3>
+            <span class="type">next_one_action</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-next_one_action">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-next_one_action">問題が大きくて動けません。以下の内容から「次の一手」を1つだけ決めてください。
+
+条件。
+今から15〜30分でできることにしてください。
+準備が要らない、すぐ始められる行動にしてください。
+
+出力形式：
+
+# 次の一手
+
+## 次の一手（1つだけ）
+
+## その行動のやり方（3ステップ以内）
+
+## それ以外を今はやらない理由
+
+整理対象：</pre>
+        </details>
+      </section>
+    </div>
+    <div class="group">
+    <h2 class="section-title">就活</h2>
+      <section class="card" data-search="経験の職務経歴書向け整理 career_experience 就活">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>経験の職務経歴書向け整理</h3>
+            <span class="type">career_experience</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-career_experience">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-career_experience">以下の経験を、職務経歴書に使える形に整理してください。
+
+介護経験、業務改善、IT学習、アプリ制作などが混ざっていても、項目ごとに分けてください。
+盛りすぎず、事実ベースでまとめてください。
+
+出力形式：
+
+# 経験整理（職務経歴書向け）
+
+## 職務内容（事実ベース）
+
+## 実績・工夫したこと（数字があれば数字つき）
+
+## 自己PRに使える要素
+
+## IT転職でアピールできる点
+
+## 面接で聞かれそうな点と答えの方向性
+
+整理対象（経験・エピソード）：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="面接回答下書き interview_answer_draft 就活">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>面接回答下書き</h3>
+            <span class="type">interview_answer_draft</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-interview_answer_draft">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-interview_answer_draft">以下の内容から、面接で話す回答の下書きを作ってください。
+
+書き言葉ではなく、実際に口に出して話しやすい言葉にしてください。
+1回答は30秒〜1分で話せる長さにしてください。
+
+出力形式：
+
+# 面接回答下書き
+
+## 志望動機
+
+## 転職理由
+
+## 自己PR
+
+## 未経験からIT転職を目指す理由
+
+## 想定追加質問と答えの方向性
+
+整理対象（自分の状況・応募先の情報・伝えたいこと）：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="ses応募向け調整 ses_application_adjust 就活">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>SES応募向け調整</h3>
+            <span class="type">ses_application_adjust</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-ses_application_adjust">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-ses_application_adjust">以下の職務経歴書・自己PRを、未経験IT・SES応募向けに調整してください。
+
+SESで評価されやすい点（学習継続力、コミュニケーション、環境適応力、自走力）を意識してください。
+経歴の偽りや誇張はしないでください。
+
+出力形式：
+
+# SES応募向け調整
+
+## 調整後の自己PR案
+
+## 調整後の職務要約案
+
+## SES面談で聞かれそうなことと答えの方向性
+
+## 応募前に直しておくべき点
+
+整理対象（現在の職務経歴書・自己PR）：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="求人票との照合 job_posting_match 就活">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>求人票との照合</h3>
+            <span class="type">job_posting_match</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-job_posting_match">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-job_posting_match">以下の求人票と自分の経験を照合してください。
+
+出力形式：
+
+# 求人票との照合
+
+## 求人の要点（仕事内容・必須条件・歓迎条件）
+
+## 自分の経験と合う点
+
+## 弱い点と補い方
+
+## 面接で話すべき点
+
+## 応募するかの判断材料
+
+整理対象（求人票の内容と、自分の経験の要点）：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="面接で話しやすい言葉化 plain_talk_training 就活">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>面接で話しやすい言葉化</h3>
+            <span class="type">plain_talk_training</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-plain_talk_training">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-plain_talk_training">以下の文章を、面接でそのまま口に出して話しやすい言葉に変換してください。
+
+条件。
+書類っぽい固い表現をやめて、自然な話し言葉にしてください。
+内容は変えないでください。
+1文を短くしてください。
+
+出力形式：
+
+# 話し言葉版
+
+## 変換後（話す用）
+
+## 話す時のポイント（区切る場所・強調する言葉）
+
+整理対象（変換したい文章）：</pre>
+        </details>
+      </section>
+    </div>
+    <div class="group">
+    <h2 class="section-title">生活・家庭共有</h2>
+      <section class="card" data-search="家族共有メモ化 family_manual 生活・家庭共有">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>家族共有メモ化</h3>
+            <span class="type">family_manual</span>
+            <span class="badge">private / family用</span>
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-family_manual">コピー</button>
+        </div>
+        <p class="note">家庭内共有用（private / family想定）。公開GitHub Pagesには載せない前提で使う。</p>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-family_manual">以下の内容を、家族が見ても分かりやすい共有メモに整理してください。
+
+条件。
+命令口調にしないでください。
+専門用語を使わず、短い文にしてください。
+確認しやすい見出しに分けてください。
+
+出力形式：
+
+# 家族共有メモ：タイトル
+
+## これは何のメモか
+
+## いつ見るか
+
+## 内容（見出し＋短い説明）
+
+## 困った時は
+
+整理対象：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="家庭内ルール整理 household_rule 生活・家庭共有">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>家庭内ルール整理</h3>
+            <span class="type">household_rule</span>
+            <span class="badge">private / family用</span>
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-household_rule">コピー</button>
+        </div>
+        <p class="note">家庭内共有用（private / family想定）。公開GitHub Pagesには載せない前提で使う。</p>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-household_rule">以下の内容を、家庭内の決まり事として整理してください。
+
+お金、家事、買い物、予定共有などが混ざっていても、項目ごとに分けてください。
+一方的なルールにせず、相談して決める前提の書き方にしてください。
+
+出力形式：
+
+# 家庭内の決まり事（案）
+
+## 決まっていること
+
+## 相談して決めたいこと
+
+## お金に関すること
+
+## 家事・買い物に関すること
+
+## 予定共有に関すること
+
+## 見直しのタイミング
+
+整理対象：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="勤務表・予定の整理 wife_schedule 生活・家庭共有">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>勤務表・予定の整理</h3>
+            <span class="type">wife_schedule</span>
+            <span class="badge">private / family用</span>
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-wife_schedule">コピー</button>
+        </div>
+        <p class="note">家庭内共有用（private / family想定）。公開GitHub Pagesには載せない前提で使う。</p>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-wife_schedule">以下の勤務表・予定を、共有しやすい形に整理してください。
+
+出力形式は2種類作ってください。
+
+出力形式1（Googleカレンダー登録用）：
+
+- 予定名：
+  - 日付：
+  - 開始時刻：
+  - 終了時刻：
+  - メモ：
+
+（予定の数だけ繰り返してください）
+
+出力形式2（家庭共有用の一覧）：
+
+# 今月の予定一覧
+
+## 週ごとの予定
+
+## 特に注意する日（早出・遅番・不在など）
+
+## 決めておきたいこと（送迎・食事・家事分担など）
+
+整理対象（勤務表・予定の内容）：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="夫婦・家族お出かけ計画 outing_plan 生活・家庭共有">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>夫婦・家族お出かけ計画</h3>
+            <span class="type">outing_plan</span>
+            <span class="badge">private / family用</span>
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-outing_plan">コピー</button>
+        </div>
+        <p class="note">家庭内共有用（private / family想定）。公開GitHub Pagesには載せない前提で使う。</p>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-outing_plan">以下の希望をもとに、無理のないお出かけ計画を作ってください。
+
+条件。
+移動時間と休憩を現実的に見積もってください。
+費用の目安も出してください。
+体調や天候で変更しやすい形にしてください。
+
+出力形式：
+
+# お出かけ計画
+
+## 行き先候補（比較つき）
+
+## 当日の流れ（時間帯つき）
+
+## 費用の目安
+
+## 持ち物・事前準備
+
+## 注意点（混雑・天候・体調）
+
+## 中止・変更する場合の判断
+
+整理対象（行きたい場所・日程・予算・気になること）：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="買い物メモ整理 shopping_memo 生活・家庭共有">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>買い物メモ整理</h3>
+            <span class="type">shopping_memo</span>
+            <span class="badge">private / family用</span>
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-shopping_memo">コピー</button>
+        </div>
+        <p class="note">家庭内共有用（private / family想定）。公開GitHub Pagesには載せない前提で使う。</p>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-shopping_memo">以下の買い物メモを、買い回りしやすい形に整理してください。
+
+条件。
+店別（例：スーパー、ドラッグストア、100円ショップ）に分けてください。
+今日必要なものと、後日でよいものを分けてください。
+同じ売り場のものはまとめてください。
+
+出力形式：
+
+# 買い物リスト
+
+## 店別リスト
+
+### 店名
+
+- [ ] 品名（数量）
+
+## 今日必要なもの
+
+## 後日でよいもの
+
+## 予算メモ
+
+整理対象：</pre>
+        </details>
+      </section>
+    </div>
+    <div class="group">
+    <h2 class="section-title">投資・検証</h2>
+      <section class="card" data-search="pead検証結果整理 pead_result_summary 投資・検証">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>PEAD検証結果整理</h3>
+            <span class="type">pead_result_summary</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-pead_result_summary">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-pead_result_summary">以下のPEAD検証の実行結果を整理してください。
+
+出力形式：
+
+# PEAD検証結果：日付
+
+## 実行した内容
+
+## 実行結果の要点
+
+## 候補銘柄（判断理由つき）
+
+## 少額検証枠で試すもの
+
+## 見るべきリスク
+
+## 次に確認すること
+
+## 検証ルールを変えたくなった点（すぐ変えずにメモ）
+
+整理対象（実行結果・ログ・気づき）：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="投資ルール確認 trading_rule_check 投資・検証">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>投資ルール確認</h3>
+            <span class="type">trading_rule_check</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-trading_rule_check">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-trading_rule_check">以下の投資判断・検証内容を、ルールに沿っているか確認してください。
+
+感情的な判断になっていないかを重視してください。
+
+出力形式：
+
+# 投資ルール確認
+
+## 勝率・期待値の根拠はあるか
+
+## 損切りラインは決まっているか
+
+## 検証が不足している点
+
+## 続けられるやり方か（時間・資金・精神面）
+
+## 今回やるべきこと・やめるべきこと
+
+整理対象（判断したい内容・検証結果）：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="検証ログ整理 validation_log 投資・検証">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>検証ログ整理</h3>
+            <span class="type">validation_log</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-validation_log">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-validation_log">以下のコマンド実行結果・検証ログを整理してください。
+
+出力形式：
+
+# 検証ログ整理：タイトル
+
+## 実行したこと
+
+## 結果（成功・失敗）
+
+## 問題点・エラー
+
+## そこからの判断
+
+## 次にやること
+
+## 再実行する時のコマンド・手順
+
+整理対象（ログ・実行結果）：</pre>
+        </details>
+      </section>
+      <section class="card" data-search="変更履歴作成 release_note_draft 投資・検証">
+        <div class="card-head">
+          <div class="card-title">
+            <h3>変更履歴作成</h3>
+            <span class="type">release_note_draft</span>
+            
+          </div>
+          <button type="button" class="copy-btn" data-copy="prompt-release_note_draft">コピー</button>
+        </div>
+        <details>
+          <summary>プロンプトを表示</summary>
+          <pre id="prompt-release_note_draft">以下の実装内容から、変更履歴（リリースノート）を作ってください。
+
+使う人に伝わる言葉で書いてください。
+
+出力形式：
+
+# 変更履歴：バージョンまたは日付
+
+## 何が変わったか
+
+## 使い方・確認方法
+
+## 注意点
+
+## 既知の未改善点
+
+## 次回に持ち越したこと
+
+整理対象（実装内容・コミット概要）：</pre>
+        </details>
+      </section>
+    </div>
   </main>
   <footer>
-    <p>生成日時：2026/07/06 21:23</p>
+    <p>生成日時：2026/07/06 23:27（収録 41 プロンプト）</p>
     <p>コード固定定義（chatgptPrompts.ts）から生成。将来はnote_templates（DB）へ出力元を切り替え予定。</p>
     <p>再生成コマンド：npm run generate:prompt-hub</p>
   </footer>
@@ -664,6 +1767,11 @@
       document.querySelectorAll('.card').forEach(function (card) {
         var hit = !keyword || card.getAttribute('data-search').indexOf(keyword) !== -1;
         card.classList.toggle('hidden', !hit);
+      });
+      // ヒットするカードが1枚もないセクションは見出しごと隠す
+      document.querySelectorAll('.group').forEach(function (group) {
+        var visible = group.querySelectorAll('.card:not(.hidden)').length > 0;
+        group.classList.toggle('hidden', !visible);
       });
     });
   </script>
