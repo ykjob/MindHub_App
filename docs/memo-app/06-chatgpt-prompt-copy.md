@@ -13,6 +13,13 @@ ChatGPT側に形式を記憶させる運用にはしない。
 
 MindHub_App側にカテゴリ別の整理プロンプトを保持し、ボタンでコピーできるようにする。
 
+### 1.1 DB管理への移行方針（2026-07-06 追加仕様）
+
+* ChatGPT整理プロンプトは、DB上のテンプレート（note_templates.prompt_body）を優先する
+* DBにない場合は、コード固定テンプレートをfallbackとして使う
+* スマホ用プロンプト集HTML（`14-mobile-prompt-hub-and-inbox.md`）でも同様のプロンプトを再利用できるようにする
+* 本ファイルの各プロンプトは、DBへseedする初期データの元とする（`12-template-db-management.md` 参照）
+
 ## 2. 利用フロー
 
 1. ユーザーがカテゴリを選ぶ

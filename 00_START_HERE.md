@@ -53,6 +53,25 @@ UIを触る場合。
 
 * docs/memo-app/08-ui-flow.md
 
+カテゴリ・テンプレートDB管理、テンプレート管理画面を触る場合。
+
+* docs/memo-app/12-template-db-management.md
+* docs/memo-app/03-data-model.md
+
+スマホ閲覧用HTML/JSONエクスポート、出力対象確認画面を触る場合。
+
+* docs/memo-app/13-mobile-view-export.md
+* docs/memo-app/07-export-and-git-rules.md
+
+スマホ用プロンプト集HTML、mobile-inbox運用を触る場合。
+
+* docs/memo-app/14-mobile-prompt-hub-and-inbox.md
+
+将来候補・不採用方針を確認する場合。
+
+* docs/memo-app/15-future-and-rejected-policies.md
+* docs/memo-app/01-decisions-and-scope.md
+
 実装順を確認する場合。
 
 * docs/memo-app/09-roadmap.md

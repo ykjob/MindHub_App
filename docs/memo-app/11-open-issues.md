@@ -80,3 +80,24 @@
 
 * 既存memosデータをnotesへ移行・統合するか
 * 将来的に既存メモ機能を廃止してnotesに一本化するか
+
+## 9. カテゴリ・テンプレートDB管理（2026-07-06 追加仕様。確認待ち）
+
+* note_categories / note_templates の実装タイミング（schema v3としていつマイグレーションするか）
+* 既存コード固定カテゴリ定義（src/features/notes/noteCategories.ts、chatgptPrompts.ts）との移行方法（seed後にコード定義をfallback専用に縮小するか、当面二重管理するか）
+* テンプレート管理画面の画面構成（設定画面をどこに置くか。既存 /notes 配下か新規 /settings 配下か）
+* note_templatesのprompt_bodyとtemplate_bodyを1レコードで持つか分離するか（追加仕様は1レコード案）
+
+## 10. スマホ閲覧用HTML/JSON（2026-07-06 追加仕様。確認待ち）
+
+* スマホ閲覧HTMLの生成方式（アプリ内でHTML文字列を組み立ててダウンロードするか、テンプレートHTML＋JSON読み込み方式にするか）
+* notes-data.jsonの具体的な形式（フィールド構成、Markdown本文をそのまま入れるか）
+* Web版DB（ブラウザ内OPFS）からの出力手段（既存Phase 7のDBアクセス問題と共通）
+* GitHub Pagesへの配置方法（リポジトリのPages設定、docs/配下公開の可否。※このリポジトリを公開するかどうか自体の確認が必要）
+* 自分のWebページへ移す場合の構成
+* private情報を扱う将来案（就活終了後に検討。認証方法など）
+
+## 11. その他（2026-07-06 追加仕様。確認待ち）
+
+* Supabase同期を検討するタイミング（検討条件は 15-future-and-rejected-policies.md 参照）
+* 既存00-overview.mdの「スマホ確認はGitHubアプリで代用」記述は、13-mobile-view-export.mdの方針で置き換え済み（01-decisions-and-scope.mdに反映）。00-overview.md本文の全面改稿は今回見送り

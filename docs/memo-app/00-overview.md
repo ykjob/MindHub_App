@@ -78,3 +78,7 @@ PCでは以下を行う。
 スマホ対応は初期実装では行わない。
 
 外出先で確認したい場合は、GitHubに上げたMarkdownをスマホのGitHubアプリで見ることで代用する。
+
+※スマホ確認については、当初はGitHubアプリでMarkdownを見る方針としていたが、
+追加仕様により「スマホ閲覧用HTML/JSONエクスポート」を正式方針とする。
+詳細は docs/memo-app/13-mobile-view-export.md を参照する。

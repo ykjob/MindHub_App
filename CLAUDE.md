@@ -35,6 +35,10 @@ npx expo start --web   # PC用Webアプリとして起動
 | ChatGPT整理プロンプトコピー | `docs/memo-app/06-chatgpt-prompt-copy.md`、`05-markdown-templates.md` |
 | Markdown書き出し・Git候補管理 | `docs/memo-app/07-export-and-git-rules.md`、`03-data-model.md` |
 | UIを触る | `docs/memo-app/08-ui-flow.md` |
+| カテゴリ・テンプレートDB管理、テンプレート管理画面 | `docs/memo-app/12-template-db-management.md`、`03-data-model.md` |
+| スマホ閲覧用HTML/JSONエクスポート | `docs/memo-app/13-mobile-view-export.md`、`07-export-and-git-rules.md` |
+| スマホ用プロンプト集HTML、mobile-inbox | `docs/memo-app/14-mobile-prompt-hub-and-inbox.md` |
+| 将来候補・不採用方針の確認 | `docs/memo-app/15-future-and-rejected-policies.md` |
 | 実装順の確認 | `docs/memo-app/09-roadmap.md`、`10-tasks.md` |
 | 判断に迷った | `docs/memo-app/01-decisions-and-scope.md`、`11-open-issues.md`、`docs/worklog/current.md` |
 

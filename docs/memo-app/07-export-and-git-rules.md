@@ -132,3 +132,14 @@ scripts/export_git_notes.py --type command
 初期実装では必須ではない。
 
 ただし、DB設計と出力ルールは一括書き出しも想定しておく。
+
+## 12. スマホ閲覧用HTML/JSON出力（2026-07-06 追加仕様）
+
+詳細は `13-mobile-view-export.md` を参照。ここでは書き出し・Git管理に関わるルールだけをまとめる。
+
+* スマホ閲覧用HTML/JSON（docs/mobile-view/）の出力対象は、`archived_at IS NULL` かつ `is_git_candidate = true` かつ `visibility = git_candidate` のメモに限定する
+* さらに公開許可カテゴリ（worklog / research / command / design / error_note / template / claude_prompt）に限定する
+* thought / chatgpt_log / jobsearch は初期の除外カテゴリとする
+* HTML/JSON生成前に出力対象確認画面を設ける（private / internalメモ・個人情報入りメモの誤公開防止）
+* 自動pushはしない。docs/mobile-view/ への配置後、手動でgit add / commit / pushする運用を基本にする
+* 将来、生成からpushまでをまとめるワンコマンド更新スクリプトを検討する（`15-future-and-rejected-policies.md` 参照）。ただしアプリ内から直接pushする機能は採用しない

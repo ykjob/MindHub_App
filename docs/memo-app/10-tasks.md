@@ -104,10 +104,56 @@
 * [x] 対象ファイル一覧表示
 * [ ] Web版DBファイルへのアクセス手段確立（未確定事項。11-open-issues.md参照）
 
-## 10. Phase 8：ダッシュボード化
+## 10. Phase 8：カテゴリ・テンプレートDB管理（2026-07-06 追加仕様）
 
-* [ ] 最近更新したメモ表示
-* [ ] プロジェクト別最新メモ表示
-* [ ] Git候補一覧
-* [ ] 未整理メモ一覧
-* [ ] 次回再開メモ一覧
+旧Phase 8（ダッシュボード化）は将来候補へ移動した（本ファイル末尾および `15-future-and-rejected-policies.md` 参照）。
+
+仕様書整理（今回完了分）。
+
+* [x] 追加仕様書4ファイル作成（12〜15）
+* [x] 既存仕様書への参照・要約追記（01 / 03 / 05 / 06 / 07 / 09 / 10 / 11、00_START_HERE.md）
+* [x] 将来候補・不採用方針整理（15-future-and-rejected-policies.md）
+* [x] mobile-inbox運用整理（14-mobile-prompt-hub-and-inbox.md）
+
+実装タスク（未着手。実装タイミングは確認待ち）。
+
+* [ ] note_categoriesテーブル設計
+* [ ] note_templatesテーブル設計
+* [ ] 既存10カテゴリseed方針整理（seedデータ作成）
+* [ ] schema_versionマイグレーション設計
+* [ ] DB優先・コード固定定義fallback実装
+* [ ] 既存コード固定定義（noteCategories.ts / chatgptPrompts.ts）からの移行方法確定
+
+## 11. Phase 9：テンプレート管理画面
+
+* [ ] カテゴリ管理画面設計
+* [ ] テンプレート管理画面設計
+* [ ] 複数テンプレート設計（カテゴリごとのデフォルト指定含む）
+* [ ] 初期状態に戻す仕様（カテゴリ単位・テンプレート単位・全体）
+* [ ] Codex / Claude Code依頼プロンプトテンプレートの初期候補整備
+
+## 12. Phase 10：スマホ閲覧用HTML/JSONエクスポート
+
+* [ ] スマホ閲覧用HTML/JSON設計（docs/mobile-view/ index.html / notes-data.json）
+* [ ] notes-data.jsonの形式設計
+* [ ] スマホ閲覧対象条件設計（安全条件・公開許可カテゴリ）
+* [ ] 出力対象確認画面設計
+* [ ] スマホ閲覧HTMLの検索・絞り込み設計
+* [ ] 簡易Markdown表示設計
+* [ ] コピーボタン設計（本文・コマンド・ChatGPT用・Gemini用・Googleタスク用）
+* [ ] 手動push運用手順の整理
+
+## 13. Phase 11：スマホ用プロンプト集HTML
+
+* [ ] スマホ用プロンプト集HTML設計
+* [ ] 初期10プロンプト本文作成
+
+## 14. 将来候補（旧Phase 8ダッシュボード含む）
+
+将来候補・不採用の詳細は `15-future-and-rejected-policies.md` を参照。
+
+* [ ] 最近更新したメモ表示（旧Phase 8）
+* [ ] プロジェクト別最新メモ表示（旧Phase 8）
+* [ ] Git候補一覧（旧Phase 8）
+* [ ] 未整理メモ一覧（旧Phase 8）
+* [ ] 次回再開メモ一覧（旧Phase 8）

@@ -19,7 +19,45 @@
 * 削除は完全削除ではなくアーカイブ方式にする
 * プロジェクト名は自由入力と候補選択の両方に対応する
 * タグも自由入力と候補選択の両方に対応する
-* スマホ確認は当面GitHubアプリで代用する
+* スマホ確認はスマホ閲覧用HTML/JSONで行う（当初の「GitHubアプリで代用する」方針は2026-07-06の追加決定で置き換え。`13-mobile-view-export.md` 参照）
+
+## 1.2 追加決定事項（2026-07-06）
+
+追加仕様（`12-template-db-management.md` 〜 `15-future-and-rejected-policies.md`）により、以下を決定事項として追加する。
+
+採用。
+
+* カテゴリ・テンプレートをDB管理にする（note_categories / note_templates）
+* テンプレート管理画面を作る
+* カテゴリごとに複数テンプレートを持てるようにする
+* カテゴリ・テンプレートを初期状態に戻す機能を持たせる
+* Codex / Claude Code依頼プロンプトをテンプレートとして保存できるようにする
+* スマホ閲覧用HTML/JSON（docs/mobile-view/）を出力できるようにする
+* スマホ閲覧対象は安全なメモ（archived_at IS NULL かつ is_git_candidate = true かつ visibility = git_candidate かつ公開許可カテゴリ）だけに限定する
+* HTML/JSON出力前に出力対象確認画面を設ける
+* スマホ閲覧ページに検索・絞り込み・簡易Markdown表示・コピーボタンを付ける
+* スマホ用プロンプト集HTMLを作る
+* mobile-inbox運用を採用する。ただし初期は保存場所を作らずChatGPT送信で代用する
+* GitHub Pagesまたは将来自分のWebページに配置できる構造にする
+* 自動pushはしない。手動push運用を基本にする
+
+将来候補（`15-future-and-rejected-policies.md` 参照）。
+
+* Supabase同期
+* OpenAI API連携
+* ワンコマンド更新スクリプト
+* カテゴリ自由追加
+* テンプレートのエクスポート・インポート
+* mobile-inboxのGitHub連携
+* ダッシュボード（旧Phase 8）
+* 家事DB・月次作業アナウンス・自分のWebページ拡張
+* private情報も扱えるスマホ閲覧方法
+
+不採用（`15-future-and-rejected-policies.md` 参照）。
+
+* アプリ内GitHub自動push
+* Codexによる日常的なスマホ入力取り込み
+* スマホからSQLite直接共有
 
 ## 2. 初期実装でやること
 
