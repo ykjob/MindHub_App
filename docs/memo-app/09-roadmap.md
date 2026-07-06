@@ -181,14 +181,41 @@
 
 * 初期10プロンプトの掲載
 * プロンプトコピー機能
+* 短期方針（2026-07-06決定）：note_templatesのDB化を待たず、コード固定プロンプト定義（chatgptPrompts.ts）からdocs配下へHTMLを生成する。note_templates実装後に出力元をDBへ切り替える
 
 完了条件。
 
 * 外出先のスマホからプロンプトをコピーしてChatGPT / Geminiで使える
 
-仕様：`14-mobile-prompt-hub-and-inbox.md`
+仕様：`14-mobile-prompt-hub-and-inbox.md`（生成方式は §1.6）
 
-## Phase 12：将来拡張
+※短期方針によりPhase 8〜9への依存がなくなったため、Phase 11は先行着手できる。
+
+## Phase 12：Android APK版ビルド（2026-07-06 端末別運用方針で追加）
+
+自分（Android端末）用に、開発サーバーなしで動くAPKをビルドしてアプリとしてインストールする。家族（iPhone）はアプリ配布せず、Phase 10のスマホ閲覧用HTML/JSONで閲覧する。
+
+ビルド方式は決定済み（2026-07-06）：EASクラウドビルド（profile: preview / internal distribution / APK形式）、SDK 54を正式採用候補として進める（`16-platform-and-distribution.md` 2.3〜2.4）。
+
+やること。
+
+* EASアカウント準備・eas-cli導入・eas.json作成（previewプロファイル / APK形式）
+* app.json等のビルド設定整備（Androidパッケージ名・アイコン等）
+* EASクラウドビルドでAPK生成、Android実機へのインストール
+* オフライン利用の確認（メモ作成・編集・保存・再起動後の保持）
+* JSONインポートの仕様確定と実装（`11-open-issues.md` 12章）
+* テンプレート管理の動作確認（Phase 8〜9実装後）
+
+完了条件。
+
+* 開発サーバーなしでAndroid実機上でメモ作成・編集ができる
+* オフラインで利用できる
+
+仕様：`16-platform-and-distribution.md`
+
+※Phase 8〜11との実施順は固定しない。着手タイミングはユーザー判断。
+
+## Phase 13：将来拡張（旧Phase 12）
 
 候補（詳細は `15-future-and-rejected-policies.md`）。
 
@@ -200,8 +227,10 @@
 * テンプレートのエクスポート・インポート
 * mobile-inboxのGitHub連携
 * 家事DB・月次作業アナウンス・自分のWebページ拡張
-* スマホ対応（アプリとしての対応）
 * ChatGPT共有受け取り
 * 添付ファイル管理
 * 画像管理
 * 音声メモ
+* 配布用リポジトリの整備・配布用データエクスポート機能（配布・共有方針は決定済み：`17-distribution-and-sharing.md`。リポジトリ作成タイミング・エクスポート機能は将来判断）
+
+※「スマホ対応（アプリとしての対応）」は端末別運用方針（2026-07-06）で整理済み：Android APK版はPhase 12で採用、iPhone向けアプリ配布は不採用（`16-platform-and-distribution.md`）。

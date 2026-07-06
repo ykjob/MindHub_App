@@ -96,8 +96,43 @@
 * GitHub Pagesへの配置方法（リポジトリのPages設定、docs/配下公開の可否。※このリポジトリを公開するかどうか自体の確認が必要）
 * 自分のWebページへ移す場合の構成
 * private情報を扱う将来案（就活終了後に検討。認証方法など）
+* スマホ用プロンプト集HTML（14）の生成方式 →【決定済み 2026-07-06】短期は(b)を採用：note_templatesのDB化を待たず、コード固定プロンプト定義（chatgptPrompts.ts）からdocs配下へスマホ閲覧用HTMLを生成する。将来、note_templates実装後に出力元をDBへ切り替える（14 §1.6に反映済み）。残る未確定：出力先ファイル名・生成の起動方法（アプリ内ボタンかスクリプトか）
 
 ## 11. その他（2026-07-06 追加仕様。確認待ち）
 
 * Supabase同期を検討するタイミング（検討条件は 15-future-and-rejected-policies.md 参照）
 * 既存00-overview.mdの「スマホ確認はGitHubアプリで代用」記述は、13-mobile-view-export.mdの方針で置き換え済み（01-decisions-and-scope.mdに反映）。00-overview.md本文の全面改稿は今回見送り
+
+## 12. Android APK版・iPhone Web閲覧版（2026-07-06 端末別運用方針）
+
+方針は決定済み（`16-platform-and-distribution.md`）。
+
+決定済み（2026-07-06）。
+
+* APKのビルド方式：初回はEASクラウドビルドで進める（profile: preview / internal distribution / APK形式）。ローカルビルド（Android Studio / Gradle / Java環境整備）は重いため後回し
+* ビルド対象のSDKバージョン：SDK 54を正式採用候補のまま進める（SDK 56固有機能は未使用。SDK 54でtsc・Webバンドル・expo-doctor合格）。SDK 56へ戻す・上げる判断はSDK 56固有機能が必要になった時に再検討
+
+残る未確定。
+
+* JSONインポートの仕様：何をインポートするか（PC Web版のnotesデータをAndroid APK版へ移すためのエクスポート/インポートか、notes-data.jsonの取り込みか）、ファイル形式、ID重複時の扱い（上書き / スキップ / 複製）、インポート画面の場所。PC側に対応するJSONエクスポート機能も未実装
+* Android APK版初版に含める機能範囲：テンプレート管理（Phase 8〜9）とJSONインポートを初版に含めるか、まず現行機能のみでAPK化して動作確認を先行するか
+* EASアカウントの準備状況（Expoアカウントでのログインが必要）、Androidパッケージ名
+* check-expo-sdk54ブランチのmainへのマージタイミング（SDK 54正式採用候補の決定を受けて）
+
+## 13. 配布・共有方針（2026-07-06 追加）
+
+三区分（自分用・家族用・配布用）の方針は決定済み（`17-distribution-and-sharing.md`）。
+
+決定済み（2026-07-06）。
+
+* 家族用の公開範囲：家族間の決まり事・家庭内マニュアルは公開GitHub Pagesに置かない。公開GitHub Pagesに出してよいのは公開されても困らない内容だけに限定する
+* familyカテゴリを追加する。ただし公開可否はカテゴリだけで判定せず、visibilityを併用する。category = family でも visibility = private / family のものは公開GitHub Pagesに出さない（04 / 03 / 13に反映済み）
+* 配布用は別リポジトリに分ける。汎用テンプレート・汎用知識データ・サンプルデータ・説明書だけを含め、個人情報・家族情報・家庭内ルール・自分用の完全DBは含めない
+* 配布物の範囲：まずWeb / PWA・JSON・説明書を優先する。配布用APK・ソース公開は将来候補とし、初期必須にはしない
+
+残る未確定。
+
+* 家庭内情報の共有手段をどれから着手するか：非公開配置先、ローカルHTML共有、PDF、JSONインポート、将来のprivate向けPWA
+* familyカテゴリ・visibility = family値の実装タイミング：コード固定定義（noteCategories.ts等）へ先行追加するか、note_categories（Phase 8）実装時に合わせるか
+* 配布用リポジトリの名称・構成・作成タイミング
+* 配布用データエクスポート機能の仕様（将来候補。当面は手動選別）

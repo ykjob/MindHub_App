@@ -123,6 +123,7 @@
 * [ ] schema_versionマイグレーション設計
 * [ ] DB優先・コード固定定義fallback実装
 * [ ] 既存コード固定定義（noteCategories.ts / chatgptPrompts.ts）からの移行方法確定
+* [ ] familyカテゴリ・visibility=family値の追加（2026-07-06決定。コード定義へ先行追加するかPhase 8実装時に合わせるかは11-open-issues.md 13章）
 
 ## 11. Phase 9：テンプレート管理画面
 
@@ -136,7 +137,7 @@
 
 * [ ] スマホ閲覧用HTML/JSON設計（docs/mobile-view/ index.html / notes-data.json）
 * [ ] notes-data.jsonの形式設計
-* [ ] スマホ閲覧対象条件設計（安全条件・公開許可カテゴリ）
+* [ ] スマホ閲覧対象条件設計（安全条件・公開許可カテゴリ。familyカテゴリは除外、公開判定はカテゴリ＋visibility併用。13-mobile-view-export.md 3.3）
 * [ ] 出力対象確認画面設計
 * [ ] スマホ閲覧HTMLの検索・絞り込み設計
 * [ ] 簡易Markdown表示設計
@@ -145,10 +146,39 @@
 
 ## 13. Phase 11：スマホ用プロンプト集HTML
 
-* [ ] スマホ用プロンプト集HTML設計
-* [ ] 初期10プロンプト本文作成
+生成方式は決定済み（2026-07-06、14-mobile-prompt-hub-and-inbox.md §1.6）：短期はコード固定プロンプト定義（chatgptPrompts.ts）からdocs配下へ生成し、note_templates実装後に出力元をDBへ切り替える。Phase 8〜9への依存がなくなったため先行着手できる。
 
-## 14. 将来候補（旧Phase 8ダッシュボード含む）
+* [ ] スマホ用プロンプト集HTML設計（出力先ファイル名・生成の起動方法は未確定。11-open-issues.md 10章）
+* [ ] コード固定プロンプト定義（chatgptPrompts.ts）からのHTML生成実装（短期方針）
+* [ ] 初期10プロンプト本文作成
+* [ ] note_templates実装後の出力元DB切り替え（将来。Phase 8〜9完了後）
+
+## 14. Phase 12：Android APK版ビルド（2026-07-06 端末別運用方針）
+
+仕様書整理（今回完了分）。
+
+* [x] 端末別運用方針の仕様書作成（16-platform-and-distribution.md）
+* [x] 既存仕様書への反映（01 / 09 / 10 / 11 / 13 / 15、00_START_HERE.md、CLAUDE.md）
+* [x] 配布・共有方針（自分用・家族用・配布用の三区分）の仕様書作成（17-distribution-and-sharing.md）
+* [x] 配布・共有方針の既存仕様書への反映（01 / 09 / 11 / 13 / 15 / 16、00_START_HERE.md、CLAUDE.md）
+
+実装タスク（着手タイミングは確認待ち）。
+
+* [x] ビルド方式確定（2026-07-06決定：EASクラウドビルド。profile: preview / internal distribution / APK形式。ローカルビルドは後回し）
+* [x] 対象SDKバージョン確定（2026-07-06決定：SDK 54を正式採用候補のまま進める。SDK 56固有機能が必要になった時に再検討）
+* [ ] check-expo-sdk54ブランチのmainマージ判断（SDK 54正式採用候補の決定を受けて。ユーザー判断）
+* [ ] EASアカウント準備・eas-cli導入
+* [ ] eas.json作成（previewプロファイル / internal distribution / APK形式）
+* [ ] app.json等のビルド設定整備（Androidパッケージ名・アイコン等）
+* [ ] EASクラウドビルドでAPK生成
+* [ ] Android実機インストール・オフライン動作確認（メモ作成・編集・保存・再起動後の保持）
+* [ ] JSONインポートの仕様確定（11-open-issues.md 12章）
+* [ ] JSONインポート実装
+* [ ] テンプレート管理の動作確認（Phase 8〜9実装後）
+
+家族用iPhone閲覧はPhase 10（スマホ閲覧用HTML/JSON）で対応するため、Phase 12にiOS向けタスクはない。
+
+## 15. 将来候補（旧Phase 8ダッシュボード含む）
 
 将来候補・不採用の詳細は `15-future-and-rejected-policies.md` を参照。
 
@@ -157,3 +187,5 @@
 * [ ] Git候補一覧（旧Phase 8）
 * [ ] 未整理メモ一覧（旧Phase 8）
 * [ ] 次回再開メモ一覧（旧Phase 8）
+* [ ] 配布用リポジトリ整備（作成タイミングは確認待ち。11-open-issues.md 13章）
+* [ ] 配布用データエクスポート機能（将来候補。17-distribution-and-sharing.md）

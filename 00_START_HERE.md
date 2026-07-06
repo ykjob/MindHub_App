@@ -72,6 +72,16 @@ UIを触る場合。
 * docs/memo-app/15-future-and-rejected-policies.md
 * docs/memo-app/01-decisions-and-scope.md
 
+Android APK版ビルド・iPhone Web閲覧版・端末別運用を触る場合。
+
+* docs/memo-app/16-platform-and-distribution.md
+* docs/memo-app/13-mobile-view-export.md
+
+配布・共有の区分（自分用・家族用・配布用）を確認する場合。
+
+* docs/memo-app/17-distribution-and-sharing.md
+* docs/memo-app/16-platform-and-distribution.md
+
 実装順を確認する場合。
 
 * docs/memo-app/09-roadmap.md

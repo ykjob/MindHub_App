@@ -17,6 +17,19 @@
 | エラー対応メモ           | error_note    | エラー原因、試したこと、解決方法             | true     |
 | テンプレート            | template      | 再利用するプロンプトや定型文               | true     |
 
+## 1.1 追加カテゴリ（2026-07-06 配布・共有方針で追加）
+
+| 表示名   | type   | 用途                                 | Git候補初期値 |
+| ----- | ------ | ---------------------------------- | -------- |
+| 家族共有  | family | 家族間の決まり事、家庭内マニュアル、家族に共有したい情報       | false    |
+
+familyカテゴリの扱い。
+
+* 公開GitHub Pagesには出さない（スマホ閲覧用HTMLの除外カテゴリに含める。`13-mobile-view-export.md` 3.2〜3.3参照）
+* 公開可否はカテゴリだけで判定せず、visibilityを併用する。category = family でも visibility = private / family のものは公開しない
+* visibilityに `family` 値を追加する（`03-data-model.md` 参照）
+* 実装タイミング（コード固定定義への追加か、note_categories（Phase 8）実装時か）は `11-open-issues.md` 13章参照
+
 ## 2. Git候補初期値の考え方
 
 個人情報が混ざりやすいカテゴリはfalseにする。

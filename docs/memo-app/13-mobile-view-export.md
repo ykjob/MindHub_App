@@ -10,6 +10,8 @@ SQLiteそのものをスマホと共有するのではなく、PC側で閲覧用
 
 これにより、従来の「スマホ確認はGitHubアプリで代用する」方針を置き換える。
 
+2026-07-06追記：端末別運用方針（`16-platform-and-distribution.md`）により、この閲覧ページの主な利用者は家族（iPhone、Safari等で閲覧）とする。家族は編集・管理をしない想定のため、iPhone向けアプリ配布・EAS iOSビルドは行わず、この閲覧専用ページで代替する。自分（Android）はAndroid APK版アプリを使う。
+
 ## 2. 出力先案
 
 ```text
@@ -52,7 +54,16 @@ claude_prompt
 thought
 chatgpt_log
 jobsearch
+family
 ```
+
+### 3.3 familyカテゴリとvisibilityの扱い（2026-07-06追加）
+
+家庭内情報用に `family` カテゴリを追加する（`04-categories-and-tags.md`、`17-distribution-and-sharing.md` 4.2参照）。
+
+* 家庭内の決まり事・マニュアルは公開GitHub Pagesに出さないため、familyカテゴリは初期の除外カテゴリに含める
+* 公開可否はカテゴリだけで判定せず、visibilityを併用する。category = family でも、visibility = private または visibility = family のものは公開GitHub Pagesには出さない
+* 家族向けの非公開な閲覧手段（非公開配置先、ローカルHTML共有、PDF、JSONインポート、private向けPWA等）は別途検討する（`11-open-issues.md` 13章）
 
 ## 4. 出力前確認画面
 
@@ -141,6 +152,8 @@ HTML/JSONを生成する前に、出力対象確認画面を表示する。
 そのため、private / internalメモは出さない。
 
 就活が終わった後、必要であればプライベート寄りの情報を扱える閲覧方法を検討する（`15-future-and-rejected-policies.md` 参照）。
+
+2026-07-06決定：家族間の決まり事・家庭内マニュアルなどの家庭内情報は、公開GitHub Pagesには置かない。公開GitHub Pagesに出してよいのは、公開されても困らない内容だけに限定する（本節の前提を維持する）。家庭内情報の共有手段は、非公開配置先・ローカルHTML共有・PDF・JSONインポート・将来のprivate向けPWAなどを別途検討する（`17-distribution-and-sharing.md` 4.1、`11-open-issues.md` 13章）。
 
 ## 7. 手動push運用
 

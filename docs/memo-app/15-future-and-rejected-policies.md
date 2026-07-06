@@ -82,6 +82,12 @@ PCとスマホで同じDBを使いたくなった場合に検討する。
 
 就活が終わった後、必要であればプライベート寄りの情報を扱える閲覧方法を検討する。
 
+### 1.10 配布用データエクスポート機能（2026-07-06追加）
+
+配布用（知人向け）リポジトリに入れるデータ（汎用の知識データ・汎用テンプレート・サンプルデータ）だけを書き出すエクスポート機能は将来候補とする（`17-distribution-and-sharing.md` 参照）。
+
+当面、配布用リポジトリの中身は手動で選別・整備する。
+
 ## 2. 不採用方針
 
 以下は現時点では採用しない。
@@ -113,7 +119,21 @@ PCとスマホで同じDBを使いたくなった場合に検討する。
 
 Codexは、実装、レビュー、コード修正、仕様整理に使う。
 
-### 2.3 スマホからSQLite直接共有
+### 2.3 iPhone向けアプリ配布・EAS iOSビルド（2026-07-06追加）
+
+不採用。
+
+理由。
+
+* 家族（iPhone利用者）は閲覧のみで、編集や管理をしない想定
+* Apple Developer Program費用・証明書管理・配布手段（TestFlight等）のコストが閲覧目的に見合わない
+
+代替。
+
+* 閲覧専用のスマホ閲覧用HTML/JSON（`13-mobile-view-export.md`）をSafari等で見てもらう
+* 自分（Android）はAndroid APK版を使う（`16-platform-and-distribution.md`）
+
+### 2.4 スマホからSQLite直接共有
 
 不採用。
 
@@ -132,3 +152,5 @@ Codexは、実装、レビュー、コード修正、仕様整理に使う。
 * 採用済み決定事項：`01-decisions-and-scope.md`
 * スマホ閲覧用HTML/JSON：`13-mobile-view-export.md`
 * mobile-inbox運用：`14-mobile-prompt-hub-and-inbox.md`
+* 端末別運用・配布方針：`16-platform-and-distribution.md`
+* 配布・共有方針（三区分）：`17-distribution-and-sharing.md`

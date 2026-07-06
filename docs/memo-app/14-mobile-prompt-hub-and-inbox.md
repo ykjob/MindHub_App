@@ -119,6 +119,15 @@ DB同期なしで、スマホからすぐ使えるプロンプト集を用意す
 
 スマホ用プロンプト集HTMLのプロンプトは、アプリ内のChatGPT整理プロンプト（DB上のテンプレート）と同様の内容を再利用できるようにする（`06-chatgpt-prompt-copy.md`、`12-template-db-management.md` 参照）。
 
+### 1.6 生成方式（2026-07-06決定）
+
+短期対応と将来対応の二段階にする。
+
+* 短期：note_templatesのDB化（Phase 8）を待たず、現在コード内に固定されているプロンプト定義（`src/features/notes/chatgptPrompts.ts`）から、docs配下へスマホ閲覧用HTMLを生成する
+* 将来：note_templates実装後に、出力元をDBへ切り替える
+
+これにより、プロンプト集HTMLはテンプレートDB管理（Phase 8〜9）の完成を待たずに先行してスマホで使えるようにする。
+
 ## 2. mobile-inbox運用
 
 ### 2.1 方針
