@@ -86,7 +86,12 @@ function loadPromptEntries() {
       name: category.label,
       groupKey: 'category',
       promptBody: buildChatGptPrompt(category.type),
-      badge: category.gitCandidateDefault ? undefined : '個人情報注意',
+      badge:
+        category.type === 'family'
+          ? 'private / family用'
+          : category.gitCandidateDefault
+            ? undefined
+            : '個人情報注意',
     })),
   };
 
@@ -161,7 +166,7 @@ function renderHtml(groups, generatedAt) {
   const sections = groups
     .map(
       (group) => `    <div class="group">
-    <h2 class="section-title">${escapeHtml(group.label)}</h2>
+    <h2 class="section-title">${escapeHtml(group.label)}（${group.entries.length}件）</h2>
 ${group.entries.map((entry) => renderCard(entry, group.label)).join('\n')}
     </div>`
     )
@@ -221,7 +226,13 @@ ${group.entries.map((entry) => renderCard(entry, group.label)).join('\n')}
     border-radius: 8px;
     background: var(--card-bg);
     color: var(--text);
-    margin-bottom: 16px;
+    margin-bottom: 4px;
+  }
+  .count {
+    font-size: 12px;
+    color: var(--sub);
+    margin: 0 0 8px;
+    text-align: right;
   }
   .card {
     background: var(--card-bg);
@@ -314,6 +325,7 @@ ${group.entries.map((entry) => renderCard(entry, group.label)).join('\n')}
     <h1>プロンプト集</h1>
     <p>コピーして ChatGPT / Gemini / Claude Code / Codex に貼り付けて使ってください。</p>
     <input type="search" id="search" placeholder="プロンプト名・分類で絞り込み">
+    <p class="count" id="count">全${total}件</p>
   </header>
   <main>
 ${sections}
@@ -379,6 +391,12 @@ ${sections}
         var visible = group.querySelectorAll('.card:not(.hidden)').length > 0;
         group.classList.toggle('hidden', !visible);
       });
+      // 表示件数を更新する
+      var total = document.querySelectorAll('.card').length;
+      var shown = document.querySelectorAll('.card:not(.hidden)').length;
+      document.getElementById('count').textContent = keyword
+        ? '表示中 ' + shown + ' / ' + total + '件'
+        : '全' + total + '件';
     });
   </script>
 </body>
