@@ -6,6 +6,7 @@ import NoteForm from '../../../src/components/NoteForm';
 import { getNoteById } from '../../../src/features/notes/noteRepository';
 import { updateNote } from '../../../src/features/notes/noteService';
 import type { Note, NoteInput } from '../../../src/features/notes/noteTypes';
+import { showMessage } from '../../../src/utils/dialog';
 
 export default function NoteEditScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -38,8 +39,12 @@ export default function NoteEditScreen() {
     try {
       await updateNote(db, id, input);
       router.back();
-    } catch {
+    } catch (error) {
       setSaving(false);
+      showMessage(
+        '保存できませんでした',
+        error instanceof Error ? error.message : String(error)
+      );
     }
   }
 

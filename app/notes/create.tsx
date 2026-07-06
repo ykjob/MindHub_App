@@ -4,6 +4,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import NoteForm from '../../src/components/NoteForm';
 import { createNote } from '../../src/features/notes/noteService';
 import type { NoteInput } from '../../src/features/notes/noteTypes';
+import { showMessage } from '../../src/utils/dialog';
 
 export default function NoteCreateScreen() {
   const db = useSQLiteContext();
@@ -14,8 +15,12 @@ export default function NoteCreateScreen() {
     try {
       const note = await createNote(db, input);
       router.replace(`/notes/${note.id}`);
-    } catch {
+    } catch (error) {
       setSaving(false);
+      showMessage(
+        '保存できませんでした',
+        error instanceof Error ? error.message : String(error)
+      );
     }
   }
 
