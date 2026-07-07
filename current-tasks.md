@@ -17,6 +17,15 @@ MindHub_Appのメモ管理機能拡張について、
 
 ## 完了したこと
 
+### APK初版実機確認の記録＋アプリ内プロンプト一覧画面の追加（2026-07-07、未push）
+
+* APK初版の実機確認結果を記録（起動・保存・再起動後保持・familyカテゴリ/visibility表示・FlowDock作成編集は成功。Androidキーボード隠れは許容。検索/絞り込み/Markdownプレビュー/オフライン保存/prompts.htmlコピーは未確認）。16 §2.5のチェックリストに反映
+* クリップボード不具合は `9338a07` で修正済み。既存APKには未反映のため、EAS再ビルド後に実機再確認が必要（16 §2.5に明記）
+* アプリ内プロンプト一覧画面 `app/prompts` を新規追加。promptHub.ts（chatgptPrompts＋mobilePrompts統合の共有データ層。42件・7セクション）＋SectionListでセクション別表示・検索・展開・コピー（修正済みcopyToClipboard使用）。ホームヘッダーに「プロンプト集」導線を追加
+* 設計判断：mobilePrompts.tsの「アプリからimportしない」方針を今回のAPK内表示要件で上書き（冒頭コメント更新）。prompts.htmlはWebView表示せずRN画面で描画。generate_prompt_hub.mjsは無変更で温存
+* 検証：tsc・expo export（web）・generate:prompt-hub（7セクション42プロンプト）すべて合格。APK実機確認はEAS再ビルド後
+* 今回対応せず：Markdown書き出しのAPK対応、Androidキーボード追加修正、Phase 8、JSONインポート、Pages有効化、PWA化、配布用リポジトリ、EAS build、push
+
 ### 配布・実機運用前の土台整備（2026-07-07、未push）
 
 * familyカテゴリ・visibility=family値をコード反映（noteTypes / noteCategories / chatgptPrompts。DBマイグレーション不要。作成・編集画面に自動表示）。公開Pages出力可否判定 mobileViewPolicy.ts を先行実装（Phase 10で使用予定）

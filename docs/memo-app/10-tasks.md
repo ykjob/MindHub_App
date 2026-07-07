@@ -153,7 +153,8 @@
 * [x] コード固定プロンプト定義（chatgptPrompts.ts）からのHTML生成実装（短期方針。scripts/generate_prompt_hub.mjs）
 * [x] 初期10プロンプト本文作成（2026-07-06完了：不足5本＝時間帯別タスク化・Googleタスク整形・カレンダー整形・優先順位整理・Codexレビュー依頼を含む追加31本を src/features/notes/mobilePrompts.ts に作成。計41本収録、7セクション構成。14 §1.2・§1.7参照）
 * [ ] 今回見送り3本（Claude Code報告確認・リポジトリ状況整理・検証結果レビュー）の追加要否判断
-* [ ] note_templates実装後の出力元DB切り替え（将来。Phase 8〜9完了後。loadPromptEntries()の差し替えのみで対応可能な構造にしてある）
+* [x] アプリ内プロンプト一覧画面の追加（2026-07-07完了：app/prompts。promptHub.tsでchatgptPrompts＋mobilePromptsを統合し42件・7セクションをRN画面で表示・検索・コピー。APK上でHTMLを探さず直接プロンプトを使える。実機確認はEAS再ビルド後）
+* [ ] note_templates実装後の出力元DB切り替え（将来。Phase 8〜9完了後。generate_prompt_hub.mjsのloadPromptEntries()とpromptHub.tsのgetPromptGroups()の差し替えのみで対応可能な構造にしてある）
 
 ## 14. Phase 12：Android APK版ビルド（2026-07-06 端末別運用方針）
 
@@ -173,9 +174,9 @@
 * [x] app.json整備（2026-07-07完了：android.package=com.ykjob.flowdock仮置き、versionCode=1）
 * [x] APK初版の機能範囲・確認チェックリスト整理（2026-07-07完了：16 §2.5。現行機能のみ、既知の制約つき）
 * [x] JSONインポートの仕様確定（2026-07-07完了：18-json-import-export.md。実装は未着手）
-* [ ] EASアカウント準備（`npx eas-cli login`・`eas build:configure`。Expoアカウントログインが必要なためユーザー操作待ち）
-* [ ] EASクラウドビルドでAPK生成（`eas build --platform android --profile preview`）
-* [ ] Android実機インストール・確認チェックリスト実施（16 §2.5）
+* [x] EASアカウント準備・初回APKビルド（2026-07-07：初回EAS APKビルド成功→Android端末インストール成功）
+* [~] Android実機インストール・確認チェックリスト実施（16 §2.5）（2026-07-07 初版確認：起動・保存・再起動後保持・familyカテゴリ/visibility表示・FlowDock作成編集は成功。検索/絞り込み/Markdownプレビュー/オフライン保存/prompts.htmlコピーは未確認）
+* [ ] クリップボード修正（9338a07）・アプリ内プロンプト一覧画面のAPK実機再確認（EAS再ビルド後）
 * [ ] JSONインポート実装（PC側エクスポート＋Android側インポート。18参照。実装時期は未定）
 * [ ] テンプレート管理の動作確認（Phase 8〜9実装後）
 

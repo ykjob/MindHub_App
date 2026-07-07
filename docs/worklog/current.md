@@ -1,6 +1,63 @@
 # 最新作業ログ
 
-最終更新：2026-07-07（配布・実機運用前の土台整備）
+最終更新：2026-07-07（APK初版実機確認の記録＋アプリ内プロンプト一覧画面の追加）
+
+## APK初版実機確認の記録とアプリ内プロンプト一覧画面の追加（2026-07-07）
+
+### APK初版の実機確認結果
+
+初回EAS APKビルド成功→Android端末インストール成功→開発サーバーなしで起動成功。以下を実機確認した。
+
+* 成功：単体起動、メモ管理（notes）の作成・編集・保存、一覧表示、再起動後のデータ保持、familyカテゴリ／visibility=family表示・保存、FlowDock（既存メモ）の作成・編集
+* 許容（未改善）：Androidキーボードで保存ボタンが隠れる件（キーボードを閉じて操作）
+* 未確認（次回以降）：検索・絞り込み・並び替え、Markdownプレビュー、機内モードでの保存、prompts.htmlのブラウザコピー
+* 判断：起動・保存・再起動後保持・カテゴリ/visibility表示は成功。Android APKとしての土台は成立
+* 記録先：docs/memo-app/16-platform-and-distribution.md §2.5 のチェックリストに結果を反映
+
+### クリップボード不具合（前タスク）の位置づけ
+
+* 「クリップボードを使用できません」は `9338a07 fix: support clipboard copy on native builds` で修正済み（expo-clipboardでネイティブ分岐）
+* 既存APKには未反映。次回EAS再ビルド後のAPKで実機再確認が必要（16 §2.5に明記）
+
+### アプリ内プロンプト一覧画面の追加（今回の実装対象）
+
+APK上で「プロンプト集をどこから開くか分からない」状態を解消するため、生成済みHTMLを探して開く運用に加え、アプリ内画面としてプロンプトを一覧・検索・コピーできるようにした。
+
+* `src/features/notes/promptHub.ts` 新規：generate_prompt_hub.mjs の loadPromptEntries() と同じセクション構成（PromptGroup[]）をReact Native側へ提供する共有データ層。chatgptPrompts.ts（カテゴリ別10）＋mobilePrompts.ts（追加31）を統合し計42件・7セクション。HTMLとアプリで同じ定義を共有し収録内容がずれないようにした
+* `app/prompts/index.tsx` 新規：SectionListでセクション別表示。検索（プロンプト名・ID・分類）、カード展開で本文表示（selectable）、コピーボタンは修正済み `copyToClipboard()` を使用。コピー成功＝緑「コピーしました」／失敗＝赤「コピー失敗」を2〜2.5秒表示。family系は「private / family用」バッジ＋公開範囲の注記、個人情報注意バッジも表示（prompts.htmlと同等の情報）
+* `app/_layout.tsx`：`prompts/index`（タイトル「プロンプト集」）を登録
+* `app/index.tsx`：ホームヘッダーに「プロンプト集」ボタンを追加（既存の「メモ管理」「設定」の左）
+
+### 設計判断（記録）
+
+* mobilePrompts.ts は従来「アプリ画面からはimportしない（バンドル軽量化）」としていたが、今回のAPK内プロンプト表示要件により方針を上書き。アプリから読めるようにし、ファイル冒頭コメントを「HTML生成スクリプトとpromptHub.tsの2系統が共有する」旨に更新した
+* prompts.html 自体をWebViewで表示する方式は採らず、既存のプロンプト定義をReact Native画面で描画する方式を採用（ユーザー指定の優先方針）
+* generate_prompt_hub.mjs は無変更。prompts.htmlの生成は従来どおり動作することを確認（7セクション・42プロンプト。タイムスタンプのみの差分は破棄）
+
+### 今回対応しないもの
+
+* Markdown書き出しのAPK対応（Web版のみで可とする）／Androidキーボード問題の追加修正／Phase 8テンプレDB管理／JSONインポート／GitHub Pages有効化／PWA化／配布用リポジトリ／EAS build実行／push
+
+### 変更したファイル
+
+* コード（新規）：src/features/notes/promptHub.ts、app/prompts/index.tsx
+* コード（変更）：src/features/notes/mobilePrompts.ts（冒頭コメントのみ）、app/_layout.tsx（ルート登録）、app/index.tsx（導線ボタン）
+* ドキュメント：docs/memo-app/16-platform-and-distribution.md §2.5、current-tasks.md、docs/worklog/current.md、docs/memo-app/10-tasks.md
+* DB（schema/migrations）・保存処理・FlowDock・EAS設定・依存関係は無変更
+
+### 検証結果
+
+* `npx tsc --noEmit` エラーなし
+* `npx expo export --platform web` 成功（Web版非破壊）
+* `npm run generate:prompt-hub` 成功（7セクション・42プロンプト。prompts.html生成が壊れていないことを確認）
+* Android APKでのプロンプト一覧・コピーの実機確認は、EAS再ビルド後に行う（要再ビルド）
+
+### 次にやること
+
+* ユーザー確認後にpush → EAS再ビルド → Android端末へ再インストール → プロンプトコピー成功とプロンプト一覧画面の実機確認
+
+---
+
 
 ## Androidパッケージ名の確定（2026-07-07）
 
