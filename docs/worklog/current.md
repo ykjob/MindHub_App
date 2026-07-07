@@ -1,6 +1,46 @@
 # 最新作業ログ
 
-最終更新：2026-07-07（APK初版実機確認の記録＋アプリ内プロンプト一覧画面の追加）
+最終更新：2026-07-07（Androidエミュレータ自動確認の調査記録＋Maestro雛形作成）
+
+## Androidエミュレータ自動確認の調査記録とMaestro雛形作成（2026-07-07）
+
+### 今回の目的
+
+Android APKを毎回スマホで手動確認する手間を減らすため、エミュレータ上で最低限の回帰確認を自動化する土台を作る。今回は調査結果のドキュメント化とMaestroフロー雛形の作成のみ（実行・CI化・コード変更はしない）。
+
+### 作成したもの
+
+* `docs/memo-app/19-android-emulator-testing.md` 新規：調査結果と導入案。目的／現状前提（EAS preview=APK・internal、appId=com.ykjob.mindhub、testID未整備）／adbでできること・厳しいこと／Maestroでできること／Detox・Appium・Maestro比較（Maestro推奨）／Windows導入方針（WSL2推奨）／推奨構成（adb=配管・Maestro=UIシナリオ・CIは後回し）／最小テスト2本／すぐやる・後回し／既知の制約／残る未決事項
+* `.maestro/README.md` 新規：ディレクトリの目的・前提（エミュレータ起動・APKインストール済み・appId）・実行イメージ・雛形である旨・文言変更時は要修正
+* `.maestro/flows/01_create_and_persist.yaml` 新規：起動→メモ管理→新規作成→本文入力→カテゴリ選択→visibility選択→保存→表示確認→stopApp→launchApp→永続化確認。冒頭のみ clearState:true、再起動時はclearStateなし
+* `.maestro/flows/02_prompt_copy.yaml` 新規：起動→プロンプト集→検索→カード展開→コピー→「コピーしました」確認
+
+### 方針・設計判断
+
+* ツールはMaestro（可視テキストベース）＋adb（配管）を推奨。Detox/Appiumは実リリースAPK検証には重く非推奨
+* testID未整備のため可視テキスト（保存・コピー・カテゴリ名・visibility名など）で操作する。フローは文言変更に弱い旨を明記
+* コピー成功はクリップボード内容の直接検証ではなく「コピーしました」表示で判定
+* 作成保存後は router.replace で詳細画面へ遷移するため、一覧確認は back で戻る構成にした
+* タイトル欄はラベルとplaceholderが同じ「タイトル」で曖昧になるため、placeholderが一意な本文欄にテスト文字列を入れる構成にした
+* CI化は後回し（UI流動的・EASビルド10〜20分のため時期尚早）
+
+### やっていないこと（今回の対象外）
+
+* Maestro/エミュレータの実行、CI設定、testID追加、アプリ本体コード変更、EAS build、GitHub Pages有効化、PWA化、配布用リポジトリ作成
+
+### 検証結果
+
+* 追加・変更はドキュメントと `.maestro/` 雛形のみ。アプリ本体（app/ / src/）は無変更
+* YAMLはappId＋`---`＋コマンド配列の構造で記述（Maestro標準形式）。実エミュレータでの実行はこれから（未実行の雛形）
+* `git status` と変更ファイル一覧で確認
+
+### 残る未決事項（19 §12）
+
+* Maestro実行環境（WSL2 or Windowsネイティブ）、AVDイメージ選定、実行タイミング（手動/CI）、testID付与範囲、テストメモのクリーンアップ方針
+
+---
+
+## APK初版実機確認の記録とアプリ内プロンプト一覧画面の追加（2026-07-07）
 
 ## APK初版実機確認の記録とアプリ内プロンプト一覧画面の追加（2026-07-07）
 

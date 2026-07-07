@@ -17,6 +17,14 @@ MindHub_Appのメモ管理機能拡張について、
 
 ## 完了したこと
 
+### Androidエミュレータ自動確認の調査記録＋Maestro雛形作成（2026-07-07、未push）
+
+* `docs/memo-app/19-android-emulator-testing.md` 新規：調査結果・導入案（adb=配管／Maestro=UIシナリオ／CIは後回し。Detox・Appiumは実リリースAPK検証に重く非推奨。Windowsは WSL2 経由推奨）
+* `.maestro/` 新規：README.md＋flows/01_create_and_persist.yaml（作成〜再起動後の永続化）＋flows/02_prompt_copy.yaml（プロンプト検索・展開・コピー）。**未実行の雛形**
+* 方針：testID未整備のため可視テキスト操作。コピー成功は「コピーしました」表示で判定。CI化は後回し
+* 今回対応せず：Maestro/エミュレータ実行、CI設定、testID追加、アプリ本体コード変更、EAS build、Pages有効化、PWA化、配布用リポジトリ
+* 検証：追加はドキュメントと.maestro雛形のみ。アプリ本体無変更。実エミュレータ実行はこれから
+
 ### APK初版実機確認の記録＋アプリ内プロンプト一覧画面の追加（2026-07-07、未push）
 
 * APK初版の実機確認結果を記録（起動・保存・再起動後保持・familyカテゴリ/visibility表示・FlowDock作成編集は成功。Androidキーボード隠れは許容。検索/絞り込み/Markdownプレビュー/オフライン保存/prompts.htmlコピーは未確認）。16 §2.5のチェックリストに反映

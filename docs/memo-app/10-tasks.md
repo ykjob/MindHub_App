@@ -177,6 +177,10 @@
 * [x] EASアカウント準備・初回APKビルド（2026-07-07：初回EAS APKビルド成功→Android端末インストール成功）
 * [~] Android実機インストール・確認チェックリスト実施（16 §2.5）（2026-07-07 初版確認：起動・保存・再起動後保持・familyカテゴリ/visibility表示・FlowDock作成編集は成功。検索/絞り込み/Markdownプレビュー/オフライン保存/prompts.htmlコピーは未確認）
 * [ ] クリップボード修正（9338a07）・アプリ内プロンプト一覧画面のAPK実機再確認（EAS再ビルド後）
+* [x] Androidエミュレータ自動確認の調査・導入案の記録（2026-07-07完了：19-android-emulator-testing.md。Maestro＋adb推奨、CIは後回し）
+* [x] Maestroフロー雛形の作成（2026-07-07完了：.maestro/README.md、flows/01_create_and_persist.yaml、flows/02_prompt_copy.yaml。未実行の雛形）
+* [ ] Maestro/エミュレータの実行環境準備（WSL2・AVD）とフロー実動確認（未着手。時期は未定）
+* [ ] 主要要素へのtestID付与によるフロー堅牢化（将来。UI安定後）
 * [ ] JSONインポート実装（PC側エクスポート＋Android側インポート。18参照。実装時期は未定）
 * [ ] テンプレート管理の動作確認（Phase 8〜9実装後）
 
