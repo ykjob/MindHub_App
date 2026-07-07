@@ -2,8 +2,10 @@
 //
 // - 既存のメモ整理プロンプト（chatgptPrompts.ts / NOTE_CATEGORIES）とは別系統。
 //   NoteTypeに対応しないため、メモ作成画面のカテゴリ選択肢には混ぜない
-// - アプリ画面からはimportしない。scripts/generate_prompt_hub.mjs だけが読み、
-//   docs/mobile-view/prompts.html に出力する
+// - 読み取り元は2系統：
+//   1) scripts/generate_prompt_hub.mjs → docs/mobile-view/prompts.html（ブラウザ閲覧用）
+//   2) src/features/notes/promptHub.ts → app/prompts（APK/アプリ内プロンプト一覧画面）
+//   どちらもここのデータ定義を共有し、収録内容がずれないようにする
 // - 将来 note_templates（DB）実装後は、category_type='template' の複数テンプレート
 //   としてseedし、出力元をDBへ切り替える予定（12-template-db-management.md）
 //
