@@ -1,6 +1,18 @@
 # 最新作業ログ
 
-最終更新：2026-07-07（Androidエミュレータ自動確認の調査記録＋Maestro雛形作成）
+最終更新：2026-07-07（2回目APKビルド前のversionCode更新）
+
+## 2回目APKビルド前のversionCode更新（2026-07-07）
+
+* app.json の android.versionCode を 1 → 2 に更新。初回APK（versionCode 1）をインストール済みの端末へ、更新版を安全に上書きインストールするための採番
+* 2回目APKに載る主な差分：クリップボード修正（9338a07）、アプリ内プロンプト一覧画面（e80a5bf）
+* `npx expo config --type public` で versionCode: 2 / package: com.ykjob.mindhub が正常に読めることを確認
+* 16-platform-and-distribution.md §2.5 のビルド設定記述を実態に更新（旧仮置きの com.ykjob.flowdock / versionCode 1 の記述を修正、初回ビルド実施済み・2回目はversionCode 2予定を明記）
+* EAS build は未実行。アプリ本体コードは無変更。pushはユーザー確認待ち
+
+---
+
+## Androidエミュレータ自動確認の調査記録とMaestro雛形作成（2026-07-07）
 
 ## Androidエミュレータ自動確認の調査記録とMaestro雛形作成（2026-07-07）
 

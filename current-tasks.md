@@ -17,6 +17,12 @@ MindHub_Appのメモ管理機能拡張について、
 
 ## 完了したこと
 
+### 2回目APKビルド前のversionCode更新（2026-07-07、未push）
+
+* app.json の android.versionCode を 1 → 2 に更新（初回versionCode 1インストール済み端末への上書き更新用）。2回目APKにはクリップボード修正（9338a07）とアプリ内プロンプト一覧画面（e80a5bf）が載る
+* `npx expo config` で versionCode: 2 / package: com.ykjob.mindhub を確認。16 §2.5の記述を実態に更新
+* EAS build未実行・アプリ本体無変更
+
 ### Androidエミュレータ自動確認の調査記録＋Maestro雛形作成（2026-07-07、未push）
 
 * `docs/memo-app/19-android-emulator-testing.md` 新規：調査結果・導入案（adb=配管／Maestro=UIシナリオ／CIは後回し。Detox・Appiumは実リリースAPK検証に重く非推奨。Windowsは WSL2 経由推奨）
