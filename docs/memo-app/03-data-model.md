@@ -249,3 +249,8 @@ note_templates
 * DBにカテゴリやテンプレートが存在しない場合のみ、コード上の初期定義をfallbackとして使う
 
 実装タイミングとマイグレーション方法は未確定（`11-open-issues.md` 参照）。DB変更時は schema_version 方式に従う。
+
+## 7. 現場適応モードのデータ方針（参照）
+
+現場適応モード（`22-workplace-adaptation-data-and-integration.md`）は、初期実装で既存notesを再利用する方針（案A）のため、本ファイルへのスキーマ追加は行わない。
+将来、専用テーブル（案C）またはnotesカラム追加（案B）に移行する場合のみ、本ファイルを正本として定義を追加し、schema_version 方式（§6.5）に従う。既存notesの破壊的変更は行わない。

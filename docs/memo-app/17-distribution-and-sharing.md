@@ -92,6 +92,16 @@
 
 * 配布用データだけを書き出すエクスポート機能（`15-future-and-rejected-policies.md` 参照）
 
+## 6.1 現場適応モード情報の非混入（2026-07-09 追加）
+
+現場適応モード（`20`〜`23`）で扱う現場情報・場面メモは、三区分いずれの共有対象にも含めない。
+
+* 配布用（別リポジトリ）：汎用データのみ。現場情報は含めない
+* 家族用：家庭内情報のみ。現場情報は含めない
+* 公開GitHub Pages（`13-mobile-view-export.md`）：現場情報を出力対象にしない
+
+守秘方針の正本は `23-workplace-adaptation-security-and-portfolio.md`。
+
 ## 7. 関連仕様書
 
 * 端末別運用・配布方針：`16-platform-and-distribution.md`

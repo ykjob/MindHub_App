@@ -30,6 +30,14 @@ familyカテゴリの扱い。
 * visibilityに `family` 値を追加する（`03-data-model.md` 参照）
 * 2026-07-07実装済み：noteCategories.ts / noteTypes.ts / chatgptPrompts.ts（家族共有テンプレート）に反映した。note_categories（Phase 8）実装時はこの定義をseed元にする
 
+## 1.2 現場適応モードのタグ・type方針（参照）
+
+現場適応モード（`20`〜`23`）は、初期方針として既存 type / tags / visibility を再利用する（新type追加は行わない）。
+場面・現場の区別はタグで表す方針とするが、具体的なタグ命名は未確定事項として `11-open-issues.md` で管理する。
+新typeが必要になった場合は本ファイルを正本として定義し、20〜23では参照に留める。
+
+なお、現場適応モードでは守秘優先のため、本ファイル §2 のカテゴリ別Git候補初期値に依らず、既定を `is_git_candidate=false` / `visibility=private` に上書きする（優先順位：現場適応モードの守秘ルール ＞ カテゴリ初期値。詳細は `23-workplace-adaptation-security-and-portfolio.md` §6.1）。
+
 ## 2. Git候補初期値の考え方
 
 個人情報が混ざりやすいカテゴリはfalseにする。

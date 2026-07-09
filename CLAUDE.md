@@ -44,6 +44,7 @@ npx expo start --web   # PC用Webアプリとして起動
 | JSONエクスポート・インポート（PC⇔Android移行） | `docs/memo-app/18-json-import-export.md`、`03-data-model.md` |
 | 実装順の確認 | `docs/memo-app/09-roadmap.md`、`10-tasks.md` |
 | 判断に迷った | `docs/memo-app/01-decisions-and-scope.md`、`11-open-issues.md`、`docs/worklog/current.md` |
+| 現場適応モード（現場適応・5場面導線・現場プロファイル・守秘） | `docs/memo-app/20-workplace-adaptation-overview.md`〜`23`、`08-ui-flow.md`、`03-data-model.md`、`04-categories-and-tags.md`、`07-export-and-git-rules.md`、`17-distribution-and-sharing.md` |
 
 ## 既存機能（FlowDock由来）のドキュメント
 

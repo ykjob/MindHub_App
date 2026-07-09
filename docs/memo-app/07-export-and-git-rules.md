@@ -143,3 +143,10 @@ scripts/export_git_notes.py --type command
 * HTML/JSON生成前に出力対象確認画面を設ける（private / internalメモ・個人情報入りメモの誤公開防止）
 * 自動pushはしない。docs/mobile-view/ への配置後、手動でgit add / commit / pushする運用を基本にする
 * 将来、生成からpushまでをまとめるワンコマンド更新スクリプトを検討する（`15-future-and-rejected-policies.md` 参照）。ただしアプリ内から直接pushする機能は採用しない
+
+## 13. 現場適応モードのGit除外（2026-07-09 追加）
+
+現場適応モード（`20`〜`23`）で扱う現場情報・場面メモは、既定で `is_git_candidate = false` とし、Markdown書き出し・Git候補・スマホ閲覧用HTML/JSONの対象にしない。
+これは本ファイル2章・10章、`13-mobile-view-export.md`、`17-distribution-and-sharing.md` の既存ルールに従う。守秘方針の正本は `23`。
+
+なお、この既定 false は `04-categories-and-tags.md` §2 のカテゴリ別Git候補初期値（worklog 等は true）よりも優先される。優先順位と根拠は `23` §6.1 を参照。
