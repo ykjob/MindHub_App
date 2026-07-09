@@ -1,6 +1,94 @@
 # 最新作業ログ
 
-最終更新：2026-07-09（現場適応モード仕様書の新規作成と既存仕様への参照追記）
+最終更新：2026-07-09（現場適応モード 翌朝再開の引き継ぎ初期入力を追加）
+
+## 現場適応モード 翌朝再開の引き継ぎ初期入力（2026-07-09、MVP後の追加修正）
+
+### 今回の目的
+
+ブラウザ確認で挙動は良好だったが、「この続きから作業開始」を押しても作業開始フォームに再開内容が反映されない点を修正する。目的は、直近の終業前メモから作業開始フォームへ再開用の内容を初期入力すること。
+
+### 固定した条件（ユーザー指定・維持）
+
+* schema変更なし／作業開始メモは保存せずコピーのみ／終業前メモの保存ルール（private・isGitCandidate=false）は不変
+* 既存 `/notes` `/memo` `/prompts` `/settings` 無変更／公開出力・GitHub Pages・配布用HTMLへ非接続
+
+### 実装方針（安全側を選択）
+
+URLに終業前メモ本文を載せず、`?fromRestart=1` のフラグのみ渡し、start画面側で直近終業前メモを取得して初期入力する方式にした。単一の取得元（`getLatestEndNote`）を再利用でき、長文をURLに乗せない。
+
+* 引き継ぎマッピング：明日最初にやること→「今日の作業」、未完了・補足→「先に確認すること」（`未完了: ` / `補足: ` を付けて連結）
+* 終業前メモ本文は `buildEndText` の生成フォーマット（`■ ラベル\n値`、空欄は「（未記入）」）を前提にパース。構造が取り出せない本文はそのまま「先に確認すること」に入れるフォールバックあり
+* 画面上に青い案内「前回の再開メモから引き継ぎました。内容を確認・修正してから使ってください。」を表示
+
+### 変更ファイル
+
+* `src/features/workplace/workplaceService.ts`：`buildStartPrefillFromEndNote`（＋内部の `parseEndNoteSections`）を追加
+* `src/components/WorkplaceSceneForm.tsx`：`initialValues`（マウント時に反映）と `banner` propを追加。values の初期化を initialValues 由来に変更
+* `app/workplace/start.tsx`：`fromRestart` 判定を追加。再開時のみ `getLatestEndNote` を待って初期値を組み立て、通常導線は即空欄表示（取得中は ActivityIndicator）
+* `app/workplace/index.tsx`：「この続きから作業開始」を `/workplace/start?fromRestart=1` へ変更（通常の作業開始カードは `/workplace/start` のまま＝空欄）
+
+### 検証結果
+
+* `npx tsc --noEmit`：合格（EXIT 0）
+* `npx expo export --platform web`：合格（バンドル成功）
+* ブラウザ実操作（引き継ぎ有無の分岐・通常導線が空欄）はユーザー確認待ち
+
+### 今回対応せず
+
+* 質問文作成・進捗報告作成、現場プロファイル、複数現場切り替え／コミット・push
+
+## 現場適応モード Phase 14 MVP実装（2026-07-09）
+
+### 今回の目的
+
+先に作成した仕様書（20〜23）に基づき、現場適応モードのMVPを最小実装する。範囲は「入口追加＋場面選択＋作業開始・詰まり記録・終業前メモ＋翌朝再開導線」。質問文作成・進捗報告作成・現場プロファイル・複数現場切り替えは対象外。コミットは行わない。
+
+### 固定した境界条件（ユーザー指定）
+
+* 入口は新規ルート `app/workplace/*` で分離。既存 `/notes` `/memo` `/prompts` `/settings` は無変更
+* 保存時は必ず `visibility=private` / `is_git_candidate=false` を固定。`getGitCandidateDefault` は使わない
+* schema変更なし・既存DB構造を壊さない
+* 公開出力・GitHub Pages・配布用HTML・家族用表示へは接続しない
+* 保存禁止情報の注意文を各画面で常時表示
+* 場面タグは `workplace_` 接頭辞。共通タグ `workplace` を併記
+* 直近終業前メモ取得は専用関数 `getLatestNoteByTag`（タグ境界厳密一致・`updated_at DESC, id DESC`・1件）
+
+### 実装した進め方
+
+進め方1（終業前メモ→翌朝再開表示→作業開始→詰まり記録）を採用。共通部品を先に固め、保存経路（終業前）を最初に通した。
+
+### 新規作成ファイル
+
+* `src/features/workplace/workplaceTags.ts`：場面タグ・共通タグ・守秘既定定数（visibility=private / git候補false）・守秘注意文・タグ組み立て
+* `src/features/workplace/workplaceService.ts`：終業前メモ保存（`createNote` 経由で守秘既定を強制、type=thought）／直近終業前メモ取得／作業開始・詰まり記録・終業前の生成テキスト組み立て
+* `src/components/WorkplaceSceneForm.tsx`：入力→整理→コピー（任意で保存）を共通化した画面部品。守秘注意を常時表示
+* `app/workplace/index.tsx`：場面選択＋直近の終業前メモ表示＋「この続きから作業開始」
+* `app/workplace/start.tsx` / `stuck.tsx` / `end.tsx`：3場面の画面（endのみ保存あり）
+
+### 既存への追記（非破壊）
+
+* `src/features/notes/noteRepository.ts`：`getLatestNoteByTag` を**追加のみ**。既存 `getNotes` 等は無変更。タグ境界を `,` で厳密一致し、タグ内の LIKE ワイルドカード（% _、例：`workplace_end` の `_`）を `ESCAPE '\'` でエスケープ。誤マッチ（前方一致・`_` の任意1文字マッチ）を防止
+* `app/index.tsx`：ホームヘッダーに「現場適応」ボタンを1つ追加（`/workplace` へ遷移）。既存3ボタンの挙動は無変更
+* `app/_layout.tsx`：`workplace/index` `workplace/start` `workplace/stuck` `workplace/end` のStack.Screen（タイトル）を追加
+
+### 守秘・安全側設計の担保点
+
+* 終業前メモの保存は `saveEndNote` → `createNote` に `visibility='private'` / `isGitCandidate=false` を直接渡す。カテゴリ初期値（`getGitCandidateDefault`）は経路に一切登場しない
+* type は gitCandidateDefault=false の `thought` を採用（`/notes` 側で開いた場合の二重防御）
+* 作業開始・詰まり記録は保存せずコピーのみ（DBに残さない）
+
+### 検証結果
+
+* `npx tsc --noEmit`：合格（EXIT 0）
+* `npx expo export --platform web`：合格（787モジュール、workplace 4画面を含めてバンドル成功、import解決エラーなし）
+* ブラウザでの実操作（入口→終業前メモ保存→再開メモ表示→作業開始／詰まり記録のコピー、`/notes` 側での private・Git候補外の目視）はユーザー確認待ち
+
+### 今回対応せず
+
+* 質問文作成・進捗報告作成（次点）、現場プロファイル、複数現場切り替え
+* notes保存の作業開始・詰まり記録への拡大（コピーのみ）
+* コミット・push
 
 ## 現場適応モード仕様書の新規作成と既存仕様への参照追記（2026-07-09）
 

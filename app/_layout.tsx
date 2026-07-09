@@ -25,6 +25,10 @@ export default function RootLayout() {
         <Stack.Screen name="notes/[id]/index" options={{ title: 'メモ詳細' }} />
         <Stack.Screen name="notes/[id]/edit" options={{ title: 'メモ編集' }} />
         <Stack.Screen name="prompts/index" options={{ title: 'プロンプト集' }} />
+        <Stack.Screen name="workplace/index" options={{ title: '現場適応モード' }} />
+        <Stack.Screen name="workplace/start" options={{ title: '作業開始' }} />
+        <Stack.Screen name="workplace/stuck" options={{ title: '詰まり記録' }} />
+        <Stack.Screen name="workplace/end" options={{ title: '終業前メモ' }} />
       </Stack>
     </SQLiteProvider>
   );

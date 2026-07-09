@@ -36,6 +36,9 @@ export default function MemoListScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>メモ一覧</Text>
         <View style={styles.headerActions}>
+          <TouchableOpacity onPress={() => router.push('/workplace')} style={styles.settingsBtn}>
+            <Text style={styles.settingsBtnText}>現場適応</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('/prompts')} style={styles.settingsBtn}>
             <Text style={styles.settingsBtnText}>プロンプト集</Text>
           </TouchableOpacity>

@@ -52,6 +52,25 @@ export async function getNoteById(
   return db.getFirstAsync<Note>('SELECT * FROM notes WHERE id = ?', [id]);
 }
 
+// 指定タグを持つ最新の未アーカイブノートを1件取得する（現場適応モードの翌朝再開導線用）。
+// getNotes の filter.tag は緩いLIKEで前方一致の誤マッチが起こりうるため、
+// ここではタグ境界を ',' で厳密一致させる専用クエリを使う。
+// タグ内に含まれ得る LIKE ワイルドカード（% _）はエスケープする（例: workplace_end の _）。
+export async function getLatestNoteByTag(
+  db: SQLiteDatabase,
+  tag: string
+): Promise<Note | null> {
+  const escaped = tag.replace(/[\\%_]/g, (c) => `\\${c}`);
+  return db.getFirstAsync<Note>(
+    `SELECT * FROM notes
+       WHERE archived_at IS NULL
+         AND (',' || tags || ',') LIKE ('%,' || ? || ',%') ESCAPE '\\'
+       ORDER BY updated_at DESC, id DESC
+       LIMIT 1`,
+    [escaped]
+  );
+}
+
 export async function insertNote(db: SQLiteDatabase, note: Note): Promise<void> {
   await db.runAsync(
     `INSERT INTO notes (

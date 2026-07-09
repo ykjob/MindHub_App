@@ -2,7 +2,8 @@
 
 ## 現在のフェーズ
 
-* 現場適応モード（Phase 14）の仕様書新規作成＋既存仕様への参照追記完了（2026-07-09）→ 実装は未着手・着手判断待ち
+* 現場適応モード（Phase 14）の仕様書新規作成＋既存仕様への参照追記完了（2026-07-09）
+* 現場適応モード（Phase 14）MVP実装完了（2026-07-09、未コミット）：入口＋場面選択＋作業開始/詰まり記録/終業前メモ＋翌朝再開導線＋再開時の引き継ぎ初期入力。守秘既定強制・schema無変更・既存導線無変更 → ブラウザ確認済み（引き継ぎ含む）
 * Phase 0〜7 一括実装完了（実験的一括実装）→ 動作確認・レビュー待ち
 * 追加仕様（カテゴリ・テンプレートDB管理／スマホ閲覧用HTML/JSON等）の仕様書統合完了（2026-07-06）→ Phase 8以降の実装は未着手・着手判断待ち
 * 端末別運用方針の決定・仕様書反映完了（2026-07-06）：自分用Android APK版（Phase 12）＋家族用iPhone Web閲覧版（Phase 10で対応、アプリ配布なし）。自動同期は対象外
@@ -17,6 +18,24 @@ MindHub_Appのメモ管理機能拡張について、
 2. 追加仕様（docs/memo-app/12〜15）の実装着手判断待ち
 
 ## 完了したこと
+
+### 現場適応モード（Phase 14）MVP実装（2026-07-09、未コミット）
+
+* 新規ルート `app/workplace/*` を追加（既存 `/notes` `/memo` `/prompts` `/settings` は無変更）。`_layout.tsx` にStack.Screen 4件登録
+  * `app/workplace/index.tsx`：場面選択＋直近の終業前メモ（再開メモ）を上部表示＋「この続きから作業開始」
+  * `app/workplace/start.tsx`（作業開始）・`stuck.tsx`（詰まり記録）・`end.tsx`（終業前メモ）
+* 共通部品 `src/components/WorkplaceSceneForm.tsx`：入力→整理→コピー（終業前のみ保存）。守秘注意文を常時表示
+* ロジック層 `src/features/workplace/`：
+  * `workplaceTags.ts`：場面タグ（`workplace_start` / `workplace_stuck` / `workplace_end`）＋共通タグ `workplace`、守秘既定定数、守秘注意文
+  * `workplaceService.ts`：終業前メモ保存（`createNote` 経由で `visibility=private` / `isGitCandidate=false` 固定・type=thought・`getGitCandidateDefault` 不使用）、直近終業前メモ取得、各場面の生成テキスト組み立て
+* `src/features/notes/noteRepository.ts` に `getLatestNoteByTag` を**追加のみ**（既存関数無変更）。タグ境界を `,` で厳密一致、LIKEワイルドカード（% _）をエスケープ、`archived_at IS NULL`、`updated_at DESC, id DESC`、1件
+* `app/index.tsx` ホームヘッダーに「現場適応」ボタンを1つ追加（既存挙動は無変更）
+* 保存対象は翌朝再開に必要な終業前メモのみ。作業開始・詰まり記録はコピーのみ
+* 再開時の引き継ぎ（2026-07-09追加）：`/workplace` 上部の「この続きから作業開始」は `?fromRestart=1` を付けて遷移し、start画面が直近終業前メモを取得して作業開始フォームへ初期入力（明日最初にやること→今日の作業、未完了・補足→先に確認すること。構造が取れない本文はそのまま先に確認すること欄へ）。青い引き継ぎ案内文を表示。通常の作業開始導線は空欄。作業開始は保存しない
+* 境界固定どおり：schema変更なし、既存導線無変更、公開出力・GitHub Pages・配布用HTML・家族用表示への接続なし
+* 次点（質問文作成・進捗報告作成）・現場プロファイル・複数現場切り替えは今回対象外
+* 検証：tsc 合格、`expo export`（web）合格（787モジュール・4画面をバンドル）。ブラウザ実操作確認はユーザー待ち
+* コミット・pushは未実施
 
 ### 現場適応モード仕様書の新規作成と既存仕様への参照追記（2026-07-09、未コミット）
 

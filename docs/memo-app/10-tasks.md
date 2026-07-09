@@ -205,11 +205,20 @@
 * [x] 仕様書4ファイル作成（20〜23）
 * [ ] 既存仕様書への参照追記（01 / 03 / 04 / 07 / 08 / 09 / 11 / 17、00_START_HERE.md、CLAUDE.md）
 
-実装タスク（未着手・着手判断待ち）。
+MVP実装（2026-07-09 実装。未コミット）。
 
-* [ ] 現場適応モード入口の追加（既存ホームへボタン追加のみ）
-* [ ] 作業開始・詰まり記録・終業前メモ（MVP優先3場面）の入力/出力画面
-* [ ] 翌朝の再開導線
-* [ ] 現場プロファイル（単一現場）
-* [ ] 質問文作成・進捗報告作成（次点）
-* [ ] 守秘チェックの導線組み込み
+* [x] 現場適応モード入口の追加（既存ホームヘッダーへ「現場適応」ボタン追加のみ。`app/index.tsx`。既存導線は無変更）
+* [x] 新規ルート `app/workplace/*` の追加（index＝場面選択＋翌朝再開表示 / start / stuck / end）。`_layout.tsx` にStack.Screen登録
+* [x] 作業開始・詰まり記録・終業前メモ（MVP優先3場面）の入力/出力画面（共通部品 `src/components/WorkplaceSceneForm.tsx`）
+* [x] 翌朝の再開導線（直近の終業前メモを1件表示→「この続きから作業開始」で作業開始へ）
+* [x] 再開時の引き継ぎ（2026-07-09追加）：「この続きから作業開始」で作業開始フォームに直近終業前メモの内容を初期入力（明日最初にやること→今日の作業、未完了・補足→先に確認すること）。通常の作業開始導線は空欄。作業開始は従来どおり保存しない
+* [x] 場面タグ実装（`workplace_start` / `workplace_stuck` / `workplace_end` ＋ 共通タグ `workplace`。`src/features/workplace/workplaceTags.ts`）
+* [x] 直近終業前メモ取得の専用関数 `getLatestNoteByTag`（タグ境界厳密一致・LIKEワイルドカードエスケープ・`archived_at IS NULL`・`updated_at DESC, id DESC`・1件。`noteRepository.ts` に追加）
+* [x] 守秘既定の強制（終業前メモ保存は `visibility=private` / `is_git_candidate=false` 固定。`getGitCandidateDefault` 不使用。type=thought。`workplaceService.ts`）
+* [x] 守秘注意文の常時表示（各入力/出力画面。`WORKPLACE_PRIVACY_NOTICE`）
+* [x] 保存は終業前メモのみ（作業開始・詰まり記録はコピーのみ）
+* [ ] 質問文作成・進捗報告作成（次点。今回対象外）
+* [ ] 現場プロファイル（単一現場。今回対象外）
+* [ ] ブラウザでの手動動作確認（tsc・expo export（web）は合格。実操作はユーザー確認待ち）
+
+今回の非対象（境界固定どおり）：schema変更なし、既存 `/notes` `/memo` `/prompts` `/settings` 無変更、公開出力・GitHub Pages・配布用HTML・家族用表示への接続なし。
