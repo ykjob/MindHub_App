@@ -28,6 +28,8 @@ export default function RootLayout() {
         <Stack.Screen name="workplace/index" options={{ title: '現場適応モード' }} />
         <Stack.Screen name="workplace/start" options={{ title: '作業開始' }} />
         <Stack.Screen name="workplace/stuck" options={{ title: '詰まり記録' }} />
+        <Stack.Screen name="workplace/question" options={{ title: '質問文作成' }} />
+        <Stack.Screen name="workplace/report" options={{ title: '進捗報告作成' }} />
         <Stack.Screen name="workplace/end" options={{ title: '終業前メモ' }} />
       </Stack>
     </SQLiteProvider>

@@ -3,7 +3,8 @@
 ## 現在のフェーズ
 
 * 現場適応モード（Phase 14）の仕様書新規作成＋既存仕様への参照追記完了（2026-07-09）
-* 現場適応モード（Phase 14）MVP実装完了（2026-07-09、未コミット）：入口＋場面選択＋作業開始/詰まり記録/終業前メモ＋翌朝再開導線＋再開時の引き継ぎ初期入力。守秘既定強制・schema無変更・既存導線無変更 → ブラウザ確認済み（引き継ぎ含む）
+* 現場適応モード（Phase 14）MVP実装完了（2026-07-09、コミット済み 37aa1e8・push済み）：入口＋場面選択＋作業開始/詰まり記録/終業前メモ＋翌朝再開導線＋再開時の引き継ぎ初期入力。守秘既定強制・schema無変更・既存導線無変更 → ブラウザ確認済み
+* 現場適応モード（Phase 14）次点2場面追加（2026-07-10、未コミット）：質問文作成・進捗報告作成を追加し5場面をそろえた。どちらも `WorkplaceSceneForm` 再利用でコピーのみ・保存なし（`onSave` 未指定）。schema無変更・notes保存処理追加なし・既存導線無変更 → ブラウザ確認待ち
 * Phase 0〜7 一括実装完了（実験的一括実装）→ 動作確認・レビュー待ち
 * 追加仕様（カテゴリ・テンプレートDB管理／スマホ閲覧用HTML/JSON等）の仕様書統合完了（2026-07-06）→ Phase 8以降の実装は未着手・着手判断待ち
 * 端末別運用方針の決定・仕様書反映完了（2026-07-06）：自分用Android APK版（Phase 12）＋家族用iPhone Web閲覧版（Phase 10で対応、アプリ配布なし）。自動同期は対象外
@@ -18,6 +19,17 @@ MindHub_Appのメモ管理機能拡張について、
 2. 追加仕様（docs/memo-app/12〜15）の実装着手判断待ち
 
 ## 完了したこと
+
+### 現場適応モード（Phase 14）次点2場面追加：質問文作成・進捗報告作成（2026-07-10、未コミット）
+
+* `app/workplace/question.tsx`（質問文作成）・`app/workplace/report.tsx`（進捗報告作成）を新規追加。`WorkplaceSceneForm` を `onSave` 未指定で再利用＝**コピーのみ・保存ボタンなし・DB非接続**
+* `src/features/workplace/workplaceService.ts` に `buildQuestionText`（結論先頭・丸投げに見えない体裁）／`buildReportText`（結論先・完了/未完了/次の作業を分離・相談は最後）を追加
+* `src/features/workplace/workplaceTags.ts` に場面定数 `workplace_question` / `workplace_report` を**定義のみ**追加（今回は未保存。将来保存時も private / isGitCandidate=false 固定の前提は不変）
+* `app/workplace/index.tsx` の場面カードに「質問文作成」「進捗報告作成」を追加（作業開始→詰まり記録→質問文作成→進捗報告作成→終業前メモ の並び）。`app/_layout.tsx` にStack.Screen 2件登録
+* 守秘：既存注意文に加え、両画面 intro に「AI・チャット・メールに貼る前に、顧客名・会社名・個人名・内部URL・システム名・社内マニュアル本文・職場固有の判断基準は一般化してから使う」旨を明記
+* 境界固定どおり：schema変更なし、notes保存処理なし、`createNote`・保存系関数は呼ばない、既存 `/notes` `/memo` `/prompts` `/settings` 無変更、公開出力・GitHub Pages・配布用HTML・家族用表示への接続なし
+* 検証：tsc 合格、`expo export`（web）合格、新2画面に保存系コード（onSave/createNote/save）が無いことを確認。ブラウザ実操作はユーザー確認待ち
+* コミット・pushは未実施
 
 ### 現場適応モード（Phase 14）MVP実装（2026-07-09、未コミット）
 

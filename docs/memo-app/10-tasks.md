@@ -217,7 +217,7 @@ MVP実装（2026-07-09 実装。未コミット）。
 * [x] 守秘既定の強制（終業前メモ保存は `visibility=private` / `is_git_candidate=false` 固定。`getGitCandidateDefault` 不使用。type=thought。`workplaceService.ts`）
 * [x] 守秘注意文の常時表示（各入力/出力画面。`WORKPLACE_PRIVACY_NOTICE`）
 * [x] 保存は終業前メモのみ（作業開始・詰まり記録はコピーのみ）
-* [ ] 質問文作成・進捗報告作成（次点。今回対象外）
+* [x] 質問文作成・進捗報告作成（次点。2026-07-10実装。`app/workplace/question.tsx` / `report.tsx`、`WorkplaceSceneForm` 再利用・コピーのみ・保存なし。`buildQuestionText` / `buildReportText` 追加。場面定数 `workplace_question` / `workplace_report` は定義のみ。守秘注意＋AI/チャット/メール貼付前の一般化注意を intro に明記）
 * [ ] 現場プロファイル（単一現場。今回対象外）
 * [ ] ブラウザでの手動動作確認（tsc・expo export（web）は合格。実操作はユーザー確認待ち）
 

@@ -1,6 +1,47 @@
 # 最新作業ログ
 
-最終更新：2026-07-09（現場適応モード 翌朝再開の引き継ぎ初期入力を追加）
+最終更新：2026-07-10（現場適応モード 次点2場面：質問文作成・進捗報告作成を追加）
+
+## 現場適応モード 次点2場面追加：質問文作成・進捗報告作成（2026-07-10）
+
+### 今回の目的
+
+MVP（作業開始・詰まり記録・終業前メモ＋翌朝再開）に続き、次点の質問文作成・進捗報告作成を追加し、5場面モデルを画面上でそろえる。どちらもコピーのみで保存しない。
+
+### 固定した条件（ユーザー指定）
+
+* 質問文作成・進捗報告作成は保存しない・保存ボタンを出さない（`WorkplaceSceneForm` に `onSave` を渡さない）
+* schema変更なし／notes保存処理を追加しない／`createNote`・保存系関数を呼ばない
+* `WorkplaceSceneForm` を再利用／急ぎ度は自由入力／場面タグ定数は定義のみ追加
+* 守秘注意に加え、AI・チャット・メールに貼る前に一般化する旨を intro に明記
+* 既存 `/notes` `/memo` `/prompts` `/settings` 無変更／公開出力・GitHub Pages・配布用HTML・家族用表示へ非接続
+
+### 変更ファイル
+
+* 新規：`app/workplace/question.tsx`（質問文作成）、`app/workplace/report.tsx`（進捗報告作成）。ともに `WorkplaceSceneForm` を `onSave` 未指定で使用＝コピーのみ
+* `src/features/workplace/workplaceService.ts`：`buildQuestionText`（聞きたいこと結論→背景→確認→試したこと→判断してほしいこと→急ぎ度。冒頭に丸投げに見えない一文）、`buildReportText`（現在の状態結論→今日やったこと→完了→残り→詰まり→次→相談）を追加
+* `src/features/workplace/workplaceTags.ts`：`WORKPLACE_QUESTION_TAG='workplace_question'` / `WORKPLACE_REPORT_TAG='workplace_report'` を定義のみ追加
+* `app/workplace/index.tsx`：場面カードに2件追加
+* `app/_layout.tsx`：`workplace/question` / `workplace/report` のStack.Screen登録
+
+### 設計判断
+
+* 急ぎ度は `WorkplaceSceneForm` の自由入力を使用（選択UIは足さず、placeholderで「急ぎ / 今日中 / 今週中 など」を誘導）。任意項目
+* 出力はAI書き換えせず、入力を結論先頭・ラベル区切りで構造化（既存 start/stuck/end と同方式）
+* 保存経路は `saveEndNote`（終業前のみ）のまま。質問・報告はDBに一切触れない
+
+### 検証結果
+
+* `npx tsc --noEmit`：合格（EXIT 0）
+* `npx expo export --platform web`：合格（バンドル成功）
+* 新2画面に保存系コード（`onSave` / `createNote` / `save`）が無いことを grep で確認
+* ブラウザ実操作（カード追加・整理/コピー・保存ボタン非表示・notes未保存）はユーザー確認待ち
+
+### 今回対応せず
+
+* 現場プロファイル、複数現場切り替え／コミット・push
+
+## 現場適応モード 翌朝再開の引き継ぎ初期入力（2026-07-09、MVP後の追加修正）
 
 ## 現場適応モード 翌朝再開の引き継ぎ初期入力（2026-07-09、MVP後の追加修正）
 

@@ -11,6 +11,10 @@ export const WORKPLACE_COMMON_TAG = 'workplace';
 export const WORKPLACE_START_TAG = 'workplace_start';
 export const WORKPLACE_STUCK_TAG = 'workplace_stuck';
 export const WORKPLACE_END_TAG = 'workplace_end';
+// 次点2場面。現状はコピーのみで保存しないが、命名の一貫性と
+// 将来保存する場合の前提維持のため定数のみ定義しておく。
+export const WORKPLACE_QUESTION_TAG = 'workplace_question';
+export const WORKPLACE_REPORT_TAG = 'workplace_report';
 
 // 保存・出力時に必ず守る守秘既定（23 §6.1）。
 // カテゴリ初期値（getGitCandidateDefault）に依らず常に安全側で固定する。

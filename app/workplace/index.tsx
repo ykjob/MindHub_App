@@ -34,6 +34,18 @@ const SCENES: SceneDef[] = [
     route: '/workplace/stuck',
   },
   {
+    key: 'question',
+    label: '質問文作成',
+    desc: '相手が答えやすい質問文に整理する',
+    route: '/workplace/question',
+  },
+  {
+    key: 'report',
+    label: '進捗報告作成',
+    desc: '結論から短く分かりやすい進捗報告に整理する',
+    route: '/workplace/report',
+  },
+  {
     key: 'end',
     label: '終業前メモ',
     desc: '今日やったこと・未完了・明日の再開メモを残す',

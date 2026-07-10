@@ -137,3 +137,52 @@ export function buildEndText(v: {
     section('補足', v.note),
   ].join('\n\n');
 }
+
+// 質問文：相手が答えやすいよう結論から並べ、丸投げに見えない体裁にする。
+export function buildQuestionText(v: {
+  ask: string;
+  background: string;
+  checked: string;
+  tried: string;
+  decision: string;
+  urgency: string;
+}): string {
+  const parts = [
+    '【質問】',
+    'お手すきのときに、以下について判断・助言をいただけますか。',
+    section('聞きたいこと（結論）', v.ask),
+    section('背景', v.background),
+    section('自分で確認したこと', v.checked),
+    section('試したこと', v.tried),
+    section('判断してほしいこと', v.decision),
+  ];
+  if (v.urgency.trim().length > 0) {
+    parts.push(section('急ぎ度', v.urgency));
+  }
+  return parts.join('\n\n');
+}
+
+// 進捗報告：結論を先に、完了・未完了・次の作業を分け、相談は最後に置く。
+export function buildReportText(v: {
+  state: string;
+  doneToday: string;
+  completed: string;
+  remaining: string;
+  blocker: string;
+  next: string;
+  consult: string;
+}): string {
+  const parts = [
+    '【進捗報告】',
+    section('現在の状態（結論）', v.state),
+    section('今日やったこと', v.doneToday),
+    section('完了したこと', v.completed),
+    section('残っていること', v.remaining),
+    section('詰まっていること', v.blocker),
+    section('次にやること', v.next),
+  ];
+  if (v.consult.trim().length > 0) {
+    parts.push(section('相談・確認したいこと', v.consult));
+  }
+  return parts.join('\n\n');
+}
