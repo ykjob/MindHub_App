@@ -25,15 +25,21 @@ export default function SettingsScreen() {
 
   useEffect(() => {
     async function load() {
-      const settings = await getGitHubSettings(db);
-      if (settings) {
-        setOwner(settings.owner);
-        setRepo(settings.repo);
-        setBranch(settings.branch);
+      try {
+        const settings = await getGitHubSettings(db);
+        if (settings) {
+          setOwner(settings.owner);
+          setRepo(settings.repo);
+          setBranch(settings.branch);
+        }
+        const savedToken = await getToken();
+        setHasToken(!!savedToken);
+      } catch {
+        // 読み込みに失敗しても画面全体は落とさない（未設定として表示する）
+        setHasToken(false);
+      } finally {
+        setLoading(false);
       }
-      const savedToken = await getToken();
-      setHasToken(!!savedToken);
-      setLoading(false);
     }
     load();
   }, [db]);
