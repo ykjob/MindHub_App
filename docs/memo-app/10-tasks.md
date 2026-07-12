@@ -219,7 +219,7 @@ MVP実装（2026-07-09 実装。未コミット）。
 * [x] 保存は終業前メモのみ（作業開始・詰まり記録はコピーのみ）
 * [x] 質問文作成・進捗報告作成（次点。2026-07-10実装。`app/workplace/question.tsx` / `report.tsx`、`WorkplaceSceneForm` 再利用・コピーのみ・保存なし。`buildQuestionText` / `buildReportText` 追加。場面定数 `workplace_question` / `workplace_report` は定義のみ。守秘注意＋AI/チャット/メール貼付前の一般化注意を intro に明記）
 * [ ] 現場プロファイル（単一現場。今回対象外）
-* [ ] ブラウザでの手動動作確認（tsc・expo export（web）は合格。実操作はユーザー確認待ち）
+* [x] ブラウザでの動作確認（2026-07-12 完了）：5場面（start / stuck / question / report / end）＋入口＋翌朝再開導線をヘッドレスブラウザで実操作確認。47チェック項目すべてOK・コンソールエラー0件・表示崩れなし・アプリ側の修正不要。確認URLは `http://localhost:8082/workplace` 以下（8081は現場適応モード追加前から動いていた古い開発サーバーで `/workplace` が Unmatched Route になるため、8082で新規起動して確認）
 
 今回の非対象（境界固定どおり）：schema変更なし、既存 `/notes` `/memo` `/prompts` `/settings` 無変更、公開出力・GitHub Pages・配布用HTML・家族用表示への接続なし。
 
