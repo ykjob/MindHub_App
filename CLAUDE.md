@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-MindHub_App（アプリ内部名：FlowDock）で作業するときのルール。
+MindHub_App（アプリ全体名：MindHub）で作業するときのルール。
 
 ## プロジェクト概要
 
@@ -8,6 +8,13 @@ Expo（React Native + expo-router）製のメモアプリ。
 
 * 既存機能：軽量メモ（memosテーブル、`app/memo/*` 画面）＋ GitHub手動アップロード。スマホ向けに作られた
 * 拡張機能：PC用Webアプリとして使うメモ管理機能（notesテーブル、`app/notes/*` 画面）。仕様は `docs/memo-app/` 配下
+
+名称方針（詳細は `docs/memo-app/01-decisions-and-scope.md` §1.6）：
+
+* MindHub＝アプリ全体名（思考メモ・作業ログ・AI活用・プロンプト集・現場適応モードのハブ）
+* FlowDock＝初期からある軽量メモ機能（`/memo` 系）の説明名。消さずに残す
+* `/memo` 系＝FlowDock由来の既存軽量メモ機能、`/notes` 系＝メモ管理機能、`/workplace` 系＝現場適応モード
+* app.json・package.json・ルート名・DB・実装コードの名称は現時点では変更しない
 
 実行方法：
 

@@ -2,7 +2,9 @@
 
 ## 1. このプロジェクトでやること
 
-MindHub_App（アプリ内部名：FlowDock）をベースに、PC用Webアプリとして使えるメモ管理機能を拡張する。
+MindHub_App（アプリ全体名：MindHub）をベースに、PC用Webアプリとして使えるメモ管理機能を拡張する。
+
+名称方針：MindHub＝アプリ全体名（思考メモ・作業ログ・AI活用・プロンプト集・現場適応モードのハブ）、FlowDock＝初期からある軽量メモ機能（`/memo` 系）の説明名。詳細は `docs/memo-app/01-decisions-and-scope.md` §1.6 を参照。
 
 目的は、ChatGPT整理結果、Claude Code用プロンプト、開発作業ログ、調査メモ、コマンド手順、就活メモ、普段の思考メモを、保存・分類・検索・Markdown書き出しできるようにすること。
 
