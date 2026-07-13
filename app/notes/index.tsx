@@ -9,6 +9,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { getNotes, getDistinctProjects, getDistinctTags } from '../../src/features/notes/noteRepository';
@@ -19,6 +20,7 @@ import { formatDisplayDate } from '../../src/utils/date';
 
 export default function NoteListScreen() {
   const db = useSQLiteContext();
+  const insets = useSafeAreaInsets();
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState('');
@@ -78,9 +80,9 @@ export default function NoteListScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: 16 + insets.top }]}>
         <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.backBtn} onPress={goBack}>
+          <TouchableOpacity style={styles.backBtn} onPress={goBack} hitSlop={8}>
             <Text style={styles.backBtnText}>← 戻る</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>メモ管理</Text>

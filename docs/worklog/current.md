@@ -1,6 +1,69 @@
 # 最新作業ログ
 
-最終更新：2026-07-13（メモ管理画面の戻る導線を画面内「← 戻る」1つに統一＋Web更新時OPFSロック競合の回復処理）
+最終更新：2026-07-13（ホーム画面ヘッダーのスマホ幅2×2グリッド化＋/notes/index のSafe Area対応。APK 3回目ビルド後のAndroid実機フィードバック対応）
+
+## ホーム画面ヘッダーのスマホ幅2×2グリッド化（2026-07-13、未コミット）
+
+### 今回の目的
+
+スマホ幅でホーム（FlowDock）の「メモ一覧」タイトルと4ボタン（現場適応・プロンプト集・メモ管理・設定）が1行に詰まって窮屈なため、承認済みの案どおりレスポンシブ化する。
+
+### 変更したファイル
+
+* `app/index.tsx` のみ：
+  * `useWindowDimensions` の `width < 480` で分岐（/notes と同じ基準）
+  * スマホ幅：1段目「メモ一覧」、2段目「現場適応/プロンプト集」、3段目「メモ管理/設定」の2×2グリッド（`flexWrap`＋`flexBasis: '48%'`＋`flexGrow: 1`）。ラベル中央寄せ・縦padding 6→10でタップしやすく
+  * PC幅（480以上）：従来の1行レイアウトを完全維持（スタイル無変更）
+  * Safe Area対応は不要（ホームはネイティブヘッダー「FlowDock」を残しており、ステータスバー分はネイティブヘッダーが確保）
+* 非対象を厳守：`_layout.tsx`・`/notes` 系画面・FAB・メモ一覧本体・既存ボタンの遷移先は無変更
+
+### 検証
+
+* `npx tsc --noEmit` エラーなし
+* ヘッドレスChrome（8083）：PC 1280pxは従来どおり1行（タイトルy82・ボタンy86の右寄せ）。390pxは2×2グリッド（各ボタン175×40px・ラベル中央・列間/行間8px）。コンソールエラー・ページエラー0件。スクリーンショット目視で余白・整列とも自然
+* Android実機確認はAPK再ビルド後（ユーザー待ち）
+
+---
+
+## /notes/index ヘッダーのSafe Area対応（2026-07-13、未コミット）
+
+### 今回の目的
+
+Android実機確認で判明した追加修正。`headerShown: false` にした結果、画面内ヘッダーがステータスバー領域に被り「← 戻る」が押しにくい。
+
+### 変更したファイル
+
+* `app/notes/index.tsx` のみ（他画面・`_layout.tsx` は無変更）：
+  * `useSafeAreaInsets` を導入し、画面内ヘッダーの上余白を `16 + insets.top` に（Android実機ではステータスバー分下がる。Web/PCでは insets.top=0 のため見た目不変）。`headerShown: false` は維持
+  * 「← 戻る」に `hitSlop={8}` を追加してタップ領域を拡大
+* 一度実装したスマホ幅2段化（`width < 480`）は方針変更で撤回（同日）。「窮屈」の対象は `/notes` ではなくホーム画面 `app/index.tsx` の可能性が高いとのユーザー指摘。`/notes` の2段化は上余白修正後の実機表示を見てから要否判断（`11-open-issues.md` ではなくユーザー判断待ち）
+* ホーム画面 `app/index.tsx` のヘッダーレスポンシブ化は同日承認され実装済み（下記）
+
+### 検証
+
+* `npx tsc --noEmit` エラーなし
+* ヘッドレスChrome（8083）：390px・1280pxとも従来どおり1行ヘッダー（撤回後の確認済み）。Web/PCの見た目はSafe Area対応前と不変
+* Android実機でのステータスバー非被り・タップ確認はユーザー確認待ち（insets適用のためWebでは検証不可）
+
+### 備考
+
+* 空状態の文言「右上の『＋ 新規作成』から作成してください」は今回未修正
+
+---
+
+## EAS preview APK 3回目ビルド（2026-07-13）
+
+* メモ管理修正2件（3e0c7ee）とversionCode 2→3（f277c12）をcommit・push済み（いずれもorigin/main反映確認済み）
+* `eas build -p android --profile preview` 実行 → **ビルド成功**（status FINISHED、ビルド時間約5.6分）
+  * build URL：https://expo.dev/accounts/ykjob/projects/flowdock/builds/0547c079-4dbf-43c5-8508-1e6bc2ec56ff
+  * APKダウンロード：https://expo.dev/artifacts/eas/-OITlCs5lojbcrciJDpt8HFQkEmk0LiwYbtqXsi0af8.apk（アーティファクト有効期限 2026-07-27）
+  * ビルド対象コミット f277c12f84be…（gitCommitHashで確認）、appBuildVersion=3、appVersion=1.0.0、SDK 54、profile=preview（INTERNAL/APK）
+* versionCode 3のため、versionCode 1/2インストール済み端末へそのまま上書きインストール可能
+* 実機での動作確認（今回のWeb向け修正はAPK動作に影響しない想定だが、起動・保存の基本確認）はユーザー待ち
+
+---
+
+
 
 ## メモ管理画面の戻るボタン追加＋Web更新時OPFSロック競合の回復処理（2026-07-13）
 

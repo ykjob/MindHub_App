@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  useWindowDimensions,
 } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -17,6 +18,8 @@ import { formatDisplayDate } from '../src/utils/date';
 
 export default function MemoListScreen() {
   const db = useSQLiteContext();
+  const { width } = useWindowDimensions();
+  const isNarrow = width < 480;
   const [memos, setMemos] = useState<Memo[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,19 +36,31 @@ export default function MemoListScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, isNarrow && styles.headerNarrow]}>
         <Text style={styles.headerTitle}>メモ一覧</Text>
-        <View style={styles.headerActions}>
-          <TouchableOpacity onPress={() => router.push('/workplace')} style={styles.settingsBtn}>
+        <View style={[styles.headerActions, isNarrow && styles.headerActionsNarrow]}>
+          <TouchableOpacity
+            onPress={() => router.push('/workplace')}
+            style={[styles.settingsBtn, isNarrow && styles.settingsBtnNarrow]}
+          >
             <Text style={styles.settingsBtnText}>現場適応</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/prompts')} style={styles.settingsBtn}>
+          <TouchableOpacity
+            onPress={() => router.push('/prompts')}
+            style={[styles.settingsBtn, isNarrow && styles.settingsBtnNarrow]}
+          >
             <Text style={styles.settingsBtnText}>プロンプト集</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/notes')} style={styles.settingsBtn}>
+          <TouchableOpacity
+            onPress={() => router.push('/notes')}
+            style={[styles.settingsBtn, isNarrow && styles.settingsBtnNarrow]}
+          >
             <Text style={styles.settingsBtnText}>メモ管理</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/settings')} style={styles.settingsBtn}>
+          <TouchableOpacity
+            onPress={() => router.push('/settings')}
+            style={[styles.settingsBtn, isNarrow && styles.settingsBtnNarrow]}
+          >
             <Text style={styles.settingsBtnText}>設定</Text>
           </TouchableOpacity>
         </View>
@@ -110,13 +125,21 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
   },
+  headerNarrow: { flexDirection: 'column', alignItems: 'stretch', gap: 12 },
   headerTitle: { fontSize: 20, fontWeight: '700', color: '#111827' },
   headerActions: { flexDirection: 'row', gap: 8 },
+  headerActionsNarrow: { flexWrap: 'wrap' },
   settingsBtn: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     backgroundColor: '#F3F4F6',
     borderRadius: 8,
+  },
+  settingsBtnNarrow: {
+    flexBasis: '48%',
+    flexGrow: 1,
+    alignItems: 'center',
+    paddingVertical: 10,
   },
   settingsBtnText: { fontSize: 14, color: '#374151' },
   list: { padding: 12, gap: 8 },
