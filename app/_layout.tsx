@@ -1,11 +1,38 @@
 import { Stack } from 'expo-router';
-import { SQLiteProvider } from 'expo-sqlite';
+import { SQLiteProvider, type SQLiteDatabase } from 'expo-sqlite';
 import { StatusBar } from 'expo-status-bar';
+import { Platform } from 'react-native';
 import { DB_NAME, runMigrations } from '../src/db/database';
+
+const OPFS_RELOAD_FLAG = 'mindhub-opfs-retry';
+
+// Web(OPFS)ではリロード直後、旧ページのworkerがaccess handleを解放する前に
+// 新ページがDBを開くとロック競合で失敗し、workerは同一ページ内では回復できない。
+// そのため1回だけページを再読み込みして回復させる（2回目も失敗したら別タブ等が原因）。
+function handleDatabaseError(error: Error): void {
+  if (
+    Platform.OS === 'web' &&
+    typeof window !== 'undefined' &&
+    /Access Handle|NoModificationAllowedError/i.test(String(error?.message)) &&
+    !window.sessionStorage.getItem(OPFS_RELOAD_FLAG)
+  ) {
+    window.sessionStorage.setItem(OPFS_RELOAD_FLAG, '1');
+    window.location.reload();
+    return;
+  }
+  throw error;
+}
+
+async function initDatabase(db: SQLiteDatabase): Promise<void> {
+  await runMigrations(db);
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    window.sessionStorage.removeItem(OPFS_RELOAD_FLAG);
+  }
+}
 
 export default function RootLayout() {
   return (
-    <SQLiteProvider databaseName={DB_NAME} onInit={runMigrations}>
+    <SQLiteProvider databaseName={DB_NAME} onInit={initDatabase} onError={handleDatabaseError}>
       <StatusBar style="dark" />
       <Stack
         screenOptions={{
@@ -20,7 +47,7 @@ export default function RootLayout() {
         <Stack.Screen name="memo/create" options={{ title: 'メモ作成' }} />
         <Stack.Screen name="memo/[id]/index" options={{ title: 'メモ詳細' }} />
         <Stack.Screen name="memo/[id]/edit" options={{ title: 'メモ編集' }} />
-        <Stack.Screen name="notes/index" options={{ title: 'メモ管理' }} />
+        <Stack.Screen name="notes/index" options={{ title: 'メモ管理', headerShown: false }} />
         <Stack.Screen name="notes/create" options={{ title: 'メモ作成' }} />
         <Stack.Screen name="notes/[id]/index" options={{ title: 'メモ詳細' }} />
         <Stack.Screen name="notes/[id]/edit" options={{ title: 'メモ編集' }} />

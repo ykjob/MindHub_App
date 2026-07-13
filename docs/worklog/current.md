@@ -1,6 +1,54 @@
 # 最新作業ログ
 
-最終更新：2026-07-12（開発リファレンス目的2本柱化＋現場理解カードG-01〜G-20の登録用本文作成完了）
+最終更新：2026-07-13（メモ管理画面の戻る導線を画面内「← 戻る」1つに統一＋Web更新時OPFSロック競合の回復処理）
+
+## メモ管理画面の戻るボタン追加＋Web更新時OPFSロック競合の回復処理（2026-07-13）
+
+### 今回の目的
+
+`/notes` で報告された2件の不具合修正。(1) Webで更新・直アクセスすると戻る履歴がなく戻るボタンが消える。(2) Web更新時に `NoModificationAllowedError`（createSyncAccessHandle）が出てDBが開けない。
+
+### 原因調査の結果
+
+* 問題1：Stackの戻る履歴依存。直アクセス時は履歴が空でネイティブヘッダーの戻るボタンが出ない
+* 問題2：expo-sqlite Web実装は worker 起動時に `AccessHandlePoolVFS` がOPFSプールファイル全部の sync access handle を一括取得する。リロード時、旧ページの worker が handle を解放し終える前に新ページの worker が取得を試みると競合して失敗する。さらに worker 内部は初期化失敗後 `_sqlite3` のみセット済み・`_vfs` は null の壊れた状態で固定され（以後 `Invalid VFS state`）、**同一ページ内のリトライでは回復不可能**
+* アプリ側のDBオープンは `app/_layout.tsx` の SQLiteProvider 1箇所のみで二重オープンなし。`app/notes/index.tsx` の `useFocusEffect`＋`useEffect` の二重 `load()` は初回マウント時に同じクエリを2回走らせる冗長だが、単一コネクション経由のためOPFS競合の原因ではない
+
+### 変更したファイル
+
+* `app/_layout.tsx`：
+  * `onError`（`handleDatabaseError`）を追加。Webで Access Handle 競合エラーのときだけ sessionStorage フラグを立てて1回だけ `window.location.reload()`（リロード後は旧workerが確実に消えているため成功する）。2回連続で失敗した場合（別タブで開いている等）はフラグが残っているため再リロードせずエラーをそのまま投げる
+  * `onInit` を `runMigrations` 直渡しから `initDatabase`（runMigrations＋成功時にフラグ解除）に変更。どちらもモジュールレベル関数で SQLiteProvider の再マウントを起こさない
+* `app/notes/index.tsx`：
+  * 画面内ヘッダー左に「← 戻る」ボタンを追加。`router.canGoBack()` なら `router.back()`、戻れなければ `router.replace('/')`（履歴依存を解消）
+  * `useEffect(() => load(), [load])` を削除し `useFocusEffect` のみに（初回マウント・フォーカス復帰・フィルタ変更のすべてを `useFocusEffect` がカバーするため二重読み込みを解消）
+
+### 検証
+
+* `npx tsc --noEmit` エラーなし
+* ブラウザ実操作確認済み（2026-07-13 追加確認、ポート8083で新規サーバーを起動しヘッドレスChromeで実施。puppeteer-coreはセッション用一時ディレクトリに隔離導入しプロジェクトは無変更）：
+  * `/notes` 直アクセスで「← 戻る」表示→クリックでホーム表示（`replace('/')` 経路）、通常遷移からの「← 戻る」も正常（`back()` 経路）
+  * メモ作成→キーワード絞り込みで0件→クリアで再表示→並び替え切り替え、の再読み込みサイクルが `useFocusEffect` のみで動作
+  * リロード6連打後も一覧表示（エラーなし）、通常起動・リロード後とも sessionStorage フラグは null（残留なし）
+  * PC幅1280px・スマホ幅390pxの両方でヘッダー表示崩れなし。コンソールエラー・ページエラー0件
+* ネイティブ安全性は静的確認：`onError`／`onInit` とも `Platform.OS === 'web'` が最初の条件で短絡評価されるため、Android / iOS では window / sessionStorage に一切触れない
+
+### 追加修正：/notes/index の戻る導線を1つに統一（2026-07-13）
+
+* 戻るボタンが2つ（Stackネイティブヘッダー＋画面内「← 戻る」）表示されて紛らわしいため、`app/_layout.tsx` の `notes/index` のみ `headerShown: false` を追加し、画面内「← 戻る」を全環境で唯一の戻る導線にした。`title: 'メモ管理'` は残置（Webのdocument title用）。他画面（`notes/create`・`notes/[id]` 等）のネイティブヘッダーは無変更
+* ヘッドレスChromeで確認（8083、PC 1280px／スマホ390px、コンソールエラー0件）：
+  * `/notes` でネイティブヘッダー消失。可視の「メモ管理」は画面内ヘッダー1箇所のみ（ホーム→遷移時にDOM上2箇所検出されるのは、非表示レイヤー＝aria-hidden・サイズ0で残るホーム画面の「メモ管理」ボタンで、表示上は1つ）
+  * 「← 戻る」「メモ管理」「＋ 新規作成」が両幅とも1行（y中心一致）で表示崩れなし
+  * ホーム→メモ管理→「← 戻る」でホーム／直アクセス・更新後も「← 戻る」でホーム
+  * `/notes/create` に「メモ作成」・`/notes/[id]` に「メモ詳細」のネイティブヘッダーが従来どおり表示
+* `npx tsc --noEmit` エラーなし
+
+### やっていないこと（今回の非対象）
+
+* expo-sqlite 本体（node_modules）へのパッチ／別タブ同時オープン時のUI表示（現状はエラーのまま）／他の `/notes` 系画面へのボタン・ヘッダー変更／コミット・push
+
+---
+
 
 ## 開発リファレンス 目的2本柱化＋現場理解カード20枚の下書き作成（2026-07-12）
 

@@ -269,3 +269,15 @@ MVP実装（2026-07-09 実装。未コミット）。
 * [x] `00_START_HERE.md` §1 と `CLAUDE.md` プロジェクト概要へ名称方針の参照を追記
 
 今回の非対象：app.json・package.json・ルート名・DB・実装コードの名称変更（表示名等を実際に MindHub へ変更する時期は未確定。`01` §1.6）、コミット・push。
+
+## 19. メモ管理画面の不具合修正（2026-07-13）
+
+`/notes` の不具合2件のバグ修正（実装コード変更あり・schema無変更・未コミット）。
+
+* [x] 戻るボタン消失の修正：`app/notes/index.tsx` の画面内ヘッダーに「← 戻る」ボタンを追加。`router.canGoBack()` なら `back()`、履歴がない（Web更新・直アクセス）場合は `replace('/')`
+* [x] Web更新時の `NoModificationAllowedError` 対応：`app/_layout.tsx` の SQLiteProvider に `onError` を追加。OPFS access handle 競合（旧workerのhandle解放前に新workerが取得）のときだけ sessionStorage フラグ付きで1回だけ自動リロードして回復。onInit 成功時にフラグ解除
+* [x] `/notes` 一覧の `useFocusEffect`＋`useEffect` 二重 `load()` を `useFocusEffect` のみに整理
+* [x] ブラウザ実操作確認（2026-07-13 ヘッドレスChromeで実施：戻るボタン両経路・フィルタ再読み込み・リロード連打回復・PC/スマホ幅表示・フラグ残留なし・コンソールエラー0件）
+* [x] 戻る導線の統一：`notes/index` のみ `headerShown: false` でネイティブヘッダーを非表示にし、画面内「← 戻る」を全環境で唯一の戻る導線に（2026-07-13。他画面のネイティブヘッダーは無変更。ヘッドレスChromeでPC/スマホ幅・遷移/直アクセス/更新後・他画面ヘッダー残存を確認済み）
+
+今回の非対象：expo-sqlite本体へのパッチ、別タブ同時オープン時の専用エラーUI、他の `/notes` 系画面へのボタン追加、コミット・push。

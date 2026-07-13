@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -67,12 +67,24 @@ export default function NoteListScreen() {
   }, [db, keyword, project, type, tag, gitOnly, includeArchived, sortBy]);
 
   useFocusEffect(useCallback(() => load(), [load]));
-  useEffect(() => load(), [load]);
+
+  const goBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>メモ管理</Text>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity style={styles.backBtn} onPress={goBack}>
+            <Text style={styles.backBtnText}>← 戻る</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>メモ管理</Text>
+        </View>
         <TouchableOpacity
           style={styles.createBtn}
           onPress={() => router.push('/notes/create')}
@@ -227,7 +239,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
   },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   headerTitle: { fontSize: 20, fontWeight: '700', color: '#111827' },
+  backBtn: { paddingVertical: 4, paddingRight: 4 },
+  backBtnText: { fontSize: 14, color: '#2563EB', fontWeight: '600' },
   createBtn: {
     paddingHorizontal: 14,
     paddingVertical: 8,
