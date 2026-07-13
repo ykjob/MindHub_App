@@ -53,7 +53,22 @@ Markdown書き出しやGit候補管理を触る場合。
 
 UIを触る場合。
 
-* docs/memo-app/08-ui-flow.md
+* docs/memo-app/08-ui-flow.md（画面構成の横断正本）
+* docs/memo-app/28-ui-ux-quality-improvement.md（Phase 15の画面別改善・情報設計の正本）
+* docs/memo-app/29-ui-design-system.md（共通UI基盤の正本）
+
+UI・UX改善（Phase 15）を扱う場合。
+
+* docs/memo-app/28-ui-ux-quality-improvement.md
+
+共通UI（色・余白・文字・角丸・ヘッダー・共通部品・状態表示・アクセシビリティ）を扱う場合。
+
+* docs/memo-app/29-ui-design-system.md
+
+UI検証（Web・Android・幅別・状態別・回帰・合格判定）を行う場合。
+
+* docs/memo-app/30-ui-validation-checklist.md
+* docs/memo-app/16-platform-and-distribution.md（APKの作成・配布・導入は16、作成済みAPKでのUI検証は30）
 
 カテゴリ・テンプレートDB管理、テンプレート管理画面を触る場合。
 

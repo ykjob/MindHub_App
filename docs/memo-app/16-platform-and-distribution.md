@@ -132,3 +132,10 @@ PC / Android / iPhone間の自動同期は今回の対象外。
 * スマホ用プロンプト集HTML・mobile-inbox：`14-mobile-prompt-hub-and-inbox.md`
 * 将来候補・不採用方針：`15-future-and-rejected-policies.md`
 * 未確定事項：`11-open-issues.md` 12章
+
+## 7. Phase 15 UI・UX検証との分担（2026-07-13追記）
+
+* 本ファイル（`16`）はAPKを**作成・配布・導入する手順と端末運用**の正本のまま変更しない
+* **作成済みAPKを使ったUI・UXの検証項目・判定・証跡**は `30-ui-validation-checklist.md` を正本とする（§2.5の初版チェックリストは初版APKの記録として残す）
+* Phase 15期間中のAPKビルド確認は**原則2回**（共通UI基盤＋ホーム＋主要4画面の基本改修後／Phase 15全体完成後。`30` §12.1）。毎タスクごとのAPKビルドは行わない
+* versionCode 4 APK（対象コミット6605d43）の基準確認項目（ホーム2×2・`/notes` 上部余白・Safe Area・戻る操作・ステータスバー等）は `30` §12.2に**未確認**として記録されている

@@ -2,7 +2,12 @@
 
 ## 現在のフェーズ
 
-* /notes/index ヘッダーのSafe Area対応（2026-07-13、未コミット）：APK 3回目のAndroid実機確認フィードバック対応。`useSafeAreaInsets` で上余白に `insets.top` を加算（ステータスバー被り解消、Webは不変）＋「← 戻る」にhitSlop追加。一度実装したスマホ幅2段化は「窮屈なのはホーム画面の可能性が高い」との指摘で撤回（実機表示を見て要否再判断）。tsc合格・Web両幅で従来どおり1行を確認済み
+* **Phase 15：UI・UX品質改善（2026-07-13、文書整備段階＝完了・未コミット）**：DOC-02（`28-ui-ux-quality-improvement.md` 作成）／DOC-03（`29-ui-design-system.md` 作成）／DOC-04（`30-ui-validation-checklist.md` 作成）／DOC-05（既存仕様書10ファイルへの反映）／DOC-06（管理ファイル更新）／DOC-07（最終文書監査：AUDIT-01〜18全項目合格）まで**すべて完了。Gate 1（仕様書整備）は完了**（2026-07-13）。タスク全体は `10-tasks.md` §20、監査記録は `docs/worklog/current.md`
+* **Phase 15実機基準確認完了（2026-07-13）**：versionCode 4 APKのAndroid実機基準確認7項目（ホーム2×2表示／`/notes` 上部余白／Safe Area／戻る操作／ステータスバーとの重なり／横方向の表示崩れ／既存機能への影響）を**すべて問題なし＝合格**として `30` §12.2 に記録。AppHeader実装の着手条件（`29` §5.4）は解消。追加所見：FlowDockメモ作成画面の保存・キャンセルボタンが画面下端に近い（単独修正せず、Phase 15全体仕上げ時にSafe Area・キーボード挙動・他入力画面との統一を含めて確認。`30` §12.2・`11` §16に記録）
+* **Phase 15の次に行う1作業**：バッチ1実装＝テーマファイル（`src/theme/index.ts`）＋初期共通コンポーネント4種＋主要4画面（ホーム・メモ管理一覧・現場適応入口・プロンプト集）のAppHeader適用（Safe Area・Web直アクセス戻るフォールバック・ネイティブヘッダー二重表示防止）
+* **Phase 15の未確定事項（代表。正本は `11-open-issues.md` §16）**：最近のメモの取得元／現場適応モードの短い表示名／プロンプト集の状況別分類／AppHeaderの具体値／アイコン導入／app.json表示名変更／ConfirmDialog二重実装の扱い
+* EAS preview APK 4回目ビルド成功（2026-07-13）：モバイルヘッダー修正（e12aed6）＋versionCode 4（6605d43）をcommit/push後にビルド完了。対象コミット6605d43・appBuildVersion=4確認済み。APK：https://expo.dev/accounts/ykjob/projects/flowdock/builds/11b19c5e-853c-4d9f-9971-f6c39e6cf0a4 （期限2026-07-27）。Android実機確認（ステータスバー・ホーム2×2・/notes 2段化要否）はユーザー待ち
+* /notes/index ヘッダーのSafe Area対応（2026-07-13、コミット済み e12aed6）：APK 3回目のAndroid実機確認フィードバック対応。`useSafeAreaInsets` で上余白に `insets.top` を加算（ステータスバー被り解消、Webは不変）＋「← 戻る」にhitSlop追加。一度実装したスマホ幅2段化は「窮屈なのはホーム画面の可能性が高い」との指摘で撤回（実機表示を見て要否再判断）。tsc合格・Web両幅で従来どおり1行を確認済み
 * ホーム画面ヘッダーのスマホ幅2×2グリッド化（2026-07-13、未コミット・承認済み案を実装）：`app/index.tsx` のみ変更。`width < 480` で「メモ一覧」＋「現場適応/プロンプト集」＋「メモ管理/設定」の2×2グリッド（各ボタン中央寄せ・縦padding拡大）、480以上は従来の1行を完全維持。tsc合格・Web両幅レイアウト実測・コンソールエラー0件。Android実機確認はAPK再ビルド後
 * EAS preview APK 3回目ビルド成功（2026-07-13）：メモ管理修正（3e0c7ee）＋versionCode 3（f277c12）をcommit/push後、`eas build -p android --profile preview` でビルド完了。対象コミットf277c12・appBuildVersion=3を確認。APK：https://expo.dev/accounts/ykjob/projects/flowdock/builds/0547c079-4dbf-43c5-8508-1e6bc2ec56ff （アーティファクト期限2026-07-27）。実機インストール・基本動作確認はユーザー待ち
 * メモ管理画面の不具合2件修正完了（2026-07-13、未コミット）：(1) `/notes` の画面内ヘッダーに「← 戻る」ボタンを追加（`canGoBack()` なら `back()`、直アクセス時は `replace('/')`。履歴依存を解消）。追加で `notes/index` のみ `headerShown: false` にしてネイティブヘッダーを消し、戻る導線を画面内「← 戻る」1つに統一（他画面のヘッダーは無変更）。(2) Web更新時の `NoModificationAllowedError`（OPFS access handle競合）に対し、`_layout.tsx` の SQLiteProvider に `onError` を追加してWebでは1回だけ自動リロードで回復（sessionStorageフラグで無限リロード防止）。あわせて `/notes` 一覧の `useEffect`＋`useFocusEffect` 二重読み込みを `useFocusEffect` のみに整理。tsc合格・ヘッドレスブラウザで実操作確認済み（戻るボタン両経路・フィルタ再読み込み・リロード連打回復・PC/スマホ幅表示・フラグ残留なし）
@@ -30,6 +35,19 @@ MindHub_Appのメモ管理機能拡張について、
 2. 追加仕様（docs/memo-app/12〜15）の実装着手判断待ち
 
 ## 完了したこと
+
+### Phase 15 UI・UX品質改善の文書整備（第1〜4B段階）（2026-07-13、未コミット）
+
+* `docs/memo-app/28-ui-ux-quality-improvement.md` を新規作成（画面別改善・情報設計・UX-01〜UX-16の正本）
+* `docs/memo-app/29-ui-design-system.md` を新規作成（デザイントークン・ヘッダー方式・共通コンポーネント・状態表示・アクセシビリティ基準の正本）
+* `docs/memo-app/30-ui-validation-checklist.md` を新規作成（検証手順・判定・Gate 1〜7・証跡記録の正本）
+* Phase 15を既存の正式仕様書10ファイルへ反映（`01` / `08` / `09` / `10` / `11` / `14` / `16` / `21`、`CLAUDE.md`、`00_START_HERE.md`）。古いホーム方針（入口ボタン追加のみ）とUI踏襲規則（#2563EB基調をそのまま踏襲）は置換注記つきで現行方針へ更新
+* 28・29・30の正本分担を確定（重複正本なし）
+* 共通UI設計判断DS-01〜DS-10を確定（AppHeader案A・theme1ファイル・既存色の役割化＋AI色 `#7C3AED`・スケール定義・初期部品4個・表示のみ共通化・実用a11y基準・アイコン保留・一括置換禁止）
+* UX-01〜UX-16を追跡可能な状態にした（`28` §16・`30` §14の追跡表。判定はすべて未確認から開始）
+* Gate 1〜Gate 7の検証構造を定義（`30` §15）
+* versionCode 4 APKの基準確認項目を**未確認**として記録（`30` §12.2。推測判定なし）
+* 実装コード・DB・依存関係・app.json・eas.json・28〜30作成後の再編集はなし。commit・push・git addは未実施
 
 ### メモ管理画面の不具合2件修正（2026-07-13、未コミット）
 

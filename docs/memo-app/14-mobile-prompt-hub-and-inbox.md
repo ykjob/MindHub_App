@@ -138,6 +138,12 @@ DB同期なしで、スマホからすぐ使えるプロンプト集を用意す
 * 生活・家庭共有系の5本には「private / family用」バッジと「公開GitHub Pagesには載せない前提」の注記を付ける（プロンプト本文自体に個人情報・家庭内情報は含めない）
 * 将来 note_templates 実装後は、category_type='template' の複数テンプレートとしてseedし、出力元をDBへ切り替える
 
+### 1.8 Phase 15 UI・UX改善との関係（2026-07-13追記）
+
+* Phase 15では、既存プロンプト本文（42件）・分類・生成ロジック（`promptHub.ts` / `generate_prompt_hub.mjs`）を変更せず、アプリ内プロンプト一覧画面（`app/prompts`）に**利用状況から選ぶ入口を追加する可能性がある**
+* 画面別改善の正本は `28-ui-ux-quality-improvement.md` §10、共通UI基盤は `29-ui-design-system.md`、検証は `30-ui-validation-checklist.md`
+* 状況別分類は未確定（`11-open-issues.md` §16）。この追記は本ファイルが正本とするプロンプト本文・生成ロジックを変更するものではない
+
 ## 2. mobile-inbox運用
 
 ### 2.1 方針

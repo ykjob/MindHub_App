@@ -41,7 +41,10 @@ npx expo start --web   # PC用Webアプリとして起動
 | Markdownテンプレート | `docs/memo-app/05-markdown-templates.md` |
 | ChatGPT整理プロンプトコピー | `docs/memo-app/06-chatgpt-prompt-copy.md`、`05-markdown-templates.md` |
 | Markdown書き出し・Git候補管理 | `docs/memo-app/07-export-and-git-rules.md`、`03-data-model.md` |
-| UIを触る | `docs/memo-app/08-ui-flow.md` |
+| UIを触る | `docs/memo-app/08-ui-flow.md`、`28-ui-ux-quality-improvement.md`、`29-ui-design-system.md` |
+| UI・UX改善（Phase 15：画面別改善・情報設計） | `docs/memo-app/28-ui-ux-quality-improvement.md` |
+| 共通UI基盤（トークン・色・余白・ヘッダー・共通部品・状態表示・アクセシビリティ） | `docs/memo-app/29-ui-design-system.md` |
+| UI検証（幅別・状態別・回帰・Android実機・合格判定） | `docs/memo-app/30-ui-validation-checklist.md`、`16-platform-and-distribution.md` |
 | カテゴリ・テンプレートDB管理、テンプレート管理画面 | `docs/memo-app/12-template-db-management.md`、`03-data-model.md` |
 | スマホ閲覧用HTML/JSONエクスポート | `docs/memo-app/13-mobile-view-export.md`、`07-export-and-git-rules.md` |
 | スマホ用プロンプト集HTML、mobile-inbox | `docs/memo-app/14-mobile-prompt-hub-and-inbox.md` |
@@ -78,8 +81,13 @@ npx expo start --web   # PC用Webアプリとして起動
 ## 実装ルール
 
 * 既存機能（memos / `app/memo/*` / GitHub連携）を壊さない。削除しない
-* 既存ルーティングを壊さない。新画面は追加のみ
-* 既存のUIスタイル（`#2563EB` 基調、カード型、StyleSheet方式）を踏襲する
+* 既存ルーティング（ルート名・ルート構成）を壊さない。新画面は追加のみ。ただし**画面内の再構成（レイアウト・表示文言の変更）は `28-ui-ux-quality-improvement.md` の範囲内なら認める**（ホーム再構成を含む）
+* UIスタイルは `29-ui-design-system.md` のデザイントークン・色の役割・移行ルールに従う（旧ルール「`#2563EB` 基調、カード型、StyleSheet方式を踏襲する」は2026-07-13にこの規則へ置き換え。青基調・カード型・StyleSheet方式自体は29のトークンとして継続する）
+* UI・UX作業（Phase 15）の追加ルール：
+  * 1タスク1目的。複数画面の同時変更・全画面一括置換をしない（`29` §10）
+  * 保存ロジック・取得処理を共通化のために書き換えない
+  * AppHeaderの実装は、versionCode 4 APKの基準確認（`30` §12.2）が完了するまで着手しない
+  * 実装後は `30-ui-validation-checklist.md` に従って検証し、判定（未確認／合格／条件付き合格／不合格／対象外）を記録する。未実施の項目を推測で合格にしない
 * DB変更は `src/db/schema.ts` + `src/db/migrations.ts` の schema_version 方式で行う。既存テーブルの破壊的変更はしない
 * 破壊的変更が必要な場合は実装せず、確認待ちとして `docs/memo-app/11-open-issues.md` に記録する
 * 未確定事項は勝手に決めず `docs/memo-app/11-open-issues.md` に記録する。作業が止まる場合は最小限の仮置きをして、その内容を作業ログにも記録する
