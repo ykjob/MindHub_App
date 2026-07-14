@@ -344,9 +344,9 @@ MVP実装（2026-07-09 実装。未コミット）。
 
 ### PROMPT（プロンプト集改善）
 
-* [ ] PROMPT-01 状況別入口の追加（分類は実装前確定。`28` §10.1・`11` §16）。依存：UI-02
-* [ ] PROMPT-02 既存検索・一覧・コピーの維持確認（`28` §10.2）。依存：PROMPT-01
-* [ ] PROMPT-03 コピー結果表示のStatusMessage共通化（`28` §10.3）。依存：UI-02
+* [x] PROMPT-01 状況別入口の追加（分類は実装前確定。`28` §10.1・`11` §16）。依存：UI-02（2026-07-14完了＝バッチ5、同日に名称・ID対応を修正版へ更新。`app/prompts/index.tsx` のみ変更。6入口＝**問題を整理する／エラー・不具合を整理する／予定・やることを整理する／作業結果をまとめる／引き継ぎを作る／開発作業を依頼・確認する**。入口名・ID対応は入口名からの推測ではなく既存プロンプト本文が実際に行う処理に合わせて定義（旧「エラーを相談する」→「エラー・不具合を整理する」、旧「仕様・実装を確認する」の `design`/`research` は設計メモ・調査メモへの整形のため入口から除外、`claude_prompt`・`claude_work_start` を「開発作業を依頼・確認する」へ追加、`daily_priority` は「問題を整理する」から「予定・やることを整理する」へ移動、`wife_schedule`／`outing_plan`／`shopping_memo` を「予定・やることを整理する」へ追加）。画面側の固定IDマッピング（`PROMPT_SITUATIONS`：コンポーネント外の型＋定数）で対応させ、`mobilePrompts.ts`・`chatgptPrompts.ts`・`noteCategories.ts`・`PromptEntry`の型・生成スクリプトは無変更。状況別入口＝既存42件から目的に近いものを絞り込む補助フィルター（既存セクション＝所属の通常導線・検索＝通常導線は不変）。同一IDの複数入口重複はどちらの目的からも自然なもののみ許可（next_one_action／validation_log／worklog_close_summary／worklog）。全42件を6入口へ無理に割り当てない＝登録外プロンプト（就活・投資、生活家庭の family_manual／household_rule）は「すべて」・既存セクション・キーワード検索から到達可能。生活・家庭共有も目的に一致する wife_schedule／outing_plan／shopping_memo は個別対応。共通FilterChipで単一選択＋「すべて」が解除を兼ねる・flexWrap折り返し・横スクロールなし・AI紫色不使用でブランド色のみ）
+* [x] PROMPT-02 既存検索・一覧・コピーの維持確認（`28` §10.2）。依存：PROMPT-01（2026-07-14完了＝バッチ5。42件・7セクション・セクション順・セクション内順・件数見出し・1件展開アコーディオン・本文表示・badge・note・コピー対象promptBodyを維持。状況選択と既存キーワード検索はAND（全42件→状況別ID→キーワード検索→0件セクション除外）。検索対象は従来どおりname／id／セクション名のみ＝本文・note・badgeは検索対象に追加しない。入口・検索変更時にexpandedIdを強制初期化しない）
+* [x] PROMPT-03 コピー結果表示のStatusMessage共通化（`28` §10.3）。依存：UI-02（2026-07-14完了＝バッチ5。旧copiedId／failedIdのボタン色変更を、共通StatusMessage（kind=success「コピーしました」／error「コピー失敗」）をカードのcardHead直下に表示する方式へ変更。copyingId＋copyResult管理・コピー中は全コピーボタンdisabled＋「コピー中…」＋accessibilityState.disabled＋プロンプト名入りaccessibilityLabel・finallyでcopyingId解除。自動消去はuseEffectで成功2000ms／失敗2500ms・新結果/消去/アンマウントでクリーンアップ・連続コピーは最後の結果のみ表示（旧タイマーが新結果を消さない）。結果表示ラッパーにaccessibilityLiveRegion="polite"。StatusMessage.tsx本体・ListStateView.tsx本体は無変更。STATE-03・04全体の完了扱いにはしない＝下記）
 
 ### DETAIL（詳細画面の補助改善）
 
@@ -356,8 +356,8 @@ MVP実装（2026-07-09 実装。未コミット）。
 
 * [ ] STATE-01 一覧系画面へのListStateView適用（`30` §9）。依存：UI-02・NOTES-03（部分適用済み：ホーム＝バッチ2・メモ管理一覧＝バッチ3・現場適応入口の再開メモ表示＝バッチ4（2026-07-14）。プロンプト集の検索結果等が残るため全体は未完了のまま）
 * [ ] STATE-02 エラー表示（再試行導線・データ非消失の明示）。依存：STATE-01（部分適用済み：ホーム・メモ管理一覧・現場適応入口はListStateViewのerror＋再試行を接続済み。ただし実エラー表示はいずれも未再現のため全体は未完了のまま）
-* [ ] STATE-03 操作結果表示（保存・コピーの成功／失敗を文字で）。依存：UI-02
-* [ ] STATE-04 二重操作防止（saving / copying 中のdisabled）。依存：STATE-03
+* [ ] STATE-03 操作結果表示（保存・コピーの成功／失敗を文字で）。依存：UI-02（部分適用済み：プロンプト集のコピー結果をStatusMessageへ共通化＝バッチ5（2026-07-14）。DETAIL-01の詳細画面本文コピー・notes/memoの保存結果等が残るため全体は未完了のまま）
+* [ ] STATE-04 二重操作防止（saving / copying 中のdisabled）。依存：STATE-03（部分適用済み：プロンプト集のコピー中に全コピーボタンdisabled＋「コピー中…」＝バッチ5（2026-07-14）。他画面の保存中disabled等が残るため全体は未完了のまま）
 
 ### A11Y（アクセシビリティ）
 

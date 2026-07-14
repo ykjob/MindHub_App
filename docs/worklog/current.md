@@ -1,6 +1,58 @@
 # 最新作業ログ
 
-最終更新：2026-07-14（バッチ4＝現場適応入口改善WORK-01〜04の実装。同日：バッチ3実装・APK確認2記録ほか＝下記の別記録）
+最終更新：2026-07-14（バッチ5＝プロンプト集改修PROMPT-01〜03の実装。同日：バッチ4実装・バッチ3実装・APK確認2記録ほか＝下記の別記録）
+
+## Phase 15バッチ5：プロンプト集改修（PROMPT-01〜03）の実装（2026-07-14、未コミット）
+
+> **同日修正（状況別入口の名称・ID対応）**：当初実装の6入口（問題を整理する／エラーを相談する／作業を始める／報告文を作る／引き継ぎを作る／仕様・実装を確認する）は、入口名からの広い推測と実際のプロンプト本文が行う処理にずれがあったため、**既存プロンプト本文が実際に行う処理**へ合わせて名称・ID対応を修正した（実装の枠組み＝固定IDマッピング／FilterChip単一選択／検索AND／StatusMessage／二重操作防止／タイマークリーンアップ／アクセシビリティは維持。プロンプト本文・件数・生成処理は無変更）。
+> - 修正後6入口：**問題を整理する／エラー・不具合を整理する／予定・やることを整理する／作業結果をまとめる／引き継ぎを作る／開発作業を依頼・確認する**
+> - 主な変更：旧「エラーを相談する」→「エラー・不具合を整理する」（AIへ相談ではなくエラー・不具合・検証ログを所定形式へ整理する処理のため）／旧「仕様・実装を確認する」の `design`・`research` は仕様確認ではなく設計メモ・調査メモへの整形のため**入口から除外**（既存セクション・検索から利用）／`claude_prompt`・`claude_work_start` を「開発作業を依頼・確認する」へ**追加**／`daily_priority` を「問題を整理する」から「予定・やることを整理する」へ**移動**／生活・家庭共有の `wife_schedule`・`outing_plan`・`shopping_memo` を「予定・やることを整理する」へ**追加**（一方 `family_manual`・`household_rule` は入口未登録＝既存セクション・検索から利用）
+> - 状況別入口は**既存42件から目的に近いものを絞り込む補助フィルター**であり、42件の削減・置換・分類し直しではない。「すべて」・既存7セクション・キーワード検索は不変で、登録外プロンプトも従来どおり利用できる。新規プロンプトは追加していない（後続候補は `11` §16に記録）
+> - 以下の記述は修正後の内容に更新済み。文書更新：`10` §20・`14` §1.8.1・`28` §10.1/§16/§17-4・`30` §8.4/§14・`11` §16・`current-tasks.md`
+
+### 今回の目的
+
+確定済み方針（`28` §10、`14` §1.8）に基づき、アプリ内プロンプト一覧画面に状況別入口を追加し、既存検索・一覧・展開・コピーを維持したまま、コピー結果表示をStatusMessageへ共通化する（PROMPT-01〜03）。
+
+### 変更したファイル
+
+* 実装：`app/prompts/index.tsx` のみ（`promptHub.ts`・`mobilePrompts.ts`・`chatgptPrompts.ts`・`noteCategories.ts`・`generate_prompt_hub.mjs`・`docs/mobile-view/prompts.html`・`FilterChip.tsx`／`StatusMessage.tsx`／`ListStateView.tsx` 本体・`src/theme/index.ts`・`app/_layout.tsx`・DB・ルート・他画面・app.json/eas.json/package.jsonは無変更）
+* 文書：`10-tasks.md` §20（PROMPT-01〜03完了・STATE-03/04部分適用注記）・`14` §1.2訂正＋§1.8.1新設・`28` §10・§16・§17-4・`30` §8.4＋§14・`11` §16（状況別分類確定・AI色部分確定）・`current-tasks.md`・本ファイル
+
+### 実装内容
+
+* **状況別入口（PROMPT-01）**：修正後6入口＝問題を整理する（stuck_reason/brain_dump_to_action/stop_overthinking/next_one_action/thought）／エラー・不具合を整理する（error_note/bug_report/validation_log）／予定・やることを整理する（time_slot_tasks/google_tasks/google_calendar/daily_priority/one_day_plan/next_one_action/wife_schedule/outing_plan/shopping_memo）／作業結果をまとめる（worklog_close_summary/release_note_draft/pead_result_summary/worklog/validation_log）／引き継ぎを作る（chat_handoff_summary/worklog_close_summary/chatgpt_log/worklog）／開発作業を依頼・確認する（claude_prompt/claude_work_start/implementation_review_request/codex_review/spec_update_request/device_checklist）。コンポーネント外に型 `PromptSituationKey` と定数 `PROMPT_SITUATIONS`（入口→既存プロンプトID配列）を定義する画面側の固定IDマッピング方式。`mobilePrompts.ts` への状況タグ追加・`PromptEntry` の型拡張・文字列自動判定・生成スクリプト変更はしない。既存セクション＝プロンプトの体系・所属の通常導線、状況別入口＝既存42件から目的に近いものを絞り込む補助フィルターとして実装。全42件を6入口へ無理に割り当てず、該当しないプロンプト（就活・投資、および生活家庭の family_manual/household_rule）は「すべて」・既存セクション・キーワード検索から到達可能。生活・家庭共有を一律除外はせず、目的に一致する wife_schedule/outing_plan/shopping_memo は個別対応。同一IDの複数入口重複はどちらの目的からも自然なもの（next_one_action＝問題/予定、validation_log＝エラー/作業結果、worklog_close_summary＝作業結果/引き継ぎ、worklog＝作業結果/引き継ぎ）のみ許可
+* **UI配置・チップ**：AppHeader→既存説明文→「今の目的から探す」見出し→状況別FilterChip→既存検索欄→表示件数→既存SectionListの順。共通 `FilterChip` を再利用し「すべて／6入口」を単一選択・「すべて」が選択解除を兼ねる・`flexWrap` 折り返し・横スクロールなし・大型カード/ボタンにしない・AI紫（`#7C3AED`）不使用でブランド色のみ
+* **検索との併用（PROMPT-02）**：状況選択と既存キーワード検索はAND（全42件→状況別IDで絞り込み→既存キーワード検索→0件セクション除外）。検索対象は従来どおりプロンプト名・ID・セクション名のみ（本文・note・badgeは追加しない）。42件・既存7セクション・セクション順・セクション内順・件数見出し・1件展開アコーディオン・本文表示・コピー対象promptBody・badge・noteを維持。入口や検索条件を変えても該当プロンプトは元セクションに所属したまま表示（フラット化しない）。入口・検索変更時に `expandedId` を強制初期化しない
+* **表示件数・0件**：条件（状況または検索）があるとき「表示中 N / 42件」、なければ「全42件」。0件は3状態を文言で区別（検索のみ＝「検索条件に一致するプロンプトがありません」／状況＋検索＝「選択した目的と検索条件の両方に一致するプロンプトがありません」／状況のみ＝「この目的に対応するプロンプトが見つかりません」）。補助文＋「絞り込みを解除」ボタン（状況＝すべて・検索語＝空を同時初期化）。`ListStateView` 本体は変更せず画面内で条件別表示を実装
+* **コピー結果のStatusMessage共通化（PROMPT-03）**：旧 `copiedId`/`failedId` のボタン色変更を廃し、状態を `copyingId`（コピー中）＋ `copyResult`（対象ID＋success/error）で管理。コピー開始で `copyingId` を設定し処理中は全コピーボタンを `disabled`＋操作対象は「コピー中…」、`finally` で解除。`disabled`／`accessibilityRole="button"`／`accessibilityState={{disabled}}`／プロンプト名入り `accessibilityLabel` を設定。結果はコピーしたカードの `cardHead` 直下に `<StatusMessage kind=success message="コピーしました" />`／`kind=error message="コピー失敗"` を表示し、ラッパーViewに `accessibilityLiveRegion="polite"`。自動消去は `useEffect`（成功2000ms/失敗2500ms・新結果/消去/アンマウントでクリーンアップ）。`copyResult` は毎回新オブジェクトのため新結果でeffect再実行＝旧タイマーはクリーンアップで破棄され、連続コピーは最後の結果のみ表示。`StatusMessage.tsx` 本体は無変更
+
+### 検証結果
+
+* `npx tsc --noEmit` 合格・`git diff --check` 問題なし・実装差分は `app/prompts/index.tsx` のみ（`git status --short` で確認）
+* ヘッドレスChrome実操作（puppeteer-coreはセッション用一時ディレクトリ＝scratchpadに隔離・使い捨てuser-data-dir・ポート8097で新規サーバー。修正後マッピングで再確認）：**自動確認63項目すべて合格・コンソールエラー0件**
+  * 6幅（360/390/412/480/768/1024）：横スクロールなし・全42件表示（初期マウント）・状況チップ（7個＝すべて＋6入口、ラベル長め）が折り返しで画面外にはみ出さない
+  * 状況別入口：6入口それぞれで期待ID群だけが表示（複数セクションにまたがる「予定・やることを整理する」はリストをスクロールして全9件を確認）・件数「表示中 N/42件」・「すべて」で全42件（＝count「全42件」・カテゴリ別（11件）見出し）へ復帰
+  * 修正後マッピングの再確認：design/research が「開発作業を依頼・確認する」に非表示・claude_prompt/claude_work_start が表示／wife_schedule・outing_plan・shopping_memo が「予定・やることを整理する」に表示／daily_priority が「問題を整理する」から外れ「予定・やることを整理する」に表示／family_manual・household_rule はどの入口にも未登録で household_rule を「家庭内ルール」検索で到達確認
+  * 重複対応ID（validation_log＝エラー/作業結果、worklog・worklog_close_summary＝作業結果/引き継ぎ、next_one_action＝問題/予定）が指定した複数入口の両方に表示
+  * 検索：「レビュー」でcodex_reviewを名称一致で抽出。状況＋検索AND：review入口＋「レビュー」＝codex_reviewのみ。0件区別：検索のみ／状況＋検索の文言差・NOT混同を確認。「絞り込みを解除」で「全42件」＋検索欄空へ復帰
+  * 展開・折りたたみ／badge「private / family用」・note「家庭内共有用…」の表示（keyword「家族」で該当カードを描画して確認）
+  * コピー：StatusMessage結果が表示・自動消去・連続コピーで結果1つだけ最後のカードに付く、を確認
+* SectionListはVirtualizedListで全42件が常時DOMに載らないため、リセット後の全件確認は件数テキスト・セクション見出し（データ由来）で判定し、コピー/badge確認は該当カードを状況・検索で描画窓へ寄せてから実施
+
+### 未確認事項
+
+* **Android実機確認は未実施**（次回APK確認で行う。`30` §8.4・§14のAndroid列は「未確認」のまま。Gate 6は通過扱いにしない）
+* **コピー成功パスのクリップボード実内容一致はWeb環境制約で未確認**：ヘッドレス／バックグラウンドChromeでは `navigator.clipboard.writeText` がChromeの権限ポリシーで拒否（`NotAllowedError: Write permission denied`。`document.hasFocus()=true` でも拒否＝プローブで確認）。アプリは失敗を握りつぶさずerrorパスで「コピー失敗」を表示することを確認し、コピー対象が `entry.promptBody` である接続はコードで確認。成功時の「コピーしました」文言表示とクリップボード内容一致はAndroid実機／通常ブラウザで要確認（実装/設定は変更していない）
+* TalkBack・端末文字サイズ最大は未確認。STATE-03・04はプロンプト集への部分適用でありPhase 15全体の完了扱いにしない。AI色の全体方針（`29` §12・`11` §16）は未確定のまま
+
+### やっていないこと（今回の非対象）
+
+コミット・push・versionCode変更・EAS/APKビルド・APK作成・Android実機確認・HTML生成・生成スクリプト実行／プロンプト本文・件数の変更／既存プロンプトID・名称・所属セクションの変更／`promptHub.ts`・`mobilePrompts.ts`・`chatgptPrompts.ts`・`noteCategories.ts`・生成スクリプト・prompts.html・共通部品本体・theme・`_layout.tsx`・DB・ルートの変更／他画面のSTATE・A11Y横断対応／新規依存・アイコン・ライブラリ追加
+
+---
+
+
 
 ## Phase 15バッチ4：現場適応モード入口改善（WORK-01〜04）の実装（2026-07-14、未コミット）
 
