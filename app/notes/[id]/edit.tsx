@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams, Stack } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import NoteForm from '../../../src/components/NoteForm';
 import NativeHeaderBackButton from '../../../src/components/NativeHeaderBackButton';
+import ListStateView from '../../../src/components/ListStateView';
 import { getNoteById } from '../../../src/features/notes/noteRepository';
 import { updateNote } from '../../../src/features/notes/noteService';
 import type { Note, NoteInput } from '../../../src/features/notes/noteTypes';
@@ -14,25 +15,38 @@ export default function NoteEditScreen() {
   const db = useSQLiteContext();
   const [note, setNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [notFound, setNotFound] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [saving, setSaving] = useState(false);
 
+  // 読み込み失敗（例外）・該当なし（取得成功・null）・取得成功を区別する。
+  // アンマウント後に古い取得が状態を更新しないよう active フラグで保護する。
+  // 編集対象が確定するまで空フォームを表示しない（loaded時のみNoteFormを描画）。
   useEffect(() => {
-    if (!id) {
-      setNote(null);
-      setLoading(false);
-      return;
-    }
-    getNoteById(db, id)
-      .then((result) => {
-        setNote(result);
-      })
-      .catch(() => {
-        setNote(null);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [id, db]);
+    let active = true;
+    setLoading(true);
+    setLoadError(false);
+    setNotFound(false);
+    (async () => {
+      try {
+        const result = id ? await getNoteById(db, id) : null;
+        if (!active) return;
+        if (result) {
+          setNote(result);
+        } else {
+          setNotFound(true);
+        }
+      } catch {
+        if (active) setLoadError(true);
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [id, db, reloadKey]);
 
   async function handleSave(input: NoteInput) {
     if (!id) return;
@@ -54,20 +68,18 @@ export default function NoteEditScreen() {
     <NativeHeaderBackButton fallback={id ? `/notes/${id}` : '/notes'} />
   );
 
-  if (loading) {
+  // loading／読み込み失敗＋再試行／該当なし の各状態でも「← 戻る」（headerLeft）を維持する。
+  if (loading || loadError || notFound) {
     return (
-      <View style={styles.center}>
+      <View style={styles.container}>
         <Stack.Screen options={{ headerLeft: editHeaderLeft }} />
-        <ActivityIndicator size="large" color="#2563EB" />
-      </View>
-    );
-  }
-
-  if (!note) {
-    return (
-      <View style={styles.center}>
-        <Stack.Screen options={{ headerLeft: editHeaderLeft }} />
-        <Text style={styles.errorText}>メモが見つかりません</Text>
+        {loading ? (
+          <ListStateView status="loading" />
+        ) : loadError ? (
+          <ListStateView status="error" onRetry={() => setReloadKey((k) => k + 1)} />
+        ) : (
+          <ListStateView status="empty" emptyMessage="メモが見つかりません" />
+        )}
       </View>
     );
   }
@@ -76,26 +88,25 @@ export default function NoteEditScreen() {
     <>
       <Stack.Screen options={{ headerLeft: editHeaderLeft }} />
       <NoteForm
-      initial={{
-        title: note.title,
-        body: note.body,
-        project: note.project,
-        type: note.type,
-        tags: note.tags,
-        source: note.source,
-        visibility: note.visibility,
-        isGitCandidate: note.is_git_candidate === 1,
-      }}
-      saving={saving}
-      saveLabel="更新"
-      onSave={handleSave}
-      onCancel={() => router.back()}
+        initial={{
+          title: note!.title,
+          body: note!.body,
+          project: note!.project,
+          type: note!.type,
+          tags: note!.tags,
+          source: note!.source,
+          visibility: note!.visibility,
+          isGitCandidate: note!.is_git_candidate === 1,
+        }}
+        saving={saving}
+        saveLabel="更新"
+        onSave={handleSave}
+        onCancel={() => router.back()}
       />
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  errorText: { fontSize: 15, color: '#6B7280' },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
 });

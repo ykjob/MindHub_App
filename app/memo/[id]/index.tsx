@@ -19,7 +19,7 @@ import { getCategoryLabel } from '../../../src/features/memos/memoCategories';
 import SyncStatusBadge from '../../../src/components/SyncStatusBadge';
 import ListStateView from '../../../src/components/ListStateView';
 import { showConfirmDialog } from '../../../src/components/ConfirmDialog';
-import { copyToClipboard } from '../../../src/utils/clipboard';
+import { useCopyFeedback } from '../../../src/hooks/useCopyFeedback';
 import { formatDisplayDate } from '../../../src/utils/date';
 
 export default function MemoDetailScreen() {
@@ -30,8 +30,7 @@ export default function MemoDetailScreen() {
   const [loadError, setLoadError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [uploading, setUploading] = useState(false);
-  const [bodyCopied, setBodyCopied] = useState(false);
-  const [bodyCopyFailed, setBodyCopyFailed] = useState(false);
+  const bodyCopy = useCopyFeedback();
 
   // 主読み込み。例外は握りつぶさず loadError に分岐し、取得成功でnullは「該当なし」として扱う。
   // フォーカス解除・アンマウント後に古い取得が状態を更新しないよう active フラグで保護する。
@@ -94,20 +93,6 @@ export default function MemoDetailScreen() {
     });
   }
 
-  async function handleCopyBody() {
-    if (!memo || !memo.body.trim()) return;
-    const ok = await copyToClipboard(memo.body);
-    if (ok) {
-      setBodyCopied(true);
-      setBodyCopyFailed(false);
-      setTimeout(() => setBodyCopied(false), 2000);
-    } else {
-      setBodyCopyFailed(true);
-      setBodyCopied(false);
-      setTimeout(() => setBodyCopyFailed(false), 2500);
-    }
-  }
-
   function getUploadButtonLabel(): string {
     if (!memo) return '';
     switch (memo.github_status) {
@@ -141,19 +126,22 @@ export default function MemoDetailScreen() {
         {memo.body.trim() ? (
           <TouchableOpacity
             style={styles.copyBodyBtn}
-            onPress={handleCopyBody}
+            onPress={() => bodyCopy.run(memo.body)}
+            disabled={bodyCopy.copying}
             accessibilityRole="button"
             accessibilityLabel="本文をコピー"
+            accessibilityState={{ disabled: bodyCopy.copying }}
+            accessibilityLiveRegion="polite"
           >
             <Text
               style={[
                 styles.copyBodyBtnText,
-                bodyCopyFailed && styles.copyBodyBtnTextFailed,
+                bodyCopy.failed && styles.copyBodyBtnTextFailed,
               ]}
             >
-              {bodyCopied
+              {bodyCopy.done
                 ? 'コピーしました ✓'
-                : bodyCopyFailed
+                : bodyCopy.failed
                   ? 'コピーできませんでした'
                   : '本文をコピー'}
             </Text>
@@ -172,7 +160,7 @@ export default function MemoDetailScreen() {
 
       {/* GitHub状態 */}
       <View style={styles.githubSection}>
-        <Text style={styles.sectionTitle}>GitHub</Text>
+        <Text style={styles.sectionTitle} accessibilityRole="header">GitHub</Text>
         <View style={styles.statusRow}>
           <Text style={styles.statusLabel}>状態</Text>
           <SyncStatusBadge status={memo.github_status} />
@@ -191,6 +179,9 @@ export default function MemoDetailScreen() {
           style={[styles.uploadBtn, uploading && styles.uploadBtnDisabled]}
           onPress={handleUpload}
           disabled={uploading}
+          accessibilityRole="button"
+          accessibilityLabel={uploading ? 'アップロード中' : getUploadButtonLabel()}
+          accessibilityState={{ disabled: uploading, busy: uploading }}
         >
           {uploading ? (
             <ActivityIndicator color="#FFFFFF" size="small" />
@@ -205,10 +196,17 @@ export default function MemoDetailScreen() {
         <TouchableOpacity
           style={styles.editBtn}
           onPress={() => router.push(`/memo/${id}/edit`)}
+          accessibilityRole="button"
+          accessibilityLabel="このメモを編集"
         >
           <Text style={styles.editBtnText}>編集</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
+        <TouchableOpacity
+          style={styles.deleteBtn}
+          onPress={handleDelete}
+          accessibilityRole="button"
+          accessibilityLabel="このメモを削除"
+        >
           <Text style={styles.deleteBtnText}>削除</Text>
         </TouchableOpacity>
       </View>
@@ -265,6 +263,8 @@ const styles = StyleSheet.create({
   copyBodyBtn: {
     marginTop: 12,
     paddingVertical: 10,
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: 8,
     backgroundColor: '#EFF6FF',
     borderWidth: 1,
@@ -308,6 +308,8 @@ const styles = StyleSheet.create({
   errorMessage: { fontSize: 12, color: '#991B1B' },
   uploadBtn: {
     paddingVertical: 12,
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: 8,
     backgroundColor: '#2563EB',
     alignItems: 'center',
@@ -319,6 +321,8 @@ const styles = StyleSheet.create({
   editBtn: {
     flex: 1,
     paddingVertical: 12,
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
@@ -329,6 +333,8 @@ const styles = StyleSheet.create({
   deleteBtn: {
     flex: 1,
     paddingVertical: 12,
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: 8,
     backgroundColor: '#FEF2F2',
     alignItems: 'center',

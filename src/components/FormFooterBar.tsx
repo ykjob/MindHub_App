@@ -6,6 +6,7 @@ import {
   InputAccessoryView,
   InteractionManager,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // 保存・キャンセル用の共通フッター。画面下部に通常表示しつつ、
 // iOSではキーボード直上にも同じボタンを表示する（InputAccessoryView）。
@@ -34,6 +35,10 @@ export default function FormFooterBar({
 }: Props) {
   const [accessoryReady, setAccessoryReady] = useState(Platform.OS !== 'ios');
   const notified = useRef(false);
+  // 画面下端に近すぎる問題への対応：通常フッターにのみ下部Safe Areaを加算する。
+  // iOSのInputAccessoryView（キーボード直上バー）はキーボード上に浮くため加算しない（重複回避）。
+  // Web・下部インセットのない端末ではinsets.bottom=0となり従来表示に一致する。
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (Platform.OS !== 'ios') return;
@@ -54,7 +59,9 @@ export default function FormFooterBar({
 
   return (
     <>
-      <View style={styles.footer}>{children}</View>
+      <View style={[styles.footer, { paddingBottom: FOOTER_PADDING + insets.bottom }]}>
+        {children}
+      </View>
       {Platform.OS === 'ios' && accessoryReady ? (
         <InputAccessoryView nativeID={accessoryId}>
           <View style={styles.footer}>{children}</View>
@@ -63,6 +70,8 @@ export default function FormFooterBar({
     </>
   );
 }
+
+const FOOTER_PADDING = 12;
 
 const styles = StyleSheet.create({
   // 保存ボタンを左下に置く（保存が左端、キャンセルがその右）

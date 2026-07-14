@@ -1,6 +1,86 @@
 # 最新作業ログ
 
-最終更新：2026-07-15（バッチ6B-2＝さくっとメモの読み込み・保存状態処理。同日：バッチ6B-1＝確認ダイアログのWeb対応ほか＝下記の別記録）
+最終更新：2026-07-15（Phase 15 Web全体回帰＝未確認経路の補完。同日：Phase 15最終統合実装バッチ／バッチ6B-2＝さくっとメモの読み込み・保存状態処理／バッチ6B-1＝確認ダイアログのWeb対応ほか＝下記の別記録）
+
+## Phase 15 Web全体回帰（2026-07-15、commit前）
+
+### 目的
+
+最終統合実装バッチのcommit前に、前回未確認・結果未明示だった機能経路をまとめて補完する。すでに合格済みの6幅×12ルート横スクロール等は不必要に繰り返さず、未確認経路に集中する。
+
+### 実施環境（他スレッド無干渉）
+
+専用ポート8114新規サーバー・使い捨てuser-data-dir（使い捨てブラウザ内DB）・puppeteer-coreはリポジトリ外scratchpad隔離。他スレッドの8081/8082は無停止、確認後に8114のみ停止。repo working treeにテスト依存・プロファイル・ログ・スクリプト混入なし。読み込み/保存失敗は**確認用ハーネスがReact fiber経由でlive DBを取得し `getFirstAsync`／`runAsync` をテスト中だけ一時差し替え**て再現（本番コード・DBは恒久変更していない）。
+
+### 結果：79項目すべて合格・不合格0・console.error 0・console.warn 0・pageerror 0・unhandledrejection 0
+
+合格した新規確認経路（詳細は `30` §8.8）：
+
+* 記録確認：一覧・作成→保存→詳細・編集→反映・絞り込み（一致／filtered-empty／リセット）・アーカイブ確認→バッジ→解除・not-found・**詳細の読み込み失敗＋再試行**・**編集の読み込み失敗＋再試行（空フォーム非表示・戻る維持）**
+* さくっとメモ：**保存失敗（alert・入力維持・ルート維持・ボタン再活性）→再保存成功**・not-found・**削除（confirm→ホーム）**
+* 現場適応：入口→5画面導線・**終業前メモの保存失敗（保存失敗・入力維持）→再保存成功→保存済みでボタン `aria-disabled=true`**・コピー専用画面は保存ボタン非存在＋コピー失敗表示→既定ラベル復帰＋**コピー直後に別画面へ移動してもunhandledrejectionなし**
+* その他：ホーム2×2・プロンプト集の状況別chip・設定（トークン未設定表示・トークン行崩れなし・横あふれなし）
+* **Web戻る12画面 ×（直アクセス＋再読み込み）＝24件すべてfallback正しく・Unmatched/空白なし**
+* **文字拡大相当（ページズーム1.5）：6画面横スクロールなし＋ネイティブヘッダーの戻る/タイトル矩形交差なし**
+
+### 環境制約により未確認
+
+* コピー**成功**経路（「コピーしました」表示・クリップボード実内容一致）はヘッドレスChromeの `clipboard.writeText` 権限制約で再現不可。**拒否時の失敗表示・二重操作防止・タイマー復帰・コンソールエラーなしは確認済み**。通常ブラウザ／最終Android実機で確認する
+
+### 未確認・不合格
+
+* 未確認：Android実機・TalkBack・文字サイズ最大（最終APK。Gate 6・Gate 7）／GitHub連携の実通信（今回対象外・完成済みとしない）
+* **不合格：なし（0件）**。アプリコードの修正は不要だった（記録確認にはアーカイブのみで削除UIは存在しない＝仕様どおり。削除はさくっとメモの機能で確認済み）
+
+### 変更（本回帰による）
+
+* 実装コードの変更なし（不具合ゼロのため）。文書のみ：`30` §8.8（新設）・`28` §16・`10` §20・`11` §16・`current-tasks.md`・本ファイル
+
+---
+
+
+
+## Phase 15最終統合実装バッチ（2026-07-15、未コミット）
+
+### 今回の目的
+
+残っていた実装項目を細かく分けず1バッチで実装する。対象＝記録確認詳細/編集の読み込み状態・現場適応の保存中二重実行防止・コピー中二重実行防止・コピー結果タイマーのクリーンアップ・FormFooterBar下部Safe Area・主要操作のA11Y属性・44相当タッチ領域・selected/disabled読み上げ・Web文字拡大相当の確認。Phase 15後の大規模リファクタ（StatusMessage全面移行・色の全theme移行・ConfirmDialog撤去等）は持ち込まない。
+
+### 変更したファイル
+
+* 実装：`app/notes/[id]/index.tsx`・`app/notes/[id]/edit.tsx`・`app/memo/[id]/index.tsx`・`app/memo/create.tsx`・`app/memo/[id]/edit.tsx`・`app/settings.tsx`・`src/components/WorkplaceSceneForm.tsx`・`src/components/NoteForm.tsx`・`src/components/CategorySelector.tsx`・`src/components/FormFooterBar.tsx`・`src/hooks/useCopyFeedback.ts`（新規）
+* 文書：`30` §8.7（新設）・`28` §16（UX-13/14/15/16へ部分適用注記）・`11` §16・`10` §20・`current-tasks.md`・本ファイル
+
+### 実装内容
+
+* **記録確認詳細（`notes/[id]/index`）の読み込み状態**：従来の `loading`＋`note===null` の2状態を、さくっとメモ詳細（バッチ6B-2）と同じ4状態へ。`useFocusEffect`＋`useCallback([id,db,reloadKey])` 内で `active` フラグ＋try/catch/finally。成功→`setNote(result)`（null＝該当なし）、例外→`setLoadError(true)`、finally→`setLoading(false)`。描画は loading→`ListStateView status="loading"`／loadError→`status="error"`＋`onRetry=reloadKey++`／`!note`→`status="empty" emptyMessage="メモが見つかりません"`。**読み込み例外でローディング固着しない・load-errorとnot-foundを別表示**。アーカイブ/書き出し後の再取得は旧 `loadNote`（フル読み込み）から非致命 `reloadNote`（try/catch内包・現在表示を保持）へ分離＝アクション後に画面全体をエラーへ倒さない。既存のアーカイブ/書き出し/本文コピー/プロンプトコピー/編集導線/静的Web戻る（`_layout` の `/notes` fallback）は無変更
+* **記録確認編集（`notes/[id]/edit`）の読み込み状態**：`loading`＋`note` のみだった実装へ `loadError`・`notFound`・`reloadKey` を追加。`useEffect([id,db,reloadKey])`＋`active` フラグ。null→`setNotFound(true)`（**空フォームを表示しない**＝loading/loadError/notFoundを1分岐でまとめ、loaded時のみ `NoteForm` を描画）、例外→`setLoadError(true)`。各状態で `<Stack.Screen options={{ headerLeft: editHeaderLeft }} />`（動的Web戻る＝`/notes/${id}` fallback）を必ずレンダリング。旧 `ActivityIndicator`/`center`/`errorText` 表示は `ListStateView`（loading/error＋再試行/empty「メモが見つかりません」）へ統一。タイトル「メモ編集」・保存/`updateNote`・`NoteForm` へのinitialは不変
+* **現場適応の保存中二重実行防止（`WorkplaceSceneForm`）**：`saveState` を `'idle'|'saving'|'done'|'failed'` に拡張し `savingRef`・`mountedRef`・`saveTimerRef` を追加。`handleSave` は `savingRef.current || saveState==='saving' || saveState==='done'` を早期return（保存中・保存済みの再実行を防止／失敗後は再保存可）。`setSaveState('saving')`→`await onSave(output)`→成功で `done`、失敗で `failed`＋2500ms後idle（タイマーはref保持・アンマウント時clear・mountedRefでアンマウント後setState防止）。ボタンは `saving`/`done` でdisabled＋ラベル「保存中…／保存しました／保存失敗／saveLabel」。コピー専用4画面は `onSave` 未指定のため保存ボタン自体が出ず、保存処理を追加していない。ルート・保存内容・タグ・private・Git候補外は無変更
+* **コピー共通hook（`src/hooks/useCopyFeedback.ts` 新規）**：copying/done/failed状態＋`run(text)` を提供。`copyingRef` で二重実行を無視、`timerRef` で結果タイマーIDを保持し次のコピー時・アンマウント時にclear、`mountedRef` でアンマウント後setStateを防止。`onFailed`＋`showInlineFailed:false` で「失敗時のみダイアログ」（プロンプトコピーの従来挙動）も表現。適用先＝memo詳細本文コピー・notes詳細本文/プロンプトコピー・`NoteForm` プロンプトコピー・`WorkplaceSceneForm` コピー。呼び出し側は `disabled={copy.copying}`＋`accessibilityState.disabled` を反映。成功/失敗の文字・維持時間（本文2000/2500ms・現場適応2000/2000ms）は従来どおり。**プロンプト集（`app/prompts/index.tsx` の copyingId 方式）は無変更**
+* **FormFooterBar下部Safe Area**：`useSafeAreaInsets()` を導入し、**通常フッターのみ** `paddingBottom = 12(FOOTER_PADDING) + insets.bottom`。iOSの `InputAccessoryView`（キーボード直上バー）側は `styles.footer`（padding:12）のままで下部インセットを加算しない（重複回避）。Webや下部インセットのない端末は `insets.bottom=0` で従来表示に一致。`InputAccessoryView`/`InteractionManager`/`onAccessoryReady` フォーカス処理は無変更。適用先＝さくっとメモ作成/編集・記録作成/編集（`NoteForm`）の共通フッター
+* **A11Y・タッチ領域・selected/disabled**：保存/キャンセル/編集/削除/アーカイブ/書き出し/コピー/整理する/GitHubアップロード/GitHubトークン削除/再試行の各操作へ `accessibilityRole="button"`＋`accessibilityLabel`、処理中・入力不足へ `accessibilityState.disabled`（保存系は `busy` も）を付与。コピー/保存結果のボタンへ `accessibilityLiveRegion="polite"`、セクション見出し・タイトルへ `accessibilityRole="header"`。`CategorySelector`・`NoteForm` のchipへ `accessibilityState.selected`＋`accessibilityLabel`（色だけで選択を伝えない）。主要ボタンへ `minHeight:44`＋`justifyContent:'center'`、chip類・プレビュー切替・トークン削除は外観を変えず `hitSlop` でタップ判定を44相当へ拡張（過度に大きいボタンにしない）
+
+### 検証結果
+
+* `npx tsc --noEmit` 合格
+* `git diff --check` 問題なし（LF/CRLFの通知のみ）
+* `npx expo export --platform web` 成功（796モジュール・バンドルエラー0件）＝変更した全画面・新hook・safe-area導入がWeb向けにコンパイル/バンドルできることを確認。dist（gitignore対象）は確認後削除
+* Web文字拡大相当（VISUAL）はコードレビュー：本バッチはAppHeader・NativeHeaderBackButton・ホーム2×2カード・記録確認フィルター/chip・プロンプト集chip・現場適応ラベルの**レイアウトを変更していない**（変更はボタンのminHeight/hitSlop・フッターのpaddingBottom・状態分岐のみ）ため、新たな文字拡大崩れを持ち込んでいないことを確認
+* **対話的Web確認（ヘッドレスChrome、2026-07-15 実施）**：他スレッドに干渉しない専用ポート8114新規サーバー・使い捨てuser-data-dir（使い捨てブラウザ内DB）・puppeteer-coreはリポジトリ外scratchpadに隔離インストール（package.json/package-lock無変更・repo working treeはバッチの意図した差分のみ）。**89項目中85合格・コンソールエラー0件**。内訳＝6幅×12ルートの横スクロールなし72件、さくっとメモ作成→保存→詳細→編集→更新反映・不正IDで「メモが見つかりません」、記録確認 NoteForm作成→保存→詳細・アーカイブ確認ダイアログ発火→バッジ表示・不正IDで「メモが見つかりません」、現場適応終業前メモの保存連続クリック→「保存しました」＋保存ボタン `aria-disabled=true`（二重実行なし）、memo詳細の本文コピー連続クリック非クラッシュ、`/workplace/stuck` はコピー動作＋保存ボタン非存在。**失敗4件はすべてヘッドレスChromeが `navigator.clipboard.writeText` を拒否する環境制約**（コピー成功パスが再現不可＝バッチ5と同じ既知事象）で、アプリはerrorパス「コピーできませんでした」を正しく表示し、約2.5秒後に既定ラベルへ戻る（`useCopyFeedback` の失敗分岐・タイマー解除が機能）ことを別スクリプトで確認＝コード欠陥ではない（`30` §8.7）
+
+### 未確認・未実施（推測で合格にしない）
+
+* **コピー成功パスの「コピーしました」表示・クリップボード実内容一致**は未再現（ヘッドレスのwriteText拒否のため）。通常ブラウザ（フォーカスあり）またはAndroid実機で確認する（失敗パスは確認済み）
+* **Android実機・TalkBack・文字サイズ最大は未確認**（最終APK）。**Gate 6・Gate 7未完了**。STATE-03/04・A11Y・VISUALの全体完了扱いにしない
+* commit・push・versionCode変更・EAS/APKビルド・Android実機確認は未実施
+
+### やっていないこと（今回の非対象）
+
+commit・push・versionCode変更・EAS/APKビルド／StatusMessageへの全面移行・hardcoded色の全theme移行・ConfirmDialog撤去・新規アイコン/依存・DBスキーマ変更・ルート変更・GitHub連携拡張・プロンプトDB化・開発リファレンス専用画面・Phase 15後の新機能。app.json/eas.json/package.json/package-lock.json・公開Pages仕様・GitHubトークンのWeb保存非対応・現場適応のprivate/Git候補外・保存本文/タグ/カテゴリ・プロンプト本文・ホーム4カードの表示名/順序/2×2・NativeHeaderBackButtonのfallbackは無変更
+
+---
+
+
 
 ## Phase 15 バッチ6B-2：さくっとメモの読み込み・保存状態処理（2026-07-15、未コミット）
 

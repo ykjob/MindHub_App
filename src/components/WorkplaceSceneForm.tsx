@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -7,8 +7,10 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
-import { copyToClipboard } from '../utils/clipboard';
+import { useCopyFeedback } from '../hooks/useCopyFeedback';
 import { WORKPLACE_PRIVACY_NOTICE } from '../features/workplace/workplaceTags';
+
+type SaveState = 'idle' | 'saving' | 'done' | 'failed';
 
 export interface WorkplaceFieldDef {
   key: string;
@@ -44,13 +46,27 @@ export default function WorkplaceSceneForm({
     ...(initialValues ?? {}),
   }));
   const [output, setOutput] = useState<string | null>(null);
-  const [copyState, setCopyState] = useState<'idle' | 'done' | 'failed'>('idle');
-  const [saveState, setSaveState] = useState<'idle' | 'done' | 'failed'>('idle');
+  const [saveState, setSaveState] = useState<SaveState>('idle');
+
+  // コピーは共通hookで二重実行防止・成功/失敗表示・タイマー解除・アンマウント安全を担保。
+  const copy = useCopyFeedback({ failedMs: 2000 });
+
+  // 保存中の二重実行防止と、失敗表示タイマー／アンマウント安全のための参照。
+  const savingRef = useRef(false);
+  const mountedRef = useRef(true);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, []);
 
   function setField(key: string, text: string) {
     setValues((prev) => ({ ...prev, [key]: text }));
     setOutput(null);
-    setCopyState('idle');
     setSaveState('idle');
   }
 
@@ -60,25 +76,31 @@ export default function WorkplaceSceneForm({
       filled[f.key] = values[f.key] ?? '';
     }
     setOutput(buildText(filled));
-    setCopyState('idle');
     setSaveState('idle');
-  }
-
-  async function handleCopy() {
-    if (!output) return;
-    const ok = await copyToClipboard(output);
-    setCopyState(ok ? 'done' : 'failed');
-    setTimeout(() => setCopyState('idle'), 2000);
   }
 
   async function handleSave() {
     if (!output || !onSave) return;
+    // 保存中・保存済みの再実行を防止（保存失敗後は再保存できる）。
+    if (savingRef.current || saveState === 'saving' || saveState === 'done') return;
+    savingRef.current = true;
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+    setSaveState('saving');
     try {
       await onSave(output);
-      setSaveState('done');
+      if (mountedRef.current) setSaveState('done');
     } catch {
-      setSaveState('failed');
-      setTimeout(() => setSaveState('idle'), 2500);
+      if (mountedRef.current) {
+        setSaveState('failed');
+        saveTimerRef.current = setTimeout(() => {
+          if (mountedRef.current) setSaveState('idle');
+        }, 2500);
+      }
+    } finally {
+      savingRef.current = false;
     }
   }
 
@@ -117,13 +139,18 @@ export default function WorkplaceSceneForm({
         </View>
       ))}
 
-      <TouchableOpacity style={styles.buildBtn} onPress={handleBuild}>
+      <TouchableOpacity
+        style={styles.buildBtn}
+        onPress={handleBuild}
+        accessibilityRole="button"
+        accessibilityLabel="入力内容を整理する"
+      >
         <Text style={styles.buildBtnText}>整理する</Text>
       </TouchableOpacity>
 
       {output ? (
         <View style={styles.outputArea}>
-          <Text style={styles.outputLabel}>出力</Text>
+          <Text style={styles.outputLabel} accessibilityRole="header">出力</Text>
           <View style={styles.outputBox}>
             <Text style={styles.outputText} selectable>
               {output}
@@ -134,15 +161,20 @@ export default function WorkplaceSceneForm({
             <TouchableOpacity
               style={[
                 styles.copyBtn,
-                copyState === 'done' && styles.btnDone,
-                copyState === 'failed' && styles.btnFailed,
+                copy.done && styles.btnDone,
+                copy.failed && styles.btnFailed,
               ]}
-              onPress={handleCopy}
+              onPress={() => copy.run(output)}
+              disabled={copy.copying}
+              accessibilityRole="button"
+              accessibilityLabel="出力をコピー"
+              accessibilityState={{ disabled: copy.copying }}
+              accessibilityLiveRegion="polite"
             >
               <Text style={styles.actionText}>
-                {copyState === 'done'
+                {copy.done
                   ? 'コピーしました'
-                  : copyState === 'failed'
+                  : copy.failed
                   ? 'コピー失敗'
                   : 'コピー'}
               </Text>
@@ -156,10 +188,18 @@ export default function WorkplaceSceneForm({
                   saveState === 'failed' && styles.btnFailed,
                 ]}
                 onPress={handleSave}
-                disabled={saveState === 'done'}
+                disabled={saveState === 'saving' || saveState === 'done'}
+                accessibilityRole="button"
+                accessibilityLabel={saveLabel}
+                accessibilityState={{
+                  disabled: saveState === 'saving' || saveState === 'done',
+                }}
+                accessibilityLiveRegion="polite"
               >
                 <Text style={styles.actionText}>
-                  {saveState === 'done'
+                  {saveState === 'saving'
+                    ? '保存中…'
+                    : saveState === 'done'
                     ? '保存しました'
                     : saveState === 'failed'
                     ? '保存失敗'
@@ -223,6 +263,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#2563EB',
     borderRadius: 8,
     paddingVertical: 12,
+    minHeight: 44,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   buildBtnText: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
@@ -242,6 +284,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#2563EB',
     borderRadius: 8,
     paddingVertical: 10,
+    minHeight: 44,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   saveBtn: {
@@ -249,6 +293,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#059669',
     borderRadius: 8,
     paddingVertical: 10,
+    minHeight: 44,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   btnDone: { backgroundColor: '#16A34A' },

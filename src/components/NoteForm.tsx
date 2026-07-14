@@ -29,8 +29,8 @@ import {
   getDistinctTags,
 } from '../features/notes/noteRepository';
 import { buildChatGptPrompt } from '../features/notes/chatgptPrompts';
-import { copyToClipboard } from '../utils/clipboard';
 import { showMessage } from '../utils/dialog';
+import { useCopyFeedback } from '../hooks/useCopyFeedback';
 import MarkdownPreview from './MarkdownPreview';
 
 interface Props {
@@ -70,7 +70,12 @@ export default function NoteForm({
   const [showPreview, setShowPreview] = useState(false);
   const [projectSuggestions, setProjectSuggestions] = useState<string[]>([]);
   const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
-  const [copied, setCopied] = useState(false);
+  // プロンプトコピーは失敗時のみダイアログ表示（従来挙動）。二重実行防止・タイマー解除はhookが担う。
+  const promptCopy = useCopyFeedback({
+    showInlineFailed: false,
+    onFailed: () =>
+      showMessage('コピーできませんでした', 'この環境ではクリップボードを使用できません。'),
+  });
 
   useEffect(() => {
     let active = true;
@@ -109,16 +114,6 @@ export default function NoteForm({
     setTags([...current, tag].join(','));
   }
 
-  async function handleCopyPrompt() {
-    const ok = await copyToClipboard(buildChatGptPrompt(type));
-    if (ok) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } else {
-      showMessage('コピーできませんでした', 'この環境ではクリップボードを使用できません。');
-    }
-  }
-
   function handleSave() {
     onSave({ title, body, project, type, tags, source, visibility, isGitCandidate });
   }
@@ -131,6 +126,9 @@ export default function NoteForm({
         style={[styles.saveBtn, !canSave && styles.saveBtnDisabled]}
         onPress={handleSave}
         disabled={!canSave || saving}
+        accessibilityRole="button"
+        accessibilityLabel={saveLabel}
+        accessibilityState={{ disabled: !canSave || saving, busy: saving }}
       >
         {saving ? (
           <ActivityIndicator color="#FFFFFF" size="small" />
@@ -138,7 +136,12 @@ export default function NoteForm({
           <Text style={styles.saveText}>{saveLabel}</Text>
         )}
       </TouchableOpacity>
-      <TouchableOpacity style={styles.cancelBtn} onPress={onCancel}>
+      <TouchableOpacity
+        style={styles.cancelBtn}
+        onPress={onCancel}
+        accessibilityRole="button"
+        accessibilityLabel="編集をキャンセル"
+      >
         <Text style={styles.cancelText}>キャンセル</Text>
       </TouchableOpacity>
     </>
@@ -163,7 +166,7 @@ export default function NoteForm({
           {...textInputAccessoryProps}
         />
 
-        <Text style={styles.label}>カテゴリ</Text>
+        <Text style={styles.label} accessibilityRole="header">カテゴリ</Text>
         <View style={styles.chipWrap}>
           {NOTE_CATEGORIES.map((cat) => (
             <Chip
@@ -175,9 +178,17 @@ export default function NoteForm({
           ))}
         </View>
 
-        <TouchableOpacity style={styles.promptBtn} onPress={handleCopyPrompt}>
+        <TouchableOpacity
+          style={styles.promptBtn}
+          onPress={() => promptCopy.run(buildChatGptPrompt(type))}
+          disabled={promptCopy.copying}
+          accessibilityRole="button"
+          accessibilityLabel="ChatGPT整理プロンプトをコピー"
+          accessibilityState={{ disabled: promptCopy.copying }}
+          accessibilityLiveRegion="polite"
+        >
           <Text style={styles.promptBtnText}>
-            {copied ? 'コピーしました ✓' : 'ChatGPT整理プロンプトをコピー'}
+            {promptCopy.done ? 'コピーしました ✓' : 'ChatGPT整理プロンプトをコピー'}
           </Text>
         </TouchableOpacity>
 
@@ -224,6 +235,10 @@ export default function NoteForm({
           <TouchableOpacity
             style={styles.previewToggle}
             onPress={() => setShowPreview(!showPreview)}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={showPreview ? '編集に戻る' : '本文をプレビュー'}
+            accessibilityState={{ selected: showPreview }}
           >
             <Text style={styles.previewToggleText}>
               {showPreview ? '編集に戻る' : 'プレビュー'}
@@ -311,6 +326,11 @@ function Chip({
         selected && styles.chipSelected,
       ]}
       onPress={onPress}
+      // 見た目を大きくせず、指のタップ判定だけ44相当へ広げる（色以外にselectedも読み上げる）
+      hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ selected }}
     >
       <Text
         style={[
@@ -358,6 +378,8 @@ const styles = StyleSheet.create({
   promptBtn: {
     marginTop: 4,
     paddingVertical: 10,
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: 8,
     backgroundColor: '#EFF6FF',
     borderWidth: 1,
@@ -406,6 +428,8 @@ const styles = StyleSheet.create({
   cancelBtn: {
     paddingHorizontal: 16,
     paddingVertical: 10,
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: 8,
     backgroundColor: '#F3F4F6',
   },
@@ -413,6 +437,8 @@ const styles = StyleSheet.create({
   saveBtn: {
     paddingHorizontal: 24,
     paddingVertical: 10,
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: 8,
     backgroundColor: '#2563EB',
     minWidth: 80,

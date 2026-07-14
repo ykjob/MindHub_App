@@ -5,7 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  ActivityIndicator,
 } from 'react-native';
 import { router, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -27,42 +26,61 @@ import {
   downloadMarkdownFile,
 } from '../../../src/features/notes/noteExport';
 import { buildChatGptPrompt } from '../../../src/features/notes/chatgptPrompts';
-import { copyToClipboard } from '../../../src/utils/clipboard';
 import { confirmDialog, showMessage } from '../../../src/utils/dialog';
 import { formatDisplayDate } from '../../../src/utils/date';
+import { useCopyFeedback } from '../../../src/hooks/useCopyFeedback';
 import MarkdownPreview from '../../../src/components/MarkdownPreview';
+import ListStateView from '../../../src/components/ListStateView';
 
 export default function NoteDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const db = useSQLiteContext();
   const [note, setNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
-  const [promptCopied, setPromptCopied] = useState(false);
-  const [bodyCopied, setBodyCopied] = useState(false);
-  const [bodyCopyFailed, setBodyCopyFailed] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
-  const loadNote = useCallback(async () => {
-    if (!id) {
-      setNote(null);
-      setLoading(false);
-      return;
-    }
-    try {
-      const result = await getNoteById(db, id);
-      setNote(result);
-    } catch {
-      setNote(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [id, db]);
+  // 本文コピーはインライン成功／失敗表示、プロンプトコピーは失敗時のみダイアログ（従来挙動を維持）。
+  const bodyCopy = useCopyFeedback();
+  const promptCopy = useCopyFeedback({
+    showInlineFailed: false,
+    onFailed: () =>
+      showMessage('コピーできませんでした', 'この環境ではクリップボードを使用できません。'),
+  });
 
+  // 主読み込み。例外は握りつぶさず loadError に分岐し、取得成功でnullは「該当なし」として扱う。
+  // フォーカス解除・アンマウント後に古い取得が状態を更新しないよう active フラグで保護する。
   useFocusEffect(
     useCallback(() => {
+      let active = true;
       setLoading(true);
-      loadNote();
-    }, [loadNote])
+      setLoadError(false);
+      (async () => {
+        try {
+          const result = id ? await getNoteById(db, id) : null;
+          if (active) setNote(result);
+        } catch {
+          if (active) setLoadError(true);
+        } finally {
+          if (active) setLoading(false);
+        }
+      })();
+      return () => {
+        active = false;
+      };
+    }, [id, db, reloadKey])
   );
+
+  // アーカイブ・書き出し後などの再取得。失敗しても未処理rejectionを出さず現在表示は保持する
+  // （画面全体はエラーへ倒さない）。
+  async function reloadNote() {
+    if (!id) return;
+    try {
+      setNote(await getNoteById(db, id));
+    } catch {
+      // 再取得失敗は非致命（バッジ・書き出し日時が更新されないだけ）。
+    }
+  }
 
   function handleArchive() {
     if (!id || !note) return;
@@ -73,7 +91,7 @@ export default function NoteDetailScreen() {
         confirmLabel: '解除',
         onConfirm: async () => {
           await unarchiveNote(db, id);
-          await loadNote();
+          await reloadNote();
         },
       });
     } else {
@@ -83,7 +101,7 @@ export default function NoteDetailScreen() {
         confirmLabel: 'アーカイブ',
         onConfirm: async () => {
           await archiveNote(db, id);
-          await loadNote();
+          await reloadNote();
         },
       });
     }
@@ -105,61 +123,38 @@ export default function NoteDetailScreen() {
       exportFilename: info.filename,
       exportPath: info.path,
     });
-    await loadNote();
+    await reloadNote();
     showMessage(
       'Markdownをダウンロードしました',
       `推奨配置先：\n${info.path}\n\nダウンロードしたファイルを上記パスに配置してください。`
     );
   }
 
-  async function handleCopyPrompt() {
-    if (!note) return;
-    const ok = await copyToClipboard(buildChatGptPrompt(note.type));
-    if (ok) {
-      setPromptCopied(true);
-      setTimeout(() => setPromptCopied(false), 2000);
-    } else {
-      showMessage('コピーできませんでした', 'この環境ではクリップボードを使用できません。');
-    }
-  }
-
-  async function handleCopyBody() {
-    if (!note || !note.body.trim()) return;
-    const ok = await copyToClipboard(note.body);
-    if (ok) {
-      setBodyCopied(true);
-      setBodyCopyFailed(false);
-      setTimeout(() => setBodyCopied(false), 2000);
-    } else {
-      setBodyCopyFailed(true);
-      setBodyCopied(false);
-      setTimeout(() => setBodyCopyFailed(false), 2500);
-    }
-  }
-
   if (loading) {
+    return <ListStateView status="loading" />;
+  }
+
+  // 読み込み失敗（例外）と該当なし（取得成功・null）を別表示にする。失敗はデータ消失と断定しない。
+  if (loadError) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2563EB" />
-      </View>
+      <ListStateView status="error" onRetry={() => setReloadKey((k) => k + 1)} />
     );
   }
 
   if (!note) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>メモが見つかりません</Text>
-      </View>
-    );
+    return <ListStateView status="empty" emptyMessage="メモが見つかりません" />;
   }
 
   const tags = parseTags(note.tags);
+  const hasBody = note.body.trim().length > 0;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.section}>
         <View style={styles.titleRow}>
-          <Text style={styles.title}>{note.title || '（無題）'}</Text>
+          <Text style={styles.title} accessibilityRole="header">
+            {note.title || '（無題）'}
+          </Text>
           {note.archived_at ? (
             <Text style={styles.archivedBadge}>アーカイブ済み</Text>
           ) : null}
@@ -177,24 +172,27 @@ export default function NoteDetailScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>本文プレビュー</Text>
+        <Text style={styles.sectionTitle} accessibilityRole="header">本文プレビュー</Text>
         <MarkdownPreview markdown={note.body || '（本文なし）'} />
-        {note.body.trim() ? (
+        {hasBody ? (
           <TouchableOpacity
             style={styles.copyBodyBtn}
-            onPress={handleCopyBody}
+            onPress={() => bodyCopy.run(note.body)}
+            disabled={bodyCopy.copying}
             accessibilityRole="button"
             accessibilityLabel="本文をコピー"
+            accessibilityState={{ disabled: bodyCopy.copying }}
+            accessibilityLiveRegion="polite"
           >
             <Text
               style={[
                 styles.copyBodyBtnText,
-                bodyCopyFailed && styles.copyBodyBtnTextFailed,
+                bodyCopy.failed && styles.copyBodyBtnTextFailed,
               ]}
             >
-              {bodyCopied
+              {bodyCopy.done
                 ? '本文をコピーしました ✓'
-                : bodyCopyFailed
+                : bodyCopy.failed
                   ? '本文をコピーできませんでした'
                   : '本文をコピー'}
             </Text>
@@ -205,7 +203,7 @@ export default function NoteDetailScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Markdown書き出し</Text>
+        <Text style={styles.sectionTitle} accessibilityRole="header">Markdown書き出し</Text>
         {note.exported_at ? (
           <>
             <MetaRow label="書き出し先" value={note.export_path ?? ''} mono />
@@ -215,7 +213,12 @@ export default function NoteDetailScreen() {
           <Text style={styles.hint}>まだ書き出されていません</Text>
         )}
         <MetaRow label="推奨パス" value={buildExportInfo(note).path} mono />
-        <TouchableOpacity style={styles.exportBtn} onPress={handleExport}>
+        <TouchableOpacity
+          style={styles.exportBtn}
+          onPress={handleExport}
+          accessibilityRole="button"
+          accessibilityLabel="Markdownを書き出してダウンロード"
+        >
           <Text style={styles.exportBtnText}>Markdown書き出し（ダウンロード）</Text>
         </TouchableOpacity>
         {note.is_git_candidate !== 1 ? (
@@ -225,9 +228,17 @@ export default function NoteDetailScreen() {
         ) : null}
       </View>
 
-      <TouchableOpacity style={styles.promptBtn} onPress={handleCopyPrompt}>
+      <TouchableOpacity
+        style={styles.promptBtn}
+        onPress={() => promptCopy.run(buildChatGptPrompt(note.type))}
+        disabled={promptCopy.copying}
+        accessibilityRole="button"
+        accessibilityLabel="ChatGPT整理プロンプトをコピー"
+        accessibilityState={{ disabled: promptCopy.copying }}
+        accessibilityLiveRegion="polite"
+      >
         <Text style={styles.promptBtnText}>
-          {promptCopied ? 'コピーしました ✓' : 'ChatGPT整理プロンプトをコピー'}
+          {promptCopy.done ? 'コピーしました ✓' : 'ChatGPT整理プロンプトをコピー'}
         </Text>
       </TouchableOpacity>
 
@@ -235,10 +246,17 @@ export default function NoteDetailScreen() {
         <TouchableOpacity
           style={styles.editBtn}
           onPress={() => router.push(`/notes/${id}/edit`)}
+          accessibilityRole="button"
+          accessibilityLabel="このメモを編集"
         >
           <Text style={styles.editBtnText}>編集</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.archiveBtn} onPress={handleArchive}>
+        <TouchableOpacity
+          style={styles.archiveBtn}
+          onPress={handleArchive}
+          accessibilityRole="button"
+          accessibilityLabel={note.archived_at ? 'アーカイブを解除' : 'このメモをアーカイブ'}
+        >
           <Text style={styles.archiveBtnText}>
             {note.archived_at ? 'アーカイブ解除' : 'アーカイブ'}
           </Text>
@@ -309,6 +327,8 @@ const styles = StyleSheet.create({
   copyBodyBtn: {
     marginTop: 4,
     paddingVertical: 10,
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: 8,
     backgroundColor: '#EFF6FF',
     borderWidth: 1,
@@ -319,6 +339,8 @@ const styles = StyleSheet.create({
   copyBodyBtnTextFailed: { color: '#DC2626' },
   exportBtn: {
     paddingVertical: 12,
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: 8,
     backgroundColor: '#2563EB',
     alignItems: 'center',
@@ -327,6 +349,8 @@ const styles = StyleSheet.create({
   exportBtnText: { fontSize: 14, fontWeight: '600', color: '#FFFFFF' },
   promptBtn: {
     paddingVertical: 12,
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: 8,
     backgroundColor: '#EFF6FF',
     borderWidth: 1,
@@ -338,6 +362,8 @@ const styles = StyleSheet.create({
   editBtn: {
     flex: 1,
     paddingVertical: 12,
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
@@ -348,6 +374,8 @@ const styles = StyleSheet.create({
   archiveBtn: {
     flex: 1,
     paddingVertical: 12,
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: 8,
     backgroundColor: '#FFFBEB',
     alignItems: 'center',

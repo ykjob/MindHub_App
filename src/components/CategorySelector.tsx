@@ -25,6 +25,11 @@ export default function CategorySelector({ selected, onChange }: Props) {
           key={cat.key}
           style={[styles.chip, selected === cat.key && styles.chipSelected]}
           onPress={() => onChange(cat.key)}
+          // 見た目は維持し、タップ判定だけ縦方向に広げる（色以外にselectedも読み上げる）
+          hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+          accessibilityRole="button"
+          accessibilityLabel={`カテゴリ ${cat.label}`}
+          accessibilityState={{ selected: selected === cat.key }}
         >
           <Text
             style={[

@@ -135,6 +135,9 @@ export default function MemoEditScreen() {
           style={[styles.saveBtn, !body.trim() && styles.saveBtnDisabled]}
           onPress={handleSave}
           disabled={!body.trim() || saving}
+          accessibilityRole="button"
+          accessibilityLabel="メモを保存"
+          accessibilityState={{ disabled: !body.trim() || saving, busy: saving }}
         >
           {saving ? (
             <ActivityIndicator color="#FFFFFF" size="small" />
@@ -142,7 +145,12 @@ export default function MemoEditScreen() {
             <Text style={styles.saveText}>保存</Text>
           )}
         </TouchableOpacity>
-        <TouchableOpacity style={styles.cancelBtn} onPress={() => router.back()}>
+        <TouchableOpacity
+          style={styles.cancelBtn}
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="編集をキャンセル"
+        >
           <Text style={styles.cancelText}>キャンセル</Text>
         </TouchableOpacity>
       </FormFooterBar>
@@ -168,6 +176,8 @@ const styles = StyleSheet.create({
   cancelBtn: {
     paddingHorizontal: 16,
     paddingVertical: 10,
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: 8,
     backgroundColor: '#F3F4F6',
   },
@@ -175,6 +185,8 @@ const styles = StyleSheet.create({
   saveBtn: {
     paddingHorizontal: 24,
     paddingVertical: 10,
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: 8,
     backgroundColor: '#2563EB',
     minWidth: 80,

@@ -97,7 +97,7 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.sectionTitle}>GitHub連携設定</Text>
+      <Text style={styles.sectionTitle} accessibilityRole="header">GitHub連携設定</Text>
 
       <View style={styles.formSection}>
         <Field
@@ -133,6 +133,9 @@ export default function SettingsScreen() {
               <TouchableOpacity
                 style={styles.tokenDeleteBtn}
                 onPress={handleDeleteToken}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                accessibilityRole="button"
+                accessibilityLabel="GitHubトークンを削除"
               >
                 <Text style={styles.tokenDeleteText}>削除</Text>
               </TouchableOpacity>
@@ -158,6 +161,9 @@ export default function SettingsScreen() {
         style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
         onPress={handleSave}
         disabled={saving}
+        accessibilityRole="button"
+        accessibilityLabel="設定を保存"
+        accessibilityState={{ disabled: saving, busy: saving }}
       >
         {saving ? (
           <ActivityIndicator color="#FFFFFF" size="small" />
