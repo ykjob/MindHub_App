@@ -29,39 +29,35 @@ const FEATURE_CARDS = [
     title: 'すぐメモする',
     description: '思いついた内容を素早く残す',
     path: '/memo/create',
-    primary: true,
   },
   {
     key: 'workplace',
     title: '仕事を整理する',
     description: '仕事中の5つの場面を整理する',
     path: '/workplace',
-    primary: true,
   },
   {
     key: 'notes',
     title: '記録を整理する',
     description: '保存した記録を確認・分類する',
     path: '/notes',
-    primary: false,
   },
   {
     key: 'prompts',
     title: 'AIの型を使う',
     description: '目的別のプロンプトを選んでコピーする',
     path: '/prompts',
-    primary: false,
   },
 ] as const;
 
-// 主要機能カードの2×2グリッド。優先順位は表示順（上段＝最重要）と左アクセントで表す（28 §6.2）
+// 主要機能カードの2×2グリッド。4枚は同じ外観とし、優先順位は表示順（上段＝最重要）だけで表す（28 §6.2）
 function FeatureCardGrid() {
   return (
     <View style={styles.cardGrid}>
       {FEATURE_CARDS.map((card) => (
         <TouchableOpacity
           key={card.key}
-          style={[styles.featureCard, card.primary && styles.featureCardPrimary]}
+          style={styles.featureCard}
           onPress={() => router.push(card.path)}
           activeOpacity={0.7}
           accessibilityRole="button"
@@ -230,10 +226,6 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.xs,
     minHeight: touchTarget.min + spacing.lg,
-  },
-  featureCardPrimary: {
-    borderLeftWidth: 3,
-    borderLeftColor: colors.brand,
   },
   featureCardTitle: {
     fontSize: typography.sectionTitle,
