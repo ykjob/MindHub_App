@@ -22,29 +22,31 @@ const RECENT_MEMO_LIMIT = 3;
 
 // ホームの主要機能カード4件（表示順含め 28 §7.2 で確定）。
 // ホーム専用のためローカル定義（共通化は2画面以上で必要になってから＝29 §6.5）。
-// 「仕事を整理する」はホームカード上の入口ラベルのみ。正式名称「現場適応モード」は変更しない（28 §11）。
+// カードラベル「現場適応」はホーム上の入口ラベルのみ。遷移先の正式名称「現場適応モード」は変更しない（28 §11）。
+// カードラベル「記録確認」に対し遷移先 /notes の正式タイトルも「記録確認」に統一。「さくっとメモ」「プロンプト集」の
+// 遷移先タイトルは「メモ作成」「プロンプト集」のままで、カード名と遷移先タイトルの完全一致は要件としない（28 §11）。
 const FEATURE_CARDS = [
   {
     key: 'memo',
-    title: 'すぐメモする',
+    title: 'さくっとメモ',
     description: '思いついた内容を素早く残す',
     path: '/memo/create',
   },
   {
     key: 'workplace',
-    title: '仕事を整理する',
+    title: '現場適応',
     description: '仕事中の5つの場面を整理する',
     path: '/workplace',
   },
   {
     key: 'notes',
-    title: '記録を整理する',
+    title: '記録確認',
     description: '保存した記録を確認・分類する',
     path: '/notes',
   },
   {
     key: 'prompts',
-    title: 'AIの型を使う',
+    title: 'プロンプト集',
     description: '目的別のプロンプトを選んでコピーする',
     path: '/prompts',
   },
@@ -126,7 +128,7 @@ export default function HomeScreen() {
           <View style={styles.sectionsHeader}>
             <FeatureCardGrid />
             <Text style={styles.sectionTitle} accessibilityRole="header">
-              最近の軽量メモ
+              最近のさくっとメモ
             </Text>
           </View>
         }
@@ -141,8 +143,8 @@ export default function HomeScreen() {
           ) : (
             <ListStateView
               status="empty"
-              emptyMessage="軽量メモがありません"
-              emptyHint="右下の＋ボタン、または「すぐメモする」から作成できます"
+              emptyMessage="さくっとメモがありません"
+              emptyHint="右下の＋ボタン、または「さくっとメモ」から作成できます"
             />
           )
         }
@@ -188,7 +190,7 @@ export default function HomeScreen() {
         onPress={() => router.push('/memo/create')}
         activeOpacity={0.8}
         accessibilityRole="button"
-        accessibilityLabel="軽量メモを作成"
+        accessibilityLabel="さくっとメモを作成"
       >
         <Text style={styles.fabText}>＋</Text>
       </TouchableOpacity>

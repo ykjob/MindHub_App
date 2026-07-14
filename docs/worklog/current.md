@@ -1,6 +1,59 @@
 # 最新作業ログ
 
-最終更新：2026-07-14（バッチ5＝プロンプト集改修PROMPT-01〜03の実装。同日：バッチ4実装・バッチ3実装・APK確認2記録ほか＝下記の別記録）
+最終更新：2026-07-14（画面文言・Webヘッダー修正バッチ。同日：バッチ5＝プロンプト集改修ほか＝下記の別記録）
+
+## Phase 15 画面文言・Webヘッダー修正バッチ（2026-07-14、未コミット）
+
+### 今回の目的
+
+ユーザーのブラウザ確認で見つかった、ホーム主要カード等の画面表示名と、Webでネイティブヘッダー画面（メモ作成・設定・記録の新規作成）の戻るボタンが見えない問題を修正する独立小バッチ。Phase 15横断調査の前に実施。実装・文書・Web確認まで行い、commit・push・EASビルドはしない。
+
+### 変更したファイル
+
+* 実装：`app/index.tsx`（ホームカード名・軽量メモ表示名・FAB label）・`app/notes/index.tsx`（AppHeaderタイトル）・`app/workplace/index.tsx`（場面ラベル・区分説明）・`app/workplace/stuck.tsx`（intro・placeholder）・`app/_layout.tsx`（notes/index・workplace/stuck タイトル、memo/create・notes/create・settings への `headerLeft` 追加）・`src/components/NativeHeaderBackButton.tsx`（新規）
+* 文書：`28` §7.1表・§7.2・§11.1（新設）・`30` §8.5.1（新設）・§12.1所見更新・`11` §16所見更新・`current-tasks.md`・本ファイル
+
+### 実装内容
+
+* **ホーム表示名（`app/index.tsx`）**：主要カード4件のラベルを さくっとメモ／現場適応／記録確認／プロンプト集 に変更（説明文・表示順・遷移先・2×2配置・カード外観は不変）。「最近の軽量メモ」→「最近のさくっとメモ」、空状態「軽量メモがありません」→「さくっとメモがありません」＋補助文の「すぐメモする」→「さくっとメモ」、FAB accessibilityLabel「軽量メモを作成」→「さくっとメモを作成」。ルート `/memo`・`memos`テーブル・`Memo`型・変数名・内部概念コメント（「最近の軽量メモの初期表示件数」＝28 §7.2概念）は不変
+* **記録確認ヘッダー**：`app/notes/index.tsx` のAppHeaderタイトル「メモ管理」→「記録確認」、`app/_layout.tsx` の `notes/index` document title 用タイトルも「記録確認」。さくっとメモ／現場適応／プロンプト集の遷移先タイトル（メモ作成／現場適応モード／プロンプト集）は不変＝カード名と遷移先タイトルの完全一致は要件としない
+* **行き詰まり記録**：`app/workplace/index.tsx` の場面カード名「詰まり記録」→「行き詰まり記録」・区分説明「詰まり、質問、進捗報告を整理します。」→「行き詰まり、…」・`_layout` の `workplace/stuck` タイトル「詰まり記録」→「行き詰まり記録」。同画面系の `workplace/stuck` intro「詰まったときに…」→「行き詰まったときに…」・状況placeholderも表記統一。内部識別子 `stuck`・ルート `/workplace/stuck`・関数/型名・DB上のタグ・保存仕様、および 20〜27 の場面モデル正本は不変（表示ラベルのみ）
+* **Web戻るボタン修正**：再現・原因調査（ヘッドレスChrome）で、`/memo/create`・`/notes/create`・`/settings` はネイティブStackヘッダーを使用し、戻るボタンはReact Navigation Web既定の**マスク画像シェブロン**で描画される。履歴のない直アクセス時はそもそも戻るボタンが描画されず、履歴ありでもマスク画像方式はブラウザ差で視認できないことがある（画面内AppHeaderのテキスト「← 戻る」は元から視認可）。最小・堅牢な対応として、対象画面だけに専用 `headerLeft`（新規 `src/components/NativeHeaderBackButton.tsx`。テキスト「← 戻る」＝ブランド色・`hitSlop`・`accessibilityRole/Label`。履歴があれば `router.back()`、無ければ fallback へ `router.replace`）を設定。当初は3画面（memo/create・settings→`/`、notes/create→`/notes`）。共通 `screenOptions`・他のネイティブヘッダー画面・画面内AppHeader・ルートは無変更（画面をAppHeader方式へ全面変更しない）
+
+### 追加修正：現場適応5入力画面への適用（同日）
+
+* ユーザーの追加確認で、ホーム→現場適応→各場面（`/workplace/start`・`/stuck`・`/question`・`/report`・`/end`）でも同じネイティブStackヘッダーの戻るボタン不可視/未描画が確認された。同じ `NativeHeaderBackButton` を5画面の `headerLeft` に追加適用（`app/_layout.tsx` のみ変更。`headerLeft` 対象は計8画面）。5画面の直アクセスfallbackはいずれも `/workplace`。各画面タイトル（作業開始／行き詰まり記録／質問文作成／進捗報告作成／終業前メモ）は短縮・変更せず維持。内部ルート・クエリ（`?fromRestart=1` 等）・初期入力・保存/コピー処理は無変更。`NativeHeaderBackButton.tsx` 本体・当初3画面の設定は維持
+* 検証：`npx tsc --noEmit` 合格・`git diff --check` 問題なし。ヘッドレスChrome（ポート8099新規サーバー・使い捨てブラウザ内DB・puppeteer-coreはscratchpad隔離）で**自動確認133項目すべて合格・コンソールエラー0件**
+  * 履歴あり（ホーム→現場適応→各場面）：5画面とも「← 戻る」視認（hover・Tabフォーカスでも消えない）・タイトルと重ならない（back右端48px＜タイトル左端56px）・タイトル未クリップ・単一戻る（二重ヘッダーなし）・「← 戻る」で `/workplace` へ戻る
+  * 直アクセス（5画面）：「← 戻る」表示・押下で `/workplace`・クラッシュ/無反応なし
+  * `/workplace/start?fromRestart=1`：クエリ保持・「← 戻る」視認・（直アクセス）fallback `/workplace`。履歴ありの戻るは `router.back()` で前画面へ（route/クエリ非依存。引き継ぎ初期入力は無変更）
+  * 幅別：5画面を390/1024、`/workplace/stuck`・`/workplace/report` を6幅（360〜1024）で重なり・切れ・横はみ出し・本文レイアウトを確認
+  * 390幅で5画面のヘッダーをスクリーンショット保存・目視（「← 戻る」青＋タイトルの余白確認）
+  * 回帰：当初3画面の「← 戻る」は維持（memo/create再確認）
+* 今回対象外（未変更）：`/memo/[id]`・`/memo/[id]/edit`・`/notes/[id]`・`/notes/[id]/edit`。直アクセス時に戻るボタンが無い挙動は従来どおりで、今回の追加には含めない
+
+### 検証結果
+
+* `npx tsc --noEmit` 合格・`git diff --check` 問題なし
+* ヘッドレスChrome実操作（puppeteer-coreはセッション用一時ディレクトリ＝scratchpadに隔離・使い捨てuser-data-dir・ポート8098新規サーバー）：**自動確認62項目すべて合格・コンソールエラー0件**
+  * 6幅（360/390/412/480/768/1024）：ホーム4カード新名称・最近のさくっとメモ・旧カード名なし・横スクロールなし
+  * 空状態文言・カード遷移・記録確認タイトル・行き詰まり記録（カード名/区分説明/Stackタイトル/intro）
+  * 戻るボタン：3画面ともテキスト「← 戻る」が視認（履歴あり・直アクセス・hover・Tabフォーカス）、戻る動作（履歴あり=back()／直アクセス=fallback）を実操作確認。スクリーンショット目視（設定・メモ作成・記録の新規作成・ホーム）で視認を確認
+  * 回帰（§5.3）：他のネイティブヘッダー画面（`/workplace/start`・`/workplace/report`）は履歴ありで既定の戻る・タイトル表示・二重ヘッダーなしを確認（無変更）
+
+### 未確認事項
+
+* **Android実機確認は未実施**（次回APK確認で行う。戻るボタン・表示名・行き詰まり記録の実機表示、Safe Area）
+* **TalkBack・端末文字サイズ最大は未確認**。HEADER-02全体・VISUAL・A11Y・Gate 6は完了扱いにしない
+* 他のネイティブヘッダー画面（`/memo/[id]`・`/notes/[id]`・`/workplace/*` 入力画面）の直アクセス時に戻るボタンが無い挙動は従来どおり（今回スコープ外）
+
+### やっていないこと（今回の非対象）
+
+commit・push・EASビルド・APK作成・Android実機確認・TalkBack確認・文字サイズ最大確認・Phase 15横断調査・新規機能追加／DB・保存ロジック・プロンプト本文/件数・ルート名・`/workplace/stuck`・`stuck`識別子・app.json・eas.json・package.json・versionCode・依存関係・アイコンライブラリの変更／内部概念「軽量メモ」の無条件全置換
+
+---
+
+
 
 ## Phase 15バッチ5：プロンプト集改修（PROMPT-01〜03）の実装（2026-07-14、未コミット）
 

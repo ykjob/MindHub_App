@@ -123,7 +123,7 @@ export default function NoteListScreen() {
     <View style={styles.container}>
       {/* 戻るフォールバック（履歴なし→ホーム）はAppHeader内で処理される */}
       <AppHeader
-        title="メモ管理"
+        title="記録確認"
         showBack
         right={
           <TouchableOpacity

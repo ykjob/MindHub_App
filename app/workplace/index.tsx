@@ -36,7 +36,7 @@ const SCENES: Record<string, SceneDef> = {
   },
   stuck: {
     key: 'stuck',
-    label: '詰まり記録',
+    label: '行き詰まり記録',
     desc: '状況・試したこと・確認したいことを言語化する',
     route: '/workplace/stuck',
     action: 'copy',
@@ -65,7 +65,7 @@ const SCENES: Record<string, SceneDef> = {
 };
 
 // 一日の流れの3区分（28 §9.1）。場面の順序は従来どおり
-// 作業開始→詰まり記録→質問文作成→進捗報告作成→終業前メモ。
+// 作業開始→行き詰まり記録→質問文作成→進捗報告作成→終業前メモ。
 const SECTIONS: { key: string; title: string; desc: string; scenes: SceneDef[] }[] = [
   {
     key: 'begin',
@@ -76,7 +76,7 @@ const SECTIONS: { key: string; title: string; desc: string; scenes: SceneDef[] }
   {
     key: 'during',
     title: '作業中',
-    desc: '詰まり、質問、進捗報告を整理します。',
+    desc: '行き詰まり、質問、進捗報告を整理します。',
     scenes: [SCENES.stuck, SCENES.question, SCENES.report],
   },
   {
