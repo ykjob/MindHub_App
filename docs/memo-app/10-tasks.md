@@ -346,6 +346,10 @@ MVP実装（2026-07-09 実装。未コミット）。
 * [ ] PROMPT-02 既存検索・一覧・コピーの維持確認（`28` §10.2）。依存：PROMPT-01
 * [ ] PROMPT-03 コピー結果表示のStatusMessage共通化（`28` §10.3）。依存：UI-02
 
+### DETAIL（詳細画面の補助改善）
+
+* [x] DETAIL-01 軽量メモ詳細・メモ管理詳細への本文コピー導線追加（2026-07-14完了。versionCode 5実機確認の追加所見を受けた先行小タスク。`app/memo/[id]/index.tsx`＝`memo.body`のコピー、`app/notes/[id]/index.tsx`＝`note.body`のコピー。既存 `copyToClipboard` 経由・既存プロンプトコピーとは文言と状態変数で区別・空本文は「本文がありません」表示。保存・削除・アーカイブ・書き出し・GitHub連携は無変更）
+
 ### STATE（状態表示）
 
 * [ ] STATE-01 一覧系画面へのListStateView適用（`30` §9）。依存：UI-02・NOTES-03

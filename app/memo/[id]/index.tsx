@@ -18,6 +18,7 @@ import type { Memo } from '../../../src/features/memos/memoTypes';
 import { getCategoryLabel } from '../../../src/features/memos/memoCategories';
 import SyncStatusBadge from '../../../src/components/SyncStatusBadge';
 import { showConfirmDialog } from '../../../src/components/ConfirmDialog';
+import { copyToClipboard } from '../../../src/utils/clipboard';
 import { formatDisplayDate } from '../../../src/utils/date';
 
 export default function MemoDetailScreen() {
@@ -26,6 +27,8 @@ export default function MemoDetailScreen() {
   const [memo, setMemo] = useState<Memo | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [bodyCopied, setBodyCopied] = useState(false);
+  const [bodyCopyFailed, setBodyCopyFailed] = useState(false);
 
   async function loadMemo() {
     if (!id) return;
@@ -69,6 +72,20 @@ export default function MemoDetailScreen() {
     });
   }
 
+  async function handleCopyBody() {
+    if (!memo || !memo.body.trim()) return;
+    const ok = await copyToClipboard(memo.body);
+    if (ok) {
+      setBodyCopied(true);
+      setBodyCopyFailed(false);
+      setTimeout(() => setBodyCopied(false), 2000);
+    } else {
+      setBodyCopyFailed(true);
+      setBodyCopied(false);
+      setTimeout(() => setBodyCopyFailed(false), 2500);
+    }
+  }
+
   function getUploadButtonLabel(): string {
     if (!memo) return '';
     switch (memo.github_status) {
@@ -100,6 +117,29 @@ export default function MemoDetailScreen() {
       {/* 本文 */}
       <View style={styles.section}>
         <Text style={styles.bodyText}>{memo.body}</Text>
+        {memo.body.trim() ? (
+          <TouchableOpacity
+            style={styles.copyBodyBtn}
+            onPress={handleCopyBody}
+            accessibilityRole="button"
+            accessibilityLabel="本文をコピー"
+          >
+            <Text
+              style={[
+                styles.copyBodyBtnText,
+                bodyCopyFailed && styles.copyBodyBtnTextFailed,
+              ]}
+            >
+              {bodyCopied
+                ? 'コピーしました ✓'
+                : bodyCopyFailed
+                  ? 'コピーできませんでした'
+                  : '本文をコピー'}
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <Text style={styles.copyBodyEmptyText}>本文がありません</Text>
+        )}
       </View>
 
       {/* メタ情報 */}
@@ -201,6 +241,18 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   bodyText: { fontSize: 16, color: '#111827', lineHeight: 26 },
+  copyBodyBtn: {
+    marginTop: 12,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+    alignItems: 'center',
+  },
+  copyBodyBtnText: { fontSize: 13, fontWeight: '600', color: '#2563EB' },
+  copyBodyBtnTextFailed: { color: '#DC2626' },
+  copyBodyEmptyText: { marginTop: 10, fontSize: 12, color: '#9CA3AF' },
   metaSection: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,

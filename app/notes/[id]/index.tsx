@@ -37,7 +37,9 @@ export default function NoteDetailScreen() {
   const db = useSQLiteContext();
   const [note, setNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
+  const [promptCopied, setPromptCopied] = useState(false);
+  const [bodyCopied, setBodyCopied] = useState(false);
+  const [bodyCopyFailed, setBodyCopyFailed] = useState(false);
 
   const loadNote = useCallback(async () => {
     if (!id) {
@@ -114,10 +116,24 @@ export default function NoteDetailScreen() {
     if (!note) return;
     const ok = await copyToClipboard(buildChatGptPrompt(note.type));
     if (ok) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setPromptCopied(true);
+      setTimeout(() => setPromptCopied(false), 2000);
     } else {
       showMessage('コピーできませんでした', 'この環境ではクリップボードを使用できません。');
+    }
+  }
+
+  async function handleCopyBody() {
+    if (!note || !note.body.trim()) return;
+    const ok = await copyToClipboard(note.body);
+    if (ok) {
+      setBodyCopied(true);
+      setBodyCopyFailed(false);
+      setTimeout(() => setBodyCopied(false), 2000);
+    } else {
+      setBodyCopyFailed(true);
+      setBodyCopied(false);
+      setTimeout(() => setBodyCopyFailed(false), 2500);
     }
   }
 
@@ -163,6 +179,29 @@ export default function NoteDetailScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>本文プレビュー</Text>
         <MarkdownPreview markdown={note.body || '（本文なし）'} />
+        {note.body.trim() ? (
+          <TouchableOpacity
+            style={styles.copyBodyBtn}
+            onPress={handleCopyBody}
+            accessibilityRole="button"
+            accessibilityLabel="本文をコピー"
+          >
+            <Text
+              style={[
+                styles.copyBodyBtnText,
+                bodyCopyFailed && styles.copyBodyBtnTextFailed,
+              ]}
+            >
+              {bodyCopied
+                ? '本文をコピーしました ✓'
+                : bodyCopyFailed
+                  ? '本文をコピーできませんでした'
+                  : '本文をコピー'}
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <Text style={styles.hint}>本文がありません</Text>
+        )}
       </View>
 
       <View style={styles.section}>
@@ -188,7 +227,7 @@ export default function NoteDetailScreen() {
 
       <TouchableOpacity style={styles.promptBtn} onPress={handleCopyPrompt}>
         <Text style={styles.promptBtnText}>
-          {copied ? 'コピーしました ✓' : 'ChatGPT整理プロンプトをコピー'}
+          {promptCopied ? 'コピーしました ✓' : 'ChatGPT整理プロンプトをコピー'}
         </Text>
       </TouchableOpacity>
 
@@ -267,6 +306,17 @@ const styles = StyleSheet.create({
   metaSection: { gap: 0 },
   sectionTitle: { fontSize: 14, fontWeight: '600', color: '#111827' },
   hint: { fontSize: 12, color: '#9CA3AF' },
+  copyBodyBtn: {
+    marginTop: 4,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+    alignItems: 'center',
+  },
+  copyBodyBtnText: { fontSize: 13, fontWeight: '600', color: '#2563EB' },
+  copyBodyBtnTextFailed: { color: '#DC2626' },
   exportBtn: {
     paddingVertical: 12,
     borderRadius: 8,
