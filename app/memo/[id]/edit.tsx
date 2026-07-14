@@ -16,6 +16,8 @@ import FormFooterBar, {
   inputAccessoryProps,
 } from '../../../src/components/FormFooterBar';
 import NativeHeaderBackButton from '../../../src/components/NativeHeaderBackButton';
+import ListStateView from '../../../src/components/ListStateView';
+import { showMessage } from '../../../src/utils/dialog';
 import type { CategoryKey } from '../../../src/features/memos/memoCategories';
 
 const FOOTER_ACCESSORY_ID = 'memo-edit-footer';
@@ -26,26 +28,46 @@ export default function MemoEditScreen() {
   const [body, setBody] = useState('');
   const [category, setCategory] = useState<CategoryKey>('inbox');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [notFound, setNotFound] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [saving, setSaving] = useState(false);
   const [currentGithubStatus, setCurrentGithubStatus] = useState<
     'not_uploaded' | 'uploaded' | 'modified_after_upload' | 'failed'
   >('not_uploaded');
   const inputRef = useRef<TextInput>(null);
 
+  // 読み込み失敗（例外）・該当なし（取得成功・null）・取得成功を区別する。
+  // アンマウント後に古い取得が状態を更新しないよう active フラグで保護する。
   useEffect(() => {
-    if (!id) return;
-    getMemoById(db, id).then((memo) => {
-      if (memo) {
-        setBody(memo.body);
-        setCategory(memo.category as CategoryKey);
-        setCurrentGithubStatus(memo.github_status);
+    let active = true;
+    setLoading(true);
+    setLoadError(false);
+    setNotFound(false);
+    (async () => {
+      try {
+        const memo = id ? await getMemoById(db, id) : null;
+        if (!active) return;
+        if (memo) {
+          setBody(memo.body);
+          setCategory(memo.category as CategoryKey);
+          setCurrentGithubStatus(memo.github_status);
+        } else {
+          setNotFound(true);
+        }
+      } catch {
+        if (active) setLoadError(true);
+      } finally {
+        if (active) setLoading(false);
       }
-      setLoading(false);
-    });
-  }, [id, db]);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [id, db, reloadKey]);
 
   async function handleSave() {
-    if (!id || !body.trim()) return;
+    if (!id || !body.trim() || saving) return;
     setSaving(true);
     try {
       await updateMemo(
@@ -54,8 +76,13 @@ export default function MemoEditScreen() {
         currentGithubStatus
       );
       router.back();
-    } catch {
+    } catch (error) {
+      // 失敗時は保存中を解除し文字で通知（本文・カテゴリは維持して再保存可能にする）。
       setSaving(false);
+      showMessage(
+        '保存できませんでした',
+        error instanceof Error ? error.message : String(error)
+      );
     }
   }
 
@@ -64,11 +91,18 @@ export default function MemoEditScreen() {
     <NativeHeaderBackButton fallback={id ? `/memo/${id}` : '/'} />
   );
 
-  if (loading) {
+  // loading／読み込み失敗＋再試行／該当なし の各状態でも「← 戻る」（Stack.Screen headerLeft）を維持する。
+  if (loading || loadError || notFound) {
     return (
-      <View style={styles.center}>
+      <View style={styles.container}>
         <Stack.Screen options={{ headerLeft: editHeaderLeft }} />
-        <ActivityIndicator size="large" color="#2563EB" />
+        {loading ? (
+          <ListStateView status="loading" />
+        ) : loadError ? (
+          <ListStateView status="error" onRetry={() => setReloadKey((k) => k + 1)} />
+        ) : (
+          <ListStateView status="empty" emptyMessage="メモが見つかりません" />
+        )}
       </View>
     );
   }

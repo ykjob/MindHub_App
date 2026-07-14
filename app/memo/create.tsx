@@ -14,6 +14,7 @@ import CategorySelector from '../../src/components/CategorySelector';
 import FormFooterBar, {
   inputAccessoryProps,
 } from '../../src/components/FormFooterBar';
+import { showMessage } from '../../src/utils/dialog';
 import type { CategoryKey } from '../../src/features/memos/memoCategories';
 
 const FOOTER_ACCESSORY_ID = 'memo-create-footer';
@@ -27,13 +28,19 @@ export default function MemoCreateScreen() {
 
   async function handleSave() {
     const trimmed = body.trim();
-    if (!trimmed) return;
+    if (!trimmed || saving) return;
     setSaving(true);
     try {
       const memo = await createMemo(db, { body: trimmed, category });
       router.replace(`/memo/${memo.id}`);
-    } catch {
+    } catch (error) {
+      // 失敗時は保存中を解除し文字で通知（入力本文・カテゴリは維持して再保存可能にする）。
+      // notes作成・編集と同じ通知形式（showMessage）に整合させる。
       setSaving(false);
+      showMessage(
+        '保存できませんでした',
+        error instanceof Error ? error.message : String(error)
+      );
     }
   }
 

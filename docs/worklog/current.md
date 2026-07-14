@@ -1,6 +1,52 @@
 # 最新作業ログ
 
-最終更新：2026-07-15（バッチ6B-1＝確認ダイアログのWeb対応。前日：バッチ6A補足＝詳細・編集4画面のWeb戻るボタンほか＝下記の別記録）
+最終更新：2026-07-15（バッチ6B-2＝さくっとメモの読み込み・保存状態処理。同日：バッチ6B-1＝確認ダイアログのWeb対応ほか＝下記の別記録）
+
+## Phase 15 バッチ6B-2：さくっとメモの読み込み・保存状態処理（2026-07-15、未コミット）
+
+### 今回の目的
+
+横断調査（バッチ6A）のA項目のうち、さくっとメモの**保存失敗の無反応**と**読み込み例外時のローディング固着・エラーと該当なしの混同**を解消する。対象はさくっとメモ3画面のみ（`app/memo/create.tsx`・`app/memo/[id]/index.tsx`・`app/memo/[id]/edit.tsx`）。コピー中状態・現場適応の二重保存・Safe Area bottom・アクセシビリティ横断は非対象。
+
+### 修正前の問題
+
+* 作成（`memo/create`）・編集（`memo/[id]/edit`）：`createMemo`/`updateMemo` 失敗時に `setSaving(false)` だけで**利用者通知なし＝保存失敗が無反応**
+* 詳細（`memo/[id]/index`）：`getMemoById` が例外を投げるとローディングが終了しない可能性。取得成功・null（該当なし）と読み込み失敗が同一表示
+* 編集：読み込み失敗でローディング固着の可能性。取得成功・該当なしでも空の編集フォームを表示
+
+### 変更したファイル
+
+* 実装：`app/memo/create.tsx`・`app/memo/[id]/index.tsx`・`app/memo/[id]/edit.tsx`（3画面のみ）
+* 文書：`10` §20（STATE-01/02/03へ部分適用注記）・`28` §16（UX-13）・`30` §8.6.2（新設）・§8.5.3（読み込みエラー後続対象→対応済みへ）・`11` §16・`current-tasks.md`・本ファイル
+
+### 実装内容
+
+* **保存失敗通知（作成・編集）**：`handleSave` の catch で `setSaving(false)` ＋ `showMessage('保存できませんでした', error instanceof Error ? error.message : String(error))`（notes作成・編集と同形式）。`saving` 中は再実行しない（`if (... || saving) return`）。保存本体（`createMemo`/`updateMemo`）・成功時遷移（作成→`router.replace('/memo/${memo.id}')`、編集→`router.back()`）は無変更。失敗時も入力本文・カテゴリを維持し再保存可能
+* **詳細の読み込み状態**：`loadError`・`reloadKey` を追加。`useFocusEffect`＋`useCallback([id, db, reloadKey])` 内で `active` フラグ＋try/catch/finally。成功で `setMemo(result)`（null＝該当なし）、例外で `setLoadError(true)`、finallyで `setLoading(false)`。描画は loading→`ListStateView status="loading"`／loadError→`status="error"`＋`onRetry=reloadKey++`／`!memo`→`status="empty" emptyMessage="メモが見つかりません"`。**読み込み失敗と該当なしを別表示**にし、失敗は「データが消えた」と断定しない（ListStateViewのerror文言は「データが消えたわけではありません。再試行してください。」）
+* **詳細のアップロード後再取得**：`handleUpload` の finally が呼ぶ再取得を `reloadMemo`（try/catchで内包し失敗しても未処理rejectionを出さず、現在表示を保持＝画面全体をエラーに倒さない）へ変更。アップロード成功/失敗とも `setUploading(false)` 後に再取得しGitHubステータス表示を更新。`uploadMemo` 本体・エラー文言は無変更
+* **編集の読み込み状態**：`loadError`・`notFound`・`reloadKey` を追加。`useEffect([id, db, reloadKey])` 内で `active` フラグ＋try/catch/finally。メモあり→body/category/currentGithubStatus設定、null→`setNotFound(true)`（**空フォームを表示しない**）、例外→`setLoadError(true)`。描画は loading/loadError/notFound を1つの分岐でまとめ、各状態で `<Stack.Screen options={{ headerLeft: editHeaderLeft }} />`（動的Web戻るボタン）を必ずレンダリング＋`ListStateView`（loading/error＋再試行/empty「メモが見つかりません」）。タイトル「メモ編集」・動的fallback（`/memo/${id}`）は不変
+* `ListStateView` 本体・`memoRepository`・`memoService`・`dialog.ts`・ルート・DBは無変更（`showMessage` の既存利用のみ）
+
+### 検証結果
+
+* `npx tsc --noEmit` 合格・`git diff --check` 問題なし・変更は3画面のみ
+* ヘッドレスChrome実操作（puppeteer-coreはscratchpad隔離・使い捨てuser-data-dir＝使い捨てブラウザ内DB・ポート8102新規サーバー）：
+  * 正常系＋該当なし＋6幅（`verify_memo_state`）：**44項目すべて合格・コンソールエラー0件**。作成→保存→詳細→編集→保存→詳細（本文更新反映）／`/memo/<存在しないID>`＝「メモが見つかりません」（load-error表示ではない）／同edit＝空フォーム非表示・「← 戻る」・タイトル維持／6幅で横スクロールなし
+  * 実例外注入（`inject_fail`）：**29項目すべて合格**。React fiber経由で live DB を取得し、`getFirstAsync`（読み込み失敗）／`runAsync`（保存失敗）を**テスト時だけ一時差し替え**て例外を再現（本番コードに失敗分岐を追加していない）。詳細・編集の読み込み失敗→「読み込みに失敗しました」＋再試行→復旧、編集は戻るボタン維持・空フォーム非表示。作成・編集の保存失敗→「保存できませんでした」・保存中解除・本文/カテゴリ維持・未処理Promise rejectionなし・復旧後の再保存成功
+  * 該当なし詳細/編集の390幅スクリーンショットを目視（「← 戻る メモ編集」＋中央「メモが見つかりません」・空フォームなし）
+
+### 未確認・後続
+
+* **Android実機・TalkBack・文字サイズ最大は未確認**（最終APK）。Gate 6・HEADER-02全体は未完了
+* 本バッチ非対象（後続）：記録確認（notes）詳細のload-error/not-found分離（現状は notes/[id] も未分離）／コピー結果のStatusMessage統一・コピー二重操作防止・timer cleanup（STATE-03/04）／現場適応の二重保存防止／Safe Area bottom（FormFooterBar）／アクセシビリティ横断／全 `Alert.alert` 整理
+
+### やっていないこと（今回の非対象）
+
+commit・push・versionCode変更・EAS/APKビルド・Android実機確認・TalkBack確認・文字サイズ最大確認／コピー二重操作防止・timer cleanup・WorkplaceSceneForm保存修正・FormFooterBar下部余白・44相当タッチ領域修正・アクセシビリティ横断／DBスキーマ・`memoRepository`・`memoService`・保存/取得本体・ルート・`NativeHeaderBackButton`・`AppHeader`・`ListStateView` 大規模変更・`ConfirmDialog`・`dialog.ts`・コピー状態・現場適応・記録確認・プロンプト集・依存・app.json/eas.json/package.jsonの変更
+
+---
+
+
 
 ## Phase 15 バッチ6B-1：確認ダイアログのWeb対応（2026-07-15、未コミット）
 

@@ -17,6 +17,7 @@ import { uploadMemo } from '../../../src/features/github/githubUploadService';
 import type { Memo } from '../../../src/features/memos/memoTypes';
 import { getCategoryLabel } from '../../../src/features/memos/memoCategories';
 import SyncStatusBadge from '../../../src/components/SyncStatusBadge';
+import ListStateView from '../../../src/components/ListStateView';
 import { showConfirmDialog } from '../../../src/components/ConfirmDialog';
 import { copyToClipboard } from '../../../src/utils/clipboard';
 import { formatDisplayDate } from '../../../src/utils/date';
@@ -26,23 +27,44 @@ export default function MemoDetailScreen() {
   const db = useSQLiteContext();
   const [memo, setMemo] = useState<Memo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [bodyCopied, setBodyCopied] = useState(false);
   const [bodyCopyFailed, setBodyCopyFailed] = useState(false);
 
-  async function loadMemo() {
-    if (!id) return;
-    const result = await getMemoById(db, id);
-    setMemo(result);
-    setLoading(false);
-  }
-
+  // 主読み込み。例外は握りつぶさず loadError に分岐し、取得成功でnullは「該当なし」として扱う。
+  // フォーカス解除・アンマウント後に古い取得が状態を更新しないよう active フラグで保護する。
   useFocusEffect(
     useCallback(() => {
+      let active = true;
       setLoading(true);
-      loadMemo();
-    }, [id, db])
+      setLoadError(false);
+      (async () => {
+        try {
+          const result = id ? await getMemoById(db, id) : null;
+          if (active) setMemo(result);
+        } catch {
+          if (active) setLoadError(true);
+        } finally {
+          if (active) setLoading(false);
+        }
+      })();
+      return () => {
+        active = false;
+      };
+    }, [id, db, reloadKey])
   );
+
+  // アップロード後などの再取得。失敗しても未処理rejectionを出さず、現在表示は保持する（画面全体は落とさない）。
+  async function reloadMemo() {
+    if (!id) return;
+    try {
+      setMemo(await getMemoById(db, id));
+    } catch {
+      // 再取得失敗は非致命（GitHubステータス表示が更新されないだけ）。エラー画面へは倒さない。
+    }
+  }
 
   async function handleUpload() {
     if (!id) return;
@@ -56,7 +78,7 @@ export default function MemoDetailScreen() {
       );
     } finally {
       setUploading(false);
-      await loadMemo();
+      await reloadMemo();
     }
   }
 
@@ -97,19 +119,18 @@ export default function MemoDetailScreen() {
   }
 
   if (loading) {
+    return <ListStateView status="loading" />;
+  }
+
+  // 読み込み失敗（例外）と該当なし（取得成功・null）を別表示にする。失敗はデータ消失と断定しない。
+  if (loadError) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2563EB" />
-      </View>
+      <ListStateView status="error" onRetry={() => setReloadKey((k) => k + 1)} />
     );
   }
 
   if (!memo) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>メモが見つかりません</Text>
-      </View>
-    );
+    return <ListStateView status="empty" emptyMessage="メモが見つかりません" />;
   }
 
   return (
