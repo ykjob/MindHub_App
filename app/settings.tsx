@@ -12,6 +12,7 @@ import {
 import { useSQLiteContext } from 'expo-sqlite';
 import { getGitHubSettings, saveGitHubSettings } from '../src/features/github/githubSettings';
 import { getToken, saveToken, deleteToken } from '../src/features/github/githubTokenStore';
+import { confirmDialog } from '../src/utils/dialog';
 
 export default function SettingsScreen() {
   const db = useSQLiteContext();
@@ -69,19 +70,21 @@ export default function SettingsScreen() {
     }
   }
 
-  async function handleDeleteToken() {
-    Alert.alert('トークン削除', 'GitHubトークンを削除しますか？', [
-      { text: 'キャンセル', style: 'cancel' },
-      {
-        text: '削除',
-        style: 'destructive',
-        onPress: async () => {
-          await deleteToken();
-          setHasToken(false);
-          Alert.alert('削除しました', 'GitHubトークンを削除しました');
-        },
+  function handleDeleteToken() {
+    // 複数ボタン確認は共通の confirmDialog に統一（Web=window.confirm／Android・iOS=Alert.alert）。
+    // ※WebではGitHubトークン保存が非対応（getToken/saveToken/deleteTokenはWebで無効）のため、
+    //   通常のWeb UIではこの削除ボタン自体が表示されない。ここは主にAndroid/iOS経路の整合修正。
+    confirmDialog({
+      title: 'トークン削除',
+      message: 'GitHubトークンを削除しますか？',
+      confirmLabel: '削除',
+      cancelLabel: 'キャンセル',
+      onConfirm: async () => {
+        await deleteToken();
+        setHasToken(false);
+        Alert.alert('削除しました', 'GitHubトークンを削除しました');
       },
-    ]);
+    });
   }
 
   if (loading) {

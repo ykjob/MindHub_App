@@ -1,6 +1,54 @@
 # 最新作業ログ
 
-最終更新：2026-07-14（バッチ6A補足＝詳細・編集4画面のWeb戻るボタン。同日：画面文言・Webヘッダー修正バッチ／バッチ5＝プロンプト集改修ほか＝下記の別記録）
+最終更新：2026-07-15（バッチ6B-1＝確認ダイアログのWeb対応。前日：バッチ6A補足＝詳細・編集4画面のWeb戻るボタンほか＝下記の別記録）
+
+## Phase 15 バッチ6B-1：確認ダイアログのWeb対応（2026-07-15、未コミット）
+
+### 今回の目的
+
+横断調査（バッチ6A）で挙げた実害A項目のうち、**さくっとメモ削除の確認ダイアログがWebで正常に機能しない**問題を解消する。確認ダイアログの2実装を整理し、Web=`window.confirm`／Android・iOS=`Alert.alert` の環境差を1箇所に集約する。戻る/保存/コピー状態・Safe Area・a11y横断は本バッチ非対象。
+
+### 修正前の確認ダイアログ実装
+
+* `src/utils/dialog.ts` の `confirmDialog`：Web=`window.confirm`／native=`Alert.alert`（Web対応済み）。ただし引数は `title/message/confirmLabel/onConfirm` で `cancelLabel` 非対応。記録確認詳細（`notes/[id]`）のアーカイブ確認で使用
+* `src/components/ConfirmDialog.tsx` の `showConfirmDialog`：全環境で `Alert.alert` を直接使用（2ボタン）。**さくっとメモ詳細（`app/memo/[id]/index.tsx`）の削除確認**で使用＝RN Webで複数ボタン非対応のためWeb機能不全
+* `app/settings.tsx` のトークン削除：複数ボタン `Alert.alert` を直接使用（WebはGitHubトークン保存非対応＝削除ボタン自体が非表示）
+
+### 変更したファイル
+
+* 実装：`src/utils/dialog.ts`（`confirmDialog` に `cancelLabel` 追加・Web制約コメント）・`src/components/ConfirmDialog.tsx`（`confirmDialog` への委譲ラッパー化）・`app/settings.tsx`（トークン削除を `confirmDialog` へ）
+* 文書：`11` §16・`29` §12（二重実装＝解決へ・誤記修正）・`30` §8.6.1（新設）・§10（誤記修正＋解決）・`current-tasks.md`・本ファイル
+
+### 実装内容
+
+* **`dialog.ts` を確認ダイアログの正本に**：`confirmDialog` に `cancelLabel?` を追加。Web＝`window.confirm(\`${title}\n\n${message}\`)`（確認→`onConfirm`／キャンセル→何もしない）。Android・iOS＝`Alert.alert` で cancel（`cancelLabel ?? 'キャンセル'`・`style='cancel'`）と confirm（`confirmLabel ?? 'OK'`・`style='destructive'`・押下時のみ `onConfirm`）。**Webの制約**（`window.confirm` はボタン文言変更不可＝`confirmLabel`/`cancelLabel` はWebで無視。ブロッキングのため二重表示なし）をコードコメントに明記
+* **`ConfirmDialog.tsx` を互換ラッパー化**：`showConfirmDialog({title,message,confirmLabel='削除',cancelLabel='キャンセル',onConfirm})` の**API・引数・関数名を維持**したまま、内部で `confirmDialog(...)` を呼ぶだけに変更。`Alert` import 削除。ファイル削除・名称変更・大規模リファクタはしない。既存呼び出し側（さくっとメモ削除）は無変更でWeb対応になる
+* **さくっとメモ削除（`memo/[id]/index.tsx`）**：呼び出し側は無変更（互換ラッパー経由でWeb対応）。削除処理 `deleteMemo(db, id)`・`router.replace('/')` も無変更。`window.confirm` はブロッキングのため多重表示・二重削除は起きない
+* **設定トークン削除（`settings.tsx`）**：`handleDeleteToken` の2ボタン `Alert.alert` を `confirmDialog`（title「トークン削除」/message「GitHubトークンを削除しますか？」/confirmLabel「削除」/cancelLabel「キャンセル」）へ置換。確認後の `await deleteToken()`→`setHasToken(false)`→削除完了Alertは維持。単一ボタンの保存成功/失敗Alertは無変更。**WebのGitHubトークン保存対応・SecureStore・`githubTokenStore.ts`・トークン入力/設定保存仕様は無変更**
+
+### 検証結果
+
+* `npx tsc --noEmit` 合格・`git diff --check` 問題なし
+* ヘッドレスChrome実操作（puppeteer-coreはscratchpad隔離・使い捨てuser-data-dir＝使い捨てブラウザ内DB・ポート8101新規サーバー・`window.confirm` は `page.on('dialog')` で捕捉）：**自動確認16項目すべて合格・コンソールエラー0件**
+  * さくっとメモ削除キャンセル：削除ボタン→`window.confirm` 表示→キャンセル→メモ削除されず詳細に残る→ホームでも一覧に残存
+  * さくっとメモ削除確認：削除ボタン→`window.confirm`→確認→`deleteMemo`→ホームへ→削除したメモが一覧に残らない
+  * `window.confirm` のメッセージにタイトル「メモを削除」＋本文「このメモを削除しますか？この操作は元に戻せません。」の両方が含まれる
+  * 設定画面：`/settings` 正常表示（GitHub連携設定・設定を保存）・**トークン削除ボタンはWebで非表示**（`hasToken` false＝既存仕様。不具合ではない）・強制表示の本番コード変更なし
+* Android/iOSの `Alert.alert` 経路（cancel/destructive・確認押下時のみ `onConfirm`）は**コード確認のみ**
+
+### 未確認・後続
+
+* **Android実機・TalkBack・文字サイズ最大は未確認**（最終APK）。ダイアログのAlert読み上げ・destructive表示も最終APKで確認
+* 誤記修正：`11` §16・`29` §12・`30` §10 の「memo詳細のアーカイブ確認」→実態「さくっとメモ詳細（`memo/[id]`）の削除確認」（アーカイブは `notes/[id]` 側で元からWeb対応）
+* 本バッチ非対象（後続）：メモ詳細・編集の読み込み例外時ローディング固着（STATE系）／保存失敗の無反応（memo作成・編集。STATE系）／保存・コピー結果のStatusMessage統一・二重操作防止横断／Safe Area bottom／アクセシビリティ横断／全 `Alert.alert` の置換
+
+### やっていないこと（今回の非対象）
+
+commit・push・versionCode変更・EAS/APKビルド・Android実機確認・TalkBack確認・文字サイズ最大確認／`ConfirmDialog.tsx` の削除・全 `Alert.alert` 置換／保存・コピー状態修正・読み込みエラー修正・Safe Area bottom修正・アクセシビリティ横断修正／DB・削除処理本体・設定保存処理・GitHubトークンのWeb保存対応・`githubTokenStore.ts`・ルート・`NativeHeaderBackButton`・`AppHeader`・依存・app.json/eas.json/package.jsonの変更
+
+---
+
+
 
 ## Phase 15 バッチ6A補足：詳細・編集4画面のWeb戻るボタン（2026-07-14、未コミット）
 

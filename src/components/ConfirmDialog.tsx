@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { confirmDialog } from '../utils/dialog';
 
 interface Options {
   title: string;
@@ -8,6 +8,10 @@ interface Options {
   onConfirm: () => void;
 }
 
+// 既存API互換の薄いラッパー。確認ダイアログの実体は src/utils/dialog.ts の confirmDialog に集約し、
+// 環境差（Web=window.confirm／Android・iOS=Alert.alert）はそこで吸収する。
+// 既存の showConfirmDialog 呼び出し側（さくっとメモ削除など）はそのままWeb対応になる。
+// 【Webの制約】window.confirm はボタン文言を変更できないため confirmLabel/cancelLabel はWebでは反映されない。
 export function showConfirmDialog({
   title,
   message,
@@ -15,8 +19,5 @@ export function showConfirmDialog({
   cancelLabel = 'キャンセル',
   onConfirm,
 }: Options): void {
-  Alert.alert(title, message, [
-    { text: cancelLabel, style: 'cancel' },
-    { text: confirmLabel, style: 'destructive', onPress: onConfirm },
-  ]);
+  confirmDialog({ title, message, confirmLabel, cancelLabel, onConfirm });
 }
