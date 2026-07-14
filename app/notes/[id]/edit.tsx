@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, Stack } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import NoteForm from '../../../src/components/NoteForm';
+import NativeHeaderBackButton from '../../../src/components/NativeHeaderBackButton';
 import { getNoteById } from '../../../src/features/notes/noteRepository';
 import { updateNote } from '../../../src/features/notes/noteService';
 import type { Note, NoteInput } from '../../../src/features/notes/noteTypes';
@@ -48,9 +49,15 @@ export default function NoteEditScreen() {
     }
   }
 
+  // 編集画面の戻る先は対応する詳細画面（動的ID）。直アクセス時はここへ戻す（履歴があればback）。
+  const editHeaderLeft = () => (
+    <NativeHeaderBackButton fallback={id ? `/notes/${id}` : '/notes'} />
+  );
+
   if (loading) {
     return (
       <View style={styles.center}>
+        <Stack.Screen options={{ headerLeft: editHeaderLeft }} />
         <ActivityIndicator size="large" color="#2563EB" />
       </View>
     );
@@ -59,13 +66,16 @@ export default function NoteEditScreen() {
   if (!note) {
     return (
       <View style={styles.center}>
+        <Stack.Screen options={{ headerLeft: editHeaderLeft }} />
         <Text style={styles.errorText}>メモが見つかりません</Text>
       </View>
     );
   }
 
   return (
-    <NoteForm
+    <>
+      <Stack.Screen options={{ headerLeft: editHeaderLeft }} />
+      <NoteForm
       initial={{
         title: note.title,
         body: note.body,
@@ -80,7 +90,8 @@ export default function NoteEditScreen() {
       saveLabel="更新"
       onSave={handleSave}
       onCancel={() => router.back()}
-    />
+      />
+    </>
   );
 }
 

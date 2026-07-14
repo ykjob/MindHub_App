@@ -276,7 +276,28 @@ Web戻るボタン（当初3画面：`/memo/create`・`/notes/create`・`/settin
 * [x] 直アクセス（`/workplace/{start,stuck,question,report,end}`）：「← 戻る」表示・押下で `/workplace` へ移動・クラッシュなし・無反応にならない
 * [x] `/workplace/start?fromRestart=1`：クエリはロード後も保持・「← 戻る」視認・（直アクセスは）fallbackで `/workplace`。履歴ありの戻るは route/クエリに依存しない `router.back()` で前画面へ戻る（初期入力・引き継ぎ内容・保存/コピー処理は無変更）
 * [x] 幅別：5画面すべてを390/1024、タイトルが長めの `/workplace/stuck`・`/workplace/report` を6幅（360/390/412/480/768/1024）で確認（back右端48px・タイトル左端56px＝重なりなし・切れなし・ヘッダー横はみ出しなし・本文レイアウト維持）。390幅で5画面のヘッダーをスクリーンショット保存・目視
-* 未実施：Android実機・TalkBack・文字サイズ最大（`11` §16。HEADER-02全体は完了扱いにしない）。今回対象外の画面（`/memo/[id]`・`/memo/[id]/edit`・`/notes/[id]`・`/notes/[id]/edit`）は未変更で、直アクセス時に戻るボタンが無い挙動は従来どおり
+* 未実施：Android実機・TalkBack・文字サイズ最大（`11` §16。HEADER-02全体は完了扱いにしない）。この時点で `/memo/[id]`・`/memo/[id]/edit`・`/notes/[id]`・`/notes/[id]/edit` は未変更（直アクセス時に戻るボタン無し）だったが、**その後 §8.5.3（バッチ6A補足）でこの4画面も修正＝`headerLeft` 対象は計12画面**
+
+### 8.5.3 詳細・編集4画面へのWeb戻るボタン適用（2026-07-14 バッチ6A補足）
+
+横断調査（バッチ6A）で「履歴経由が主なので影響は限定的」と評価された `/memo/[id]`・`/memo/[id]/edit`・`/notes/[id]`・`/notes/[id]/edit` を再確認した結果、**当初8画面と同一のネイティブStackヘッダーのマスク画像戻るボタン**を使用しており、**履歴あり遷移でも同じ視認性不安定・直アクセス時は戻るボタン自体が未描画（行き止まり）**を再現（実データのメモ・記録を作成し、ホーム→詳細→編集の履歴経路と実在IDの直アクセスの両方で確認）。**判定＝A（再現）**。既に8画面を修正した方針との整合から、直アクセスの行き止まりを残さず4画面も修正した。同じ `NativeHeaderBackButton` を再利用し `headerLeft` 対象は**計12画面**。使い捨てブラウザ内DB・ポート8100新規サーバー・ヘッドレスChrome自動確認 **53項目すべて合格・コンソールエラー0件**。
+
+fallback方針（詳細＝静的／編集＝対応する詳細への動的ID）：
+
+| 画面 | fallback | 設定場所 |
+|---|---|---|
+| `/memo/[id]` | `/`（ホーム） | `app/_layout.tsx` の `headerLeft`（静的） |
+| `/memo/[id]/edit` | `/memo/[id]`（対応する詳細） | 画面内 `<Stack.Screen options>`＋`useLocalSearchParams` の id（動的） |
+| `/notes/[id]` | `/notes` | `app/_layout.tsx` の `headerLeft`（静的） |
+| `/notes/[id]/edit` | `/notes/[id]`（対応する詳細） | 画面内 `<Stack.Screen options>`＋id（動的） |
+
+* [x] 履歴あり（ホーム→詳細→編集）：4画面ともテキスト「← 戻る」が視認・タイトル（メモ詳細／メモ編集）と重ならない・二重ヘッダーなし。編集の「← 戻る」で対応する詳細へ、詳細の「← 戻る」でホーム／`/notes` へ戻る
+* [x] 直アクセス（実在ID）：4画面とも「← 戻る」表示・押下で指定fallbackへ移動（詳細→`/`・`/notes`、編集→`/memo/<id>`・`/notes/<id>`＝**編集のfallbackに正しいIDが入る**）・クラッシュ/無反応なし
+* [x] タイトル維持：`/memo/[id]`・`/notes/[id]`＝メモ詳細、`/memo/[id]/edit`・`/notes/[id]/edit`＝メモ編集（短縮・変更なし。in-component `<Stack.Screen>` でも `_layout` のtitleが保持されることを確認）
+* [x] 幅別：4画面を6幅（360/390/412/480/768/1024）で back視認・タイトル非重複・タイトル未クリップ・ヘッダー横はみ出しなし。390幅でスクリーンショット保存・目視
+* [x] 既存8画面（`/settings`・`/memo/create`・`/notes/create`・現場適応5画面）は無変更（`_layout` diffで確認）
+* 未実施：Android実機・TalkBack・文字サイズ最大（`11` §16。HEADER-02全体は完了扱いにしない）
+* **後続対象**：メモ詳細（`/memo/[id]`）・メモ編集（`/memo/[id]/edit`）の読み込み例外時にローディングが終わらない可能性は、本補足では変更せず**後続の保存・状態バッチ（STATE系）で対応**（`loadMemo`・`getMemoById`・loading/error・保存/コピー/削除/アーカイブは無変更）
 
 ## 9. 状態別検証
 
@@ -378,7 +399,7 @@ TalkBack確認対象（`29` §8）。
 * **大きな問題なし**。起動・主要4画面・AppHeader・戻る操作・既存機能に致命的問題なし
 * バッチ1（テーマ＋共通部品＋AppHeader 4画面）はAndroid実機上でも大きな問題なしとして扱う
 * この記録はHEADER-02の「Android実機で大きな問題なし」までの記録であり、UX-01〜UX-16の完了判定（§14）は変更しない。Phase 15全体の最終判定は後続レビュー（Gate 6〜7）で行う
-* 追加所見：(1) 軽量メモ詳細・メモ管理詳細に本文コピー導線が必要 → DETAIL-01として2026-07-14に実装済み（`10-tasks.md` DETAIL節） (2) Web表示で戻るボタンが見えない所見あり → **切り分けの結果、原因はネイティブStackヘッダーのマスク画像戻るボタンで、直アクセス時は未描画。2026-07-14「画面文言・Webヘッダー修正」バッチで当初3画面（`/memo/create`・`/notes/create`・`/settings`）にテキスト「← 戻る」の `headerLeft`（履歴なしはfallback）を設定してWeb修正済み（§8.5.1）。同日追加で、同じ問題が確認された現場適応5入力画面（`/workplace/start`・`/stuck`・`/question`・`/report`・`/end`。fallback＝`/workplace`）にも適用し `headerLeft` 対象は計8画面に拡大（§8.5.2）。画面内AppHeaderのテキスト戻るは元から視認可。Android実機・TalkBack・HEADER-02全体は未確認のまま（`11` §16）**
+* 追加所見：(1) 軽量メモ詳細・メモ管理詳細に本文コピー導線が必要 → DETAIL-01として2026-07-14に実装済み（`10-tasks.md` DETAIL節） (2) Web表示で戻るボタンが見えない所見あり → **切り分けの結果、原因はネイティブStackヘッダーのマスク画像戻るボタンで、直アクセス時は未描画。2026-07-14「画面文言・Webヘッダー修正」バッチで当初3画面（`/memo/create`・`/notes/create`・`/settings`）にテキスト「← 戻る」の `headerLeft`（履歴なしはfallback）を設定してWeb修正済み（§8.5.1）。同日追加で、同じ問題が確認された現場適応5入力画面（`/workplace/start`・`/stuck`・`/question`・`/report`・`/end`。fallback＝`/workplace`）にも適用し `headerLeft` 対象は計8画面に拡大（§8.5.2）。さらにバッチ6A補足で詳細・編集4画面（`/memo/[id]`・`/memo/[id]/edit`・`/notes/[id]`・`/notes/[id]/edit`）でも同問題を再現・修正し**計12画面**（§8.5.3。編集は対応する詳細への動的fallback）。画面内AppHeaderのテキスト戻るは元から視認可。Android実機・TalkBack・HEADER-02全体は未確認のまま（`11` §16）**
 * 注記：本確認時点のホームはAppHeader追加のみで、ホーム本格再構成（HOME-01〜04）は未実施
 
 #### APK確認2

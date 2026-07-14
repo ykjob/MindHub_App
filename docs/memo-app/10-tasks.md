@@ -326,7 +326,7 @@ MVP実装（2026-07-09 実装。未コミット）。
 ### HEADER（ヘッダー統一）
 
 * [x] HEADER-01 対象4画面のAppHeader適用（ホーム・メモ管理一覧・現場適応入口・プロンプト集。`29` §5.1）。依存：UI-02（2026-07-14完了・未コミット。バッチ1。ホームは既存の4ボタングリッド・一覧を維持したままAppHeader追加のみ＝本格再構成はHOME-01）
-* [ ] HEADER-02 統一項目の確認（Safe Area・タイトル・戻るフォールバック・右側操作・タッチ領域・二重表示なし。`30` §7）。依存：HEADER-01（Web確認は2026-07-14実施済み＝1280px/390px・直アクセス・戻る両経路・二重表示なし・コンソールエラー0件。Android実機はversionCode 5 APK確認1で**大きな問題なし**まで記録＝`30` §12.1。TalkBack・最終判定は後続レビューで行うため未完了のまま。保留所見：Webで戻るボタンが見えない件は、原因がネイティブStackヘッダーのマスク画像戻るボタンと特定し、テキスト「← 戻る」headerLeftで**Web修正済み**＝当初3画面（memo/create・notes/create・settings）＋同日追加の現場適応5入力画面（workplace/start・stuck・question・report・end。fallback=`/workplace`）の計8画面（2026-07-14「画面文言・Webヘッダー修正」バッチ。`30` §8.5.1・§8.5.2・`11` §16）。`/memo/[id]`・`/notes/[id]` 等は今回対象外で従来どおり。Android実機・TalkBackは未確認のためHEADER-02全体は未完了のまま）
+* [ ] HEADER-02 統一項目の確認（Safe Area・タイトル・戻るフォールバック・右側操作・タッチ領域・二重表示なし。`30` §7）。依存：HEADER-01（Web確認は2026-07-14実施済み＝1280px/390px・直アクセス・戻る両経路・二重表示なし・コンソールエラー0件。Android実機はversionCode 5 APK確認1で**大きな問題なし**まで記録＝`30` §12.1。TalkBack・最終判定は後続レビューで行うため未完了のまま。保留所見：Webで戻るボタンが見えない件は、原因がネイティブStackヘッダーのマスク画像戻るボタンと特定し、テキスト「← 戻る」headerLeftで**Web修正済み**＝当初3画面（memo/create・notes/create・settings）＋同日追加の現場適応5入力画面（workplace/start・stuck・question・report・end。fallback=`/workplace`）の計8画面（2026-07-14「画面文言・Webヘッダー修正」バッチ。`30` §8.5.1・§8.5.2・`11` §16）。さらにバッチ6A補足で詳細・編集4画面（memo/[id]・memo/[id]/edit・notes/[id]・notes/[id]/edit。編集は対応する詳細への動的fallback）も同問題を再現・修正し**計12画面**（`30` §8.5.3）。Android実機・TalkBackは未確認のためHEADER-02全体は未完了のまま）
 
 ### NOTES（メモ管理改善）
 

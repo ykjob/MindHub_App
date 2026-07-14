@@ -7,7 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, Stack } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { getMemoById } from '../../../src/features/memos/memoRepository';
 import { updateMemo } from '../../../src/features/memos/memoService';
@@ -15,6 +15,7 @@ import CategorySelector from '../../../src/components/CategorySelector';
 import FormFooterBar, {
   inputAccessoryProps,
 } from '../../../src/components/FormFooterBar';
+import NativeHeaderBackButton from '../../../src/components/NativeHeaderBackButton';
 import type { CategoryKey } from '../../../src/features/memos/memoCategories';
 
 const FOOTER_ACCESSORY_ID = 'memo-edit-footer';
@@ -58,9 +59,15 @@ export default function MemoEditScreen() {
     }
   }
 
+  // 編集画面の戻る先は対応する詳細画面（動的ID）。直アクセス時はここへ戻す（履歴があればback）。
+  const editHeaderLeft = () => (
+    <NativeHeaderBackButton fallback={id ? `/memo/${id}` : '/'} />
+  );
+
   if (loading) {
     return (
       <View style={styles.center}>
+        <Stack.Screen options={{ headerLeft: editHeaderLeft }} />
         <ActivityIndicator size="large" color="#2563EB" />
       </View>
     );
@@ -68,6 +75,7 @@ export default function MemoEditScreen() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen options={{ headerLeft: editHeaderLeft }} />
       <View style={styles.toolbar}>
         <CategorySelector selected={category} onChange={setCategory} />
       </View>

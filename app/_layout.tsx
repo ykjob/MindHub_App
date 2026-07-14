@@ -57,14 +57,23 @@ export default function RootLayout() {
           name="memo/create"
           options={{ title: 'メモ作成', headerLeft: () => <NativeHeaderBackButton fallback="/" /> }}
         />
-        <Stack.Screen name="memo/[id]/index" options={{ title: 'メモ詳細' }} />
+        {/* 詳細画面もネイティブStackヘッダーのマスク画像戻るが視認できず／直アクセス時に描画されない
+            ため、テキスト「← 戻る」のheaderLeftを設定。詳細のfallbackは静的（memo→ホーム、notes→/notes）。
+            編集画面は対応する詳細へ戻す動的fallbackが必要なため、各画面内でStack.Screenを設定する（30 §8.5.3・11 §16） */}
+        <Stack.Screen
+          name="memo/[id]/index"
+          options={{ title: 'メモ詳細', headerLeft: () => <NativeHeaderBackButton fallback="/" /> }}
+        />
         <Stack.Screen name="memo/[id]/edit" options={{ title: 'メモ編集' }} />
         <Stack.Screen name="notes/index" options={{ title: '記録確認', headerShown: false }} />
         <Stack.Screen
           name="notes/create"
           options={{ title: 'メモ作成', headerLeft: () => <NativeHeaderBackButton fallback="/notes" /> }}
         />
-        <Stack.Screen name="notes/[id]/index" options={{ title: 'メモ詳細' }} />
+        <Stack.Screen
+          name="notes/[id]/index"
+          options={{ title: 'メモ詳細', headerLeft: () => <NativeHeaderBackButton fallback="/notes" /> }}
+        />
         <Stack.Screen name="notes/[id]/edit" options={{ title: 'メモ編集' }} />
         <Stack.Screen name="prompts/index" options={{ title: 'プロンプト集', headerShown: false }} />
         <Stack.Screen name="workplace/index" options={{ title: '現場適応モード', headerShown: false }} />

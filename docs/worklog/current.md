@@ -1,6 +1,56 @@
 # 最新作業ログ
 
-最終更新：2026-07-14（画面文言・Webヘッダー修正バッチ。同日：バッチ5＝プロンプト集改修ほか＝下記の別記録）
+最終更新：2026-07-14（バッチ6A補足＝詳細・編集4画面のWeb戻るボタン。同日：画面文言・Webヘッダー修正バッチ／バッチ5＝プロンプト集改修ほか＝下記の別記録）
+
+## Phase 15 バッチ6A補足：詳細・編集4画面のWeb戻るボタン（2026-07-14、未コミット）
+
+### 今回の目的
+
+横断調査（バッチ6A）で「直アクセス時に戻るボタンが出ないが履歴経由が主なので影響限定的」と評価した詳細・編集4画面（`/memo/[id]`・`/memo/[id]/edit`・`/notes/[id]`・`/notes/[id]/edit`）を再調査し、同じ問題が再現する場合は修正する。戻るボタンのみに限定し、読み込みエラー処理・保存/コピー/削除処理には触れない。
+
+### 修正前の再現確認（実データ）
+
+ヘッドレスChromeで実データ（軽量メモ・記録を作成しID取得）を用意し、履歴あり（ホーム→最近のさくっとメモ→詳細→編集／ホーム→記録確認→詳細→編集）と実在IDの直アクセスの両方を確認：
+
+* **履歴あり（4画面とも）**：戻るボタンは `type=native-masked`（React Navigation Web既定のマスク画像シェブロン。aria-label「…, back」・テキストなし）。当初修正した8画面と同一機構で、ブラウザ差で視認できないことがある視認性不安定
+* **直アクセス（4画面とも）**：`visible:false`＝**戻るボタンが1つも描画されない（行き止まり）**。スクリーンショットでも「メモ編集」等のタイトルのみで戻る無しを確認
+* **判定＝A（再現）**。「直アクセスは稀」だけを理由に残さず、8画面修正方針との整合から4画面も修正
+
+### 変更したファイル
+
+* 実装：`app/_layout.tsx`（詳細2画面に静的fallbackの `headerLeft` 追加）・`app/memo/[id]/edit.tsx`・`app/notes/[id]/edit.tsx`（各画面内 `<Stack.Screen options>` で動的fallbackの `headerLeft` 設定）。`NativeHeaderBackButton.tsx` 本体・既存8画面の設定は無変更
+* 文書：`30` §8.5.3（新設）・§8.5.2末尾・§12.1所見更新・`11` §16更新・`10` §20 HEADER-02更新・`current-tasks.md`・本ファイル
+
+### 実装内容
+
+* `NativeHeaderBackButton`（既存部品）を再利用し、新規部品は作らない。`headerLeft` 対象は計12画面
+* **詳細（静的fallback）**：`_layout.tsx` の `Stack.Screen` に `headerLeft`。`/memo/[id]`→`/`（ホーム）、`/notes/[id]`→`/notes`。既存8画面と同じ設定方式
+* **編集（動的fallback＝対応する詳細）**：`app/memo/[id]/edit.tsx`・`app/notes/[id]/edit.tsx` の各画面内で `import { Stack } from 'expo-router'` し、`useLocalSearchParams` の `id` を使って `<Stack.Screen options={{ headerLeft: () => <NativeHeaderBackButton fallback={id ? `/memo/${id}` : '/'} /> }} />` を設定（notesは `/notes/${id}` / `/notes`）。ローディング・not-found・本体の各returnに `<Stack.Screen>` を配置し、どの状態でも戻るが出るようにした。expo-routerの in-component `Stack.Screen` は `_layout` のtitleとマージされ、タイトル（メモ詳細／メモ編集）は保持される（実装が面倒という理由でホーム/一覧へ丸めず、自然な戻り先＝対応する詳細を維持）
+* ルート・クエリ・初期入力・`loadMemo`・`getMemoById`・loading/error・保存/コピー/削除/アーカイブ・DBは無変更
+
+### 検証結果
+
+* `npx tsc --noEmit` 合格・`git diff --check` 問題なし。`_layout` diffは詳細2画面のみ（既存8画面は無変更＝diffで確認）
+* ヘッドレスChrome実操作（puppeteer-coreはscratchpad隔離・使い捨てuser-data-dir＝使い捨てブラウザ内DB・ポート8100新規サーバー）：**自動確認53項目すべて合格・コンソールエラー0件**
+  * 履歴あり：4画面ともテキスト「← 戻る」視認・タイトルと非重複・二重ヘッダーなし・編集の戻るで対応する詳細へ・詳細の戻るでホーム／`/notes` へ
+  * 直アクセス（実在ID）：4画面とも「← 戻る」視認・押下で指定fallbackへ（詳細→`/`・`/notes`、編集→`/memo/<id>`・`/notes/<id>`＝**編集fallbackに正しいIDが入る**）・クラッシュ/無反応なし
+  * タイトル維持：メモ詳細／メモ編集（短縮・変更なし）
+  * 幅別：4画面を6幅（360/390/412/480/768/1024）で back視認・非重複・未クリップ・横はみ出しなし
+  * 既存8画面が無変更であること・二重ヘッダーなし
+  * 390幅で4画面のヘッダーをスクリーンショット保存・目視（「← 戻る」青＋タイトルの余白確認）
+
+### 未確認・後続
+
+* **Android実機・TalkBack・文字サイズ最大は未確認**。HEADER-02全体は完了扱いにしない
+* **メモ詳細（`/memo/[id]`）・メモ編集（`/memo/[id]/edit`）の読み込み例外時にローディングが終わらない可能性は本補足では変更せず、後続の保存・状態バッチ（STATE系）で対応**（バッチ6A横断調査で記録済み）
+
+### やっていないこと（今回の非対象）
+
+commit・push・versionCode変更・EAS/APKビルド・Android実機確認・TalkBack確認・文字サイズ最大確認／ダイアログ修正・保存/コピー状態修正・Safe Area bottom修正・アクセシビリティ横断修正／DB・ルート・保存/コピー/削除/アーカイブ処理・依存・アイコン・app.json/eas.json/package.jsonの変更／既存8画面・`NativeHeaderBackButton.tsx` 本体の変更
+
+---
+
+
 
 ## Phase 15 画面文言・Webヘッダー修正バッチ（2026-07-14、未コミット）
 
