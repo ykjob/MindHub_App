@@ -298,7 +298,7 @@ MVP実装（2026-07-09 実装。未コミット）。
 * [x] DOC-05 既存仕様書への反映（2026-07-13完了：01 / 08 / 09 / 10 / 11 / 14 / 16 / 21、CLAUDE.md、00_START_HERE.md）
 * [x] DOC-06 管理ファイル更新（2026-07-13完了：current-tasks.md・docs/worklog/current.md。既存のAPK 4回目記録は無変更で保持）
 * [x] DOC-07 文書監査・Gate 1判定（2026-07-13完了：AUDIT-01〜18の18項目を監査し全項目合格。参照切れ0件・正本重複なし・UX-01〜16追跡可能・DS-01〜10反映済み・古い方針は置換注記済み・versionCode 4は未確認のまま維持。軽微3件は `docs/worklog/current.md` の監査記録参照）
-* **Gate 1（仕様書整備）：完了（2026-07-13）**。以降の実装着手は、versionCode 4 APKの実機基準確認（`30` §12.2）と IA系判断の確定後
+* **Gate 1（仕様書整備）：完了（2026-07-13）**。versionCode 4 APKの実機基準確認は2026-07-13に完了（7項目とも問題なし。`30` §12.2）。文書基準点コミット：faaaa94（docs: finalize phase 15 ui ux specification、未push）
 
 ### IA（情報設計。実装前判断＝ユーザー判断待ち）
 
@@ -309,8 +309,8 @@ MVP実装（2026-07-09 実装。未コミット）。
 
 ### UI（共通UI基盤）
 
-* [ ] UI-01 デザイントークン `src/theme/index.ts` 作成（`29` §3〜§4。作成時点では既存画面を書き換えない）。依存：DOC-07
-* [ ] UI-02 初期共通コンポーネント作成（AppHeader / FilterChip / ListStateView / StatusMessage。`29` §6）。依存：UI-01。AppHeaderはversionCode 4基準確認（`30` §12.2）完了後
+* [x] UI-01 デザイントークン `src/theme/index.ts` 作成（`29` §3〜§4。作成時点では既存画面を書き換えない）。依存：DOC-07（2026-07-14完了・未コミット。バッチ1）
+* [x] UI-02 初期共通コンポーネント作成（AppHeader / FilterChip / ListStateView / StatusMessage。`29` §6）。依存：UI-01。AppHeaderはversionCode 4基準確認（`30` §12.2）完了後（2026-07-14完了・未コミット。バッチ1。AppHeaderは実用状態、FilterChip・ListStateView・StatusMessageは表示基盤のみで既存画面へは未適用）
 * [ ] UI-03 色の意味の固定（`29` §3.1の運用確認。意味のない場所への使用がないこと）
 
 ### HOME（ホーム改善）
@@ -323,8 +323,8 @@ MVP実装（2026-07-09 実装。未コミット）。
 
 ### HEADER（ヘッダー統一）
 
-* [ ] HEADER-01 対象4画面のAppHeader適用（ホーム・メモ管理一覧・現場適応入口・プロンプト集。`29` §5.1）。依存：UI-02
-* [ ] HEADER-02 統一項目の確認（Safe Area・タイトル・戻るフォールバック・右側操作・タッチ領域・二重表示なし。`30` §7）。依存：HEADER-01
+* [x] HEADER-01 対象4画面のAppHeader適用（ホーム・メモ管理一覧・現場適応入口・プロンプト集。`29` §5.1）。依存：UI-02（2026-07-14完了・未コミット。バッチ1。ホームは既存の4ボタングリッド・一覧を維持したままAppHeader追加のみ＝本格再構成はHOME-01）
+* [ ] HEADER-02 統一項目の確認（Safe Area・タイトル・戻るフォールバック・右側操作・タッチ領域・二重表示なし。`30` §7）。依存：HEADER-01（Web確認は2026-07-14実施済み＝1280px/390px・直アクセス・戻る両経路・二重表示なし・コンソールエラー0件。Android実機のSafe Area・戻る・TalkBackはAPK確認1で実施のため未完了のまま）
 
 ### NOTES（メモ管理改善）
 

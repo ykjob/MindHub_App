@@ -9,18 +9,17 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { getNotes, getDistinctProjects, getDistinctTags } from '../../src/features/notes/noteRepository';
 import type { Note, NoteFilter, NoteType, NoteSortKey } from '../../src/features/notes/noteTypes';
 import { parseTags } from '../../src/features/notes/noteTypes';
 import { NOTE_CATEGORIES, getNoteCategoryLabel } from '../../src/features/notes/noteCategories';
+import AppHeader from '../../src/components/AppHeader';
 import { formatDisplayDate } from '../../src/utils/date';
 
 export default function NoteListScreen() {
   const db = useSQLiteContext();
-  const insets = useSafeAreaInsets();
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState('');
@@ -70,30 +69,21 @@ export default function NoteListScreen() {
 
   useFocusEffect(useCallback(() => load(), [load]));
 
-  const goBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/');
-    }
-  };
-
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: 16 + insets.top }]}>
-        <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.backBtn} onPress={goBack} hitSlop={8}>
-            <Text style={styles.backBtnText}>← 戻る</Text>
+      {/* 戻るフォールバック（履歴なし→ホーム）はAppHeader内で処理される */}
+      <AppHeader
+        title="メモ管理"
+        showBack
+        right={
+          <TouchableOpacity
+            style={styles.createBtn}
+            onPress={() => router.push('/notes/create')}
+          >
+            <Text style={styles.createBtnText}>＋ 新規作成</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>メモ管理</Text>
-        </View>
-        <TouchableOpacity
-          style={styles.createBtn}
-          onPress={() => router.push('/notes/create')}
-        >
-          <Text style={styles.createBtnText}>＋ 新規作成</Text>
-        </TouchableOpacity>
-      </View>
+        }
+      />
 
       <View style={styles.filters}>
         <TextInput
@@ -230,21 +220,6 @@ function FilterChip({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9FAFB' },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  headerTitle: { fontSize: 20, fontWeight: '700', color: '#111827' },
-  backBtn: { paddingVertical: 4, paddingRight: 4 },
-  backBtnText: { fontSize: 14, color: '#2563EB', fontWeight: '600' },
   createBtn: {
     paddingHorizontal: 14,
     paddingVertical: 8,

@@ -11,6 +11,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { getLatestEndNote } from '../../src/features/workplace/workplaceService';
 import type { Note } from '../../src/features/notes/noteTypes';
+import AppHeader from '../../src/components/AppHeader';
 import { formatDisplayDate } from '../../src/utils/date';
 
 interface SceneDef {
@@ -79,8 +80,10 @@ export default function WorkplaceHomeScreen() {
   );
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.lead}>
+    <View style={styles.root}>
+      <AppHeader title="現場適応モード" showBack />
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <Text style={styles.lead}>
         毎日の場面ごとに整理してコピー・保存できます。現場固有の情報は保存しません（一般化した個人用の覚書に留めます）。
       </Text>
 
@@ -122,11 +125,13 @@ export default function WorkplaceHomeScreen() {
           <Text style={styles.sceneDesc}>{s.desc}</Text>
         </TouchableOpacity>
       ))}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: '#F9FAFB' },
   container: { flex: 1, backgroundColor: '#F9FAFB' },
   content: { padding: 16, paddingBottom: 40, gap: 12 },
   lead: { fontSize: 13, color: '#6B7280', lineHeight: 19 },

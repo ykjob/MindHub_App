@@ -14,6 +14,7 @@ import { getAllMemos } from '../src/features/memos/memoRepository';
 import type { Memo } from '../src/features/memos/memoTypes';
 import { getCategoryLabel } from '../src/features/memos/memoCategories';
 import SyncStatusBadge from '../src/components/SyncStatusBadge';
+import AppHeader from '../src/components/AppHeader';
 import { formatDisplayDate } from '../src/utils/date';
 
 export default function MemoListScreen() {
@@ -36,6 +37,11 @@ export default function MemoListScreen() {
 
   return (
     <View style={styles.container}>
+      {/* ネイティブヘッダー（旧FlowDock）は headerShown: false。ホームは戻るボタンを表示しない（30 §7） */}
+      <AppHeader
+        title="MindHub"
+        subtitle="思考メモ・仕事の整理・AI活用をまとめるハブ"
+      />
       <View style={[styles.header, isNarrow && styles.headerNarrow]}>
         <Text style={styles.headerTitle}>メモ一覧</Text>
         <View style={[styles.headerActions, isNarrow && styles.headerActionsNarrow]}>

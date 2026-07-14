@@ -42,7 +42,9 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: '#F9FAFB' },
         }}
       >
-        <Stack.Screen name="index" options={{ title: 'FlowDock' }} />
+        {/* 主要4画面（index / notes/index / prompts/index / workplace/index）は画面内AppHeaderへ統一（29 §5.1）。
+            title はWebのdocument title用に残す */}
+        <Stack.Screen name="index" options={{ title: 'MindHub', headerShown: false }} />
         <Stack.Screen name="settings" options={{ title: '設定' }} />
         <Stack.Screen name="memo/create" options={{ title: 'メモ作成' }} />
         <Stack.Screen name="memo/[id]/index" options={{ title: 'メモ詳細' }} />
@@ -51,8 +53,8 @@ export default function RootLayout() {
         <Stack.Screen name="notes/create" options={{ title: 'メモ作成' }} />
         <Stack.Screen name="notes/[id]/index" options={{ title: 'メモ詳細' }} />
         <Stack.Screen name="notes/[id]/edit" options={{ title: 'メモ編集' }} />
-        <Stack.Screen name="prompts/index" options={{ title: 'プロンプト集' }} />
-        <Stack.Screen name="workplace/index" options={{ title: '現場適応モード' }} />
+        <Stack.Screen name="prompts/index" options={{ title: 'プロンプト集', headerShown: false }} />
+        <Stack.Screen name="workplace/index" options={{ title: '現場適応モード', headerShown: false }} />
         <Stack.Screen name="workplace/start" options={{ title: '作業開始' }} />
         <Stack.Screen name="workplace/stuck" options={{ title: '詰まり記録' }} />
         <Stack.Screen name="workplace/question" options={{ title: '質問文作成' }} />

@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { getPromptGroups, type PromptEntry } from '../../src/features/notes/promptHub';
 import { copyToClipboard } from '../../src/utils/clipboard';
+import AppHeader from '../../src/components/AppHeader';
 
 interface Section {
   key: string;
@@ -56,6 +57,7 @@ export default function PromptHubScreen() {
 
   return (
     <View style={styles.container}>
+      <AppHeader title="プロンプト集" showBack />
       <View style={styles.searchArea}>
         <Text style={styles.lead}>
           コピーして ChatGPT / Gemini / Claude Code / Codex に貼り付けて使ってください。

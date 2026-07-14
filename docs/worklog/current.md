@@ -1,6 +1,50 @@
 # 最新作業ログ
 
-最終更新：2026-07-13（Phase 15実機基準確認の完了記録と文書基準点の確定。同日：Phase 15文書監査・Gate 1完了＝下記の別記録）
+最終更新：2026-07-14（Phase 15バッチ1実装＝テーマ・共通部品・主要4画面AppHeader。前日：実機基準確認記録と文書基準点コミット＝下記の別記録）
+
+## Phase 15バッチ1実装：テーマ・共通コンポーネント・主要4画面AppHeader（2026-07-14、未コミット）
+
+### 今回の目的
+
+文書基準点コミット（faaaa94）の後、Phase 15バッチ1として共通UI基盤（テーマ＋初期部品）を作成し、主要4画面のヘッダーをAppHeaderへ統一する（`29` §4〜§6、`30` §7）。
+
+### 新規作成したファイル（5件）
+
+* `src/theme/index.ts`：デザイントークン1ファイル構成（`colors`＝29 §3.1の役割名／`spacing` 4・8・12・16・24／`typography` 20・16・15・14・12・11／`radius` 8・12・pill／`touchTarget` 44）。トークン以外の処理なし
+* `src/components/AppHeader.tsx`（実用状態まで実装）：props＝`title`（必須）・`subtitle?`・`showBack?`・`right?`。Safe Area＝`useSafeAreaInsets` で `paddingTop: insets.top`。内容領域は `minHeight: 56`＋上下 `spacing.sm`（固定高さにせず文字を切らない）。戻る＝`router.canGoBack()` なら `back()`、履歴なしなら `replace('/')`（Web直アクセスフォールバック）。`accessibilityRole="header"`（タイトル）・`accessibilityRole="button"`＋`accessibilityLabel="戻る"`＋`hitSlop={8}`（戻る）。下辺境界線
+* `src/components/FilterChip.tsx`（表示基盤のみ・未適用）：label/selected/onPress。選択＝ブランド塗り＋白文字＋太字、pill形状、accessibilityState.selected
+* `src/components/ListStateView.tsx`（表示基盤のみ・未適用）：status＝loading/empty/filtered-empty/error。filtered-emptyは条件解除の示唆、errorは再試行ボタン（onRetry時）＋「データが消えたわけではない」旨
+* `src/components/StatusMessage.tsx`（表示基盤のみ・未適用）：kind＝success/error/information＋message。色＋文字で結果表示。自動消去は呼び出し側管理
+
+### 変更したファイル（5件）
+
+* `app/_layout.tsx`：`index`・`prompts/index`・`workplace/index` に `headerShown: false` を追加（`notes/index` は既存のままfalse）。`index` のtitleを「MindHub」に変更。**Stack.Screen登録・OPFS onError/onInitは無変更**
+* `app/index.tsx`：AppHeader（title「MindHub」・補助文「思考メモ・仕事の整理・AI活用をまとめるハブ」・戻るなし）を最上部に追加のみ。既存の「メモ一覧」＋4ボタン（狭幅2×2グリッド）・一覧・FABは無変更（ホーム本格再構成はIA判断待ちのため対象外）
+* `app/notes/index.tsx`：画面内ヘッダー（戻る＋タイトル＋新規作成）をAppHeaderへ置換（title「メモ管理」・showBack・right＝＋新規作成ボタン）。画面内のgoBack関数・insets処理・旧ヘッダーStyleSheetを削除（AppHeaderへ移譲）。フィルター・一覧・取得処理は無変更
+* `app/workplace/index.tsx`：ScrollViewの外側にrootのViewを追加し、AppHeader（title「現場適応モード」・showBack）を配置。場面カード・再開メモ・守秘注意文は無変更
+* `app/prompts/index.tsx`：AppHeader（title「プロンプト集」・showBack）を最上部に追加のみ。検索・一覧・コピーは無変更
+
+### 検証結果
+
+* `npx tsc --noEmit`：合格（exit 0）。`git diff --check`：問題なし
+* ヘッドレスブラウザ実操作（8084で新規サーバー起動、puppeteer-coreはセッション用一時ディレクトリに隔離＝プロジェクト無変更）：**70項目中68件合格・既知の残課題2件・コンソールエラー0件**
+  * 1280px・390pxの両幅で：ホーム（MindHubタイトル・補助文・戻るなし・旧FlowDockヘッダー消失・4ボタン・横スクロールなし）／`/notes`・`/workplace`・`/prompts` の直アクセス（タイトル1箇所のみ＝二重表示なし・← 戻る表示・横スクロールなし）／戻るback()経路とフォールバック経路の両方でホーム到達／対象外画面 `/notes/create` のネイティブヘッダー「メモ作成」維持
+  * 既知の残課題2件＝Webのdocument.title（ブラウザタブ）が「FlowDock」のまま。切り分けの結果、**全ルート（ネイティブヘッダー維持の `/settings` 含む）で従来からapp.jsonのname由来**であり、Stack.Screenのtitleは反映されない既存挙動＝今回の退行ではない。app.json変更は禁止範囲・時期未確定（`11` §16）のため今回は修正せず、UX-04の残課題として扱う
+* expo-doctor：依存関係・package.json・app.jsonに変更がないため実行不要と判断
+* 変更ファイルは上記10件のみ（`git status --short` で確認）。禁止範囲（DBスキーマ・保存ロジック・既存ルート・GitHub連携・OPFS自動リロード・区分・守秘既定・SDK 54・依存関係・package.json・app.json・eas.json・プロンプト本文/生成ロジック・FlowDockメモ作成画面のボタン位置）に差分なし
+
+### 暫定判断（未確定事項の扱い）
+
+* AppHeaderの高さ・padding：minHeight 56＋spacing値で開始（`29` §12どおり実装タスク内の調整可能な値。APK確認1で再調整可）
+* スマホ幅の補助文：常時表示（折り返し許容）で暫定実装。390pxで破綻なし（`29` §12の未確定は暫定値として継続）
+* ホームのAppHeaderタイトルは「MindHub」（`28` §11「画面上の全体名はMindHubに寄せる」の採用済み方針に従う）。設定ボタンのヘッダー右側への移動などホーム再構成はバッチ1では行っていない
+
+### やっていないこと（今回の非対象）
+
+* FilterChip・ListStateView・StatusMessageの既存画面への適用（後続バッチ）／ホーム本格再構成・メモ管理フィルター収納・現場適応3区分・プロンプト状況別入口（IA判断待ち・後続バッチ）／UX-01〜16の判定更新（`30` §14はすべて未確認のまま。Android実機確認＝APK確認1が未実施のため完了扱いにしない）／FlowDockメモ作成画面の下部ボタン修正／コミット・push（実装差分はレビュー用に未コミットで保持）
+
+---
+
 
 ## Phase 15実機基準確認の完了記録と文書基準点の確定（2026-07-13）
 
