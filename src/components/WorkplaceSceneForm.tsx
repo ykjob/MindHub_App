@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  Keyboard,
+  type KeyboardEvent,
 } from 'react-native';
 import { useCopyFeedback } from '../hooks/useCopyFeedback';
 import { WORKPLACE_PRIVACY_NOTICE } from '../features/workplace/workplaceTags';
@@ -47,6 +49,10 @@ export default function WorkplaceSceneForm({
   }));
   const [output, setOutput] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<SaveState>('idle');
+  // Androidでキーボード表示中に下側の入力欄が隠れ下までスクロールできない問題への局所対応。
+  // KeyboardAvoidingViewは他入力画面で不安定だったため、キーボード高さぶんだけ
+  // ScrollViewの下部余白を増やす方式にする（非表示時は0＝通常余白のまま）。
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   // コピーは共通hookで二重実行防止・成功/失敗表示・タイマー解除・アンマウント安全を担保。
   const copy = useCopyFeedback({ failedMs: 2000 });
@@ -61,6 +67,21 @@ export default function WorkplaceSceneForm({
     return () => {
       mountedRef.current = false;
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, []);
+
+  // キーボード表示・非表示を監視し、表示中だけ下部余白へキーボード高さを加算する。
+  // アンマウント時に両listenerを解除する。
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', (event: KeyboardEvent) => {
+      setKeyboardHeight(event.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardHeight(0);
+    });
+    return () => {
+      showSub.remove();
+      hideSub.remove();
     };
   }, []);
 
@@ -107,8 +128,13 @@ export default function WorkplaceSceneForm({
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[
+        styles.content,
+        // 表示中だけ通常の下部余白(40)へキーボード高さを加算（paddingBottomを上書き＝二重加算しない）。
+        keyboardHeight > 0 && { paddingBottom: 40 + keyboardHeight },
+      ]}
       keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
     >
       <Text style={styles.intro}>{intro}</Text>
 

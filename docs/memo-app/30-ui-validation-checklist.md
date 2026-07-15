@@ -428,6 +428,23 @@ FormFooterBar下部Safe Area：
 
 補足：記録確認（notes）に**削除UIは存在しない**（アーカイブ／解除のみ。詳細のメッセージも「削除はされません」）。削除はさくっとメモ（memo）の機能で、上記で確認済み。
 
+### 8.9 現場適応フォームのキーボード下部余白（2026-07-15、未コミット）
+
+**発見したAndroid実機不具合**：現場適応モードの入力画面（`WorkplaceSceneForm`）でAndroidキーボードを表示すると下側の入力欄がキーボードに隠れ、下まで十分スクロールできない（特に `/workplace/stuck` の後半フィールド）。原因＝`ScrollView` の `contentContainerStyle` の下部余白が固定値40のみで、キーボード表示中にキーボード高さぶんの余白がないため。
+
+**実装した修正（`src/components/WorkplaceSceneForm.tsx` のみ・共通コンポーネント1か所）**：
+
+* `Keyboard.addListener('keyboardDidShow', e => setKeyboardHeight(e.endCoordinates.height))` ／ `'keyboardDidHide' → setKeyboardHeight(0)`。アンマウント時に両subscriptionを `remove()`
+* `contentContainerStyle` を配列化し、`keyboardHeight > 0` のときだけ `{ paddingBottom: 40 + keyboardHeight }` を追加（`styles.content` の `paddingBottom:40` を上書き＝二重加算しない）。非表示時は通常の40のまま
+* `keyboardDismissMode="on-drag"` を追加（下スクロールでキーボードを閉じやすくする）
+* `KeyboardAvoidingView` への置換・`app.json` の `softwareKeyboardLayoutMode` 変更・固定の大余白追加・画面別5ファイルへの重複実装はしていない。入力項目・保存内容・タグ・private/Git候補外・ルートは無変更
+
+**Androidで確認できた範囲**：**なし（本セッションではAndroid実機／エミュレータが利用できず未実施）**。キーボードの表示・非表示イベントはネイティブのみで発火し、Web（react-native-web）では発火しないため、`/workplace/stuck` のキーボード回避・下部までのスクロール等（必須確認1〜10）は**未確認**。
+
+**Web（回帰確認）**：ヘッドレスChrome（専用ポート8114・使い捨てブラウザ内DB・puppeteerはリポジトリ外scratchpad隔離・他スレッド無停止）で現場適応5画面（start/stuck/question/report/end）を確認。**21項目すべて合格・console.error 0・pageerror 0・unhandledrejection 0**（各画面が開く・入力欄へ入力し値が保持される・横スクロールなし・縦スクロール可・stuckは整理する→出力表示）。Webでは `keyboardHeight` は常に0で下部余白は従来の40のまま＝**Web表示は変化なし**を確認。`npx tsc --noEmit` 合格・`npx expo export --platform web` 成功・`git diff --check` 問題なし。
+
+**未確認の範囲**：Android実機／エミュレータでの必須確認1〜10（キーボード表示中の下側入力欄の可視化・下部までのスクロール・閉じたときの余白復帰・入力保持・整理/コピー/保存ボタンまでの到達）。→ 最終Android実機確認（次回APKまたは端末実機）で確認する。
+
 ## 9. 状態別検証
 
 | 状態 | 発生条件 | 期待表示 | 操作可能範囲 | 合格条件 |

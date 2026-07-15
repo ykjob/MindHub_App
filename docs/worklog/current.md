@@ -1,6 +1,36 @@
 # 最新作業ログ
 
-最終更新：2026-07-15（Phase 15最終APK＝versionCode 7のAndroid実機確認結果を記録。同日：Phase 15 Web全体回帰／最終統合実装バッチ／バッチ6B-2／バッチ6B-1＝下記の別記録）
+最終更新：2026-07-15（現場適応フォームのキーボード下部余白の局所修正。同日：Phase 15最終APK＝versionCode 7のAndroid実機確認結果を記録／Web全体回帰／最終統合実装バッチ／バッチ6B-2／バッチ6B-1＝下記の別記録）
+
+## 現場適応フォームのキーボード下部余白（2026-07-15、未コミット）
+
+### 発見したAndroid実機不具合
+
+現場適応モードの入力画面（`WorkplaceSceneForm`）でAndroidキーボードを表示すると下側の入力欄が隠れ、下まで十分にスクロールできない（特に `/workplace/stuck` の後半フィールド＝「確認したいこと」「エラー内容」の下側）。原因は `ScrollView` の下部余白が固定値40のみで、キーボード表示中にキーボード高さぶんの余白がないこと。
+
+### 実装した修正（共通コンポーネント1か所のみ）
+
+`src/components/WorkplaceSceneForm.tsx`：
+
+* `react-native` から `Keyboard`・`type KeyboardEvent` を追加。`keyboardHeight` state を追加
+* `useEffect` で `keyboardDidShow`（`e.endCoordinates.height` を保存）／`keyboardDidHide`（0へ）を購読し、アンマウント時に両subscriptionを `remove()`
+* `contentContainerStyle` を配列化し、`keyboardHeight > 0` のときだけ `{ paddingBottom: 40 + keyboardHeight }` を加算（`styles.content` の `paddingBottom:40` を上書き＝二重加算しない）。非表示時は40のまま
+* `keyboardDismissMode="on-drag"` を追加
+* `KeyboardAvoidingView` 置換・`app.json` の `softwareKeyboardLayoutMode` 変更・固定大余白・画面別5ファイルへの重複実装はしない。入力項目・保存内容・タグ・private/Git候補外・ルートは無変更
+
+### 確認
+
+* `npx tsc --noEmit` 合格・`npx expo export --platform web` 成功・`git diff --check` 問題なし。dist削除済
+* **Web（回帰）**：ヘッドレスChrome（専用ポート8114・使い捨てブラウザ内DB・puppeteerはリポジトリ外scratchpad隔離・他スレッド無停止）で現場適応5画面＝**21項目すべて合格・console.error 0・pageerror 0・unhandledrejection 0**（各画面が開く・入力保持・横スクロールなし・縦スクロール可・stuckは整理する→出力）。Webでは `keyboardHeight` 常に0＝**下部余白は従来40のまま・表示変化なし**
+* **Android実機／エミュレータは本セッションで利用できず未確認**（キーボードイベントはネイティブのみ発火し、Webでは発火しない）。`/workplace/stuck` のキーボード回避・下部までのスクロール・閉じたときの余白復帰・整理/コピー/保存ボタンまでの到達（必須確認1〜10）は最終Android実機確認へ残す
+
+### 非変更・停止条件
+
+commit・push・versionCode更新・EASビルド・APK作成は未実施（差分と確認結果の報告で停止）。変更ファイルは `src/components/WorkplaceSceneForm.tsx` のみ＋文書（`30` §8.9・`11` §16・`current-tasks.md`・本ファイル）
+
+---
+
+
 
 ## Phase 15最終APK（versionCode 7）Android実機確認（2026-07-15、文書のみ）
 
