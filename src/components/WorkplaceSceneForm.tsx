@@ -134,7 +134,8 @@ export default function WorkplaceSceneForm({
         keyboardHeight > 0 && { paddingBottom: 40 + keyboardHeight },
       ]}
       keyboardShouldPersistTaps="handled"
-      keyboardDismissMode="on-drag"
+      // ドラッグでキーボードが閉じてスクロールできない問題への対応。ドラッグ中は閉じない（明示）。
+      keyboardDismissMode="none"
     >
       <Text style={styles.intro}>{intro}</Text>
 

@@ -1,6 +1,32 @@
 # 最新作業ログ
 
-最終更新：2026-07-15（現場適応フォームのキーボード下部余白の局所修正。同日：Phase 15最終APK＝versionCode 7のAndroid実機確認結果を記録／Web全体回帰／最終統合実装バッチ／バッチ6B-2／バッチ6B-1＝下記の別記録）
+最終更新：2026-07-15（現場適応キーボードの `on-drag` 副作用修正＝`none` へ変更しExpo Go実機で合格。同日：キーボード下部余白の局所修正／Phase 15最終APK＝versionCode 7実機確認／Web全体回帰／最終統合実装バッチ／バッチ6B-2／バッチ6B-1＝下記の別記録）
+
+## 現場適応キーボード：`on-drag` 副作用修正と実機合格（2026-07-15）
+
+### versionCode 8 APK実機で判明した不具合
+
+`/workplace/stuck` の入力中に画面を上へスクロールしようとすると**キーボードが閉じ、画面がスクロールされない**（下側入力欄をキーボードより上へ移動できない）。原因＝`keyboardDismissMode="on-drag"` によりドラッグ開始でキーボードが閉じ、`keyboardDidHide` で追加していた下部余白（`40 + keyboardHeight`）も同時に消えていたため。
+
+### 修正（`src/components/WorkplaceSceneForm.tsx` の1行のみ）
+
+`keyboardDismissMode="on-drag"` → **`keyboardDismissMode="none"`**（意図明示・ドラッグ中は閉じない）。キーボード高さ取得（`keyboardDidShow`）・0復帰（`keyboardDidHide`）・listener cleanup・表示中 `paddingBottom: 40 + keyboardHeight`・非表示時40・`keyboardShouldPersistTaps="handled"` は維持。`KeyboardAvoidingView`・`softwareKeyboardLayoutMode`・固定大余白・新規依存・自動フォーカス移動・画面別重複実装は追加していない。
+
+### Android実機確認（Expo Go・合格）
+
+ユーザーがPixelのExpo Go（LAN・専用ポート8115・他スレッド無停止）で `/workplace/stuck` を確認し、次を合格として確認：キーボードを表示したままスクロール可／スクロール開始でキーボードが閉じない／下側「エラー内容」をキーボードより上へ移動可／最下部「整理する」まで到達可／入力内容維持／キーボードを閉じると追加下部余白が縮む（余白40へ復帰）。
+
+### 静的確認・非変更
+
+`npx tsc --noEmit` 合格・`npx expo export --platform web` 成功・`git diff --check` 問題なし（dist削除済）。Webは `keyboardHeight` 常に0＝余白40のまま・表示変化なし。commit・push・versionCode 9更新・EAS APKビルドはこの後の手順で実施。未追跡 `AGENTS.md` は作業対象外＝無変更。
+
+### 引き続き未確認・未完了
+
+TalkBack／端末最大フォントサイズの下側見切れ／コピー成功経路の明確な確認報告／GitHub連携の実通信／Gate 6・Gate 7（`30` §8.10・`11` §16）。
+
+---
+
+
 
 ## 現場適応フォームのキーボード下部余白（2026-07-15、未コミット）
 

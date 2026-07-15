@@ -443,7 +443,26 @@ FormFooterBar下部Safe Area：
 
 **Web（回帰確認）**：ヘッドレスChrome（専用ポート8114・使い捨てブラウザ内DB・puppeteerはリポジトリ外scratchpad隔離・他スレッド無停止）で現場適応5画面（start/stuck/question/report/end）を確認。**21項目すべて合格・console.error 0・pageerror 0・unhandledrejection 0**（各画面が開く・入力欄へ入力し値が保持される・横スクロールなし・縦スクロール可・stuckは整理する→出力表示）。Webでは `keyboardHeight` は常に0で下部余白は従来の40のまま＝**Web表示は変化なし**を確認。`npx tsc --noEmit` 合格・`npx expo export --platform web` 成功・`git diff --check` 問題なし。
 
-**未確認の範囲**：Android実機／エミュレータでの必須確認1〜10（キーボード表示中の下側入力欄の可視化・下部までのスクロール・閉じたときの余白復帰・入力保持・整理/コピー/保存ボタンまでの到達）。→ 最終Android実機確認（次回APKまたは端末実機）で確認する。
+**未確認の範囲**：Android実機／エミュレータでの必須確認1〜10（キーボード表示中の下側入力欄の可視化・下部までのスクロール・閉じたときの余白復帰・入力保持・整理/コピー/保存ボタンまでの到達）。→ **§8.10（versionCode 8 APK実機確認で `on-drag` の副作用が判明→`none` へ修正→Expo Go実機で合格）に続く**。
+
+### 8.10 現場適応キーボード：`on-drag` の副作用修正と実機合格（2026-07-15）
+
+**versionCode 8 APK（`on-drag`）のAndroid実機で判明した不具合**：`/workplace/stuck` の入力中に画面を上へスクロールしようとすると**キーボードが閉じ、画面がスクロールされない**（下側の入力欄をキーボードより上へ移動できない）。原因＝`keyboardDismissMode="on-drag"` によりドラッグ開始でキーボードが閉じ、`keyboardDidHide` で追加していた下部余白（`40 + keyboardHeight`）も同時に消えていたため。
+
+**修正（`src/components/WorkplaceSceneForm.tsx` の1行のみ）**：`keyboardDismissMode="on-drag"` → **`keyboardDismissMode="none"`**（意図明示。ドラッグ中はキーボードを閉じない）。キーボード高さ取得（`keyboardDidShow`）・0復帰（`keyboardDidHide`）・listener cleanup・表示中 `paddingBottom: 40 + keyboardHeight`・非表示時40・`keyboardShouldPersistTaps="handled"` は**維持**。`KeyboardAvoidingView`・`softwareKeyboardLayoutMode`・固定大余白・新規依存・自動フォーカス移動・画面別重複実装は追加していない。
+
+**Androidで確認できた範囲（合格）**：ユーザーがPixelのExpo Go（LAN・専用ポート8115・他スレッド無停止）で `/workplace/stuck` を確認し、次を合格として確認：
+
+* [x] キーボードを表示したまま画面をスクロールできる
+* [x] スクロール開始時にキーボードが閉じない
+* [x] 下側の「エラー内容」をキーボードより上へ移動できる
+* [x] 最下部の「整理する」まで到達できる
+* [x] 入力内容が維持される
+* [x] キーボードを閉じると追加された下部余白が縮む（`keyboardDidHide` で余白40へ復帰）
+
+**静的確認**：`npx tsc --noEmit` 合格・`npx expo export --platform web` 成功・`git diff --check` 問題なし。Webは `keyboardHeight` 常に0＝余白40のまま・表示変化なし（`on-drag`/`none` はWeb挙動に影響しない）。
+
+**引き続き未確認・未完了（今回の対象外）**：TalkBack／端末最大フォントサイズの下側見切れ（`11` §16）／コピー成功経路の明確な確認報告／GitHub連携の実通信／Gate 6・Gate 7。発表デモに影響する現場適応のキーボード問題は本修正で解決確認済みだが、上記は未完了のまま維持する。
 
 ## 9. 状態別検証
 
