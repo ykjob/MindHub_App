@@ -150,10 +150,11 @@
 
 ## 14. 現場適応モード（確認待ち）
 
-* 生成した質問文・報告文・再開メモを notes に保存するか、コピーのみに留めるか（初期はコピー中心。`22` 8章 / `23`）
+* 生成した**再開メモ・その他場面メモ**を notes に保存するか、コピーのみに留めるか（初期はコピー中心。`22` 8章 / `23`）。※**質問文・報告文はPhase 16で「完成文だけ任意保存」に確定済み**（`22` §8.1・`32` §14・`33` §7.3〜7.4）＝本項の未決定対象から外す
+* Phase 16で質問・報告を新規保存した後、一般の記録編集画面から `visibility` / `is_git_candidate` を変更可能にするか（保存時は private・Git候補false を強制。保存後の再編集時の扱いは今回未決定。永続ロック・変更禁止機能は勝手に採用しない。`23` §5.1・§6.1.1）
 * 入口・画面の配置（ホーム／`app/notes`配下／新規ルート `app/workplace/*`。`21` 9章）
 * 現場プロファイルの保存構造（案A notes再利用のタグ運用か、将来の案B/C移行か。`22`）
-* 場面タグ・現場タグの具体的な命名（workplace_* を採用するか等。`04` 1.2 / `22` 4章）
+* 場面タグ・現場タグの具体的な命名（**作業開始・詰まり・終業前・現場タグ**等で workplace_* を採用するか等。`04` 1.2 / `22` 4章）。※**質問＝`workplace_question`・報告＝`workplace_report` はPhase 16で確定済み**（`04` §1.2.1）＝本項の未決定対象から外す
 * 複数現場切り替えの実装時期（初期は単一現場。`20` 7.2）
 * 将来スマホで現場適応モードの内容（現場ルール・再開メモ等）を確認できるようにする場合でも、公開GitHub Pagesには現場情報を出さない。スマホ閲覧を実装する場合は、非公開チャネル・ローカル閲覧・認証付き環境など、公開配布（`13-mobile-view-export.md` / `17-distribution-and-sharing.md`）と分離した方法を検討する。具体的な方式は未確定（守秘方針の正本は `23` §7・§3.1）
 
@@ -218,3 +219,13 @@ Phase 15内では確定しない（保留のまま）もの。
 * **ホームFABと「すぐメモする」カードの役割重複**（2026-07-14 IA判断時に整理）：→ **解消（2026-07-14 APK確認2）**。既存FABはスクロール位置にかかわらず軽量メモ作成へ進める即時入力導線として維持（カード＝機能の発見性、FAB＝即時操作性。`28` §7.2）。Web確認に加え、Android実機（versionCode 6）でもFABが正しく遷移し、一覧や展開操作（「すべて表示／3件に戻す」）を妨げないことを確認。FAB維持＋カード併存で問題なしとして評価完了（`30` §12.1）
 * **app.json の表示名（name / slug / scheme）を MindHub へ変更する時期**：Androidランチャー名・EASビルドへ波及するため、画面内文言の整理とは別判断（`01` §1.6・§1.7）。Phase 15の必須条件にしない
 * **ConfirmDialogとWeb対応ダイアログの二重実装** → **解決（2026-07-15 バッチ6B-1）**。実態：`src/components/ConfirmDialog.tsx` の `showConfirmDialog`（`Alert.alert` を直接使用。RN Webでは複数ボタン非対応）は**さくっとメモ詳細（`app/memo/[id]/index.tsx`）の削除確認**で使用しており、Webで削除確認が正常に機能しない状態だった（※以前この項目に「memo詳細のアーカイブ確認」と誤記していたが、memo詳細にアーカイブはなく削除であり、アーカイブは記録確認詳細＝`notes/[id]` 側で、そちらは元から `dialog.ts` の `confirmDialog`＝Web対応済み）。対応：`src/utils/dialog.ts` の `confirmDialog` を確認ダイアログの**正本**とし（`cancelLabel` を追加。Web=`window.confirm`／Android・iOS=`Alert.alert`で `style='cancel'`/`'destructive'`）、`ConfirmDialog.tsx` は `showConfirmDialog` の**薄い互換ラッパー**として `confirmDialog` へ委譲（ファイル削除・API名変更はしない）。設定画面（`app/settings.tsx`）のGitHubトークン削除の複数ボタン `Alert.alert` も `confirmDialog` へ統一（Android/iOS経路の整合。WebはGitHubトークン保存が非対応＝getToken/saveToken/deleteTokenがWeb無効で削除ボタン自体が非表示のため、Web実害は主にメモ削除側）。**WebのGitHubトークン保存対応・SecureStore・githubTokenStore.ts・トークン入力/設定保存仕様は無変更**。制約：ブラウザ標準の `window.confirm` はボタン文言を変更できないため、Webでは `confirmLabel`/`cancelLabel` は反映されない（title・messageのみ表示。コード・`29` §12に明記）。Web確認：さくっとメモ削除の確認・キャンセル両経路（`window.confirm` にtitle「メモを削除」＋本文が含まれる・キャンセルで残存・確認で削除しホームへ）・設定画面の通常表示と削除ボタン非表示・コンソールエラー0件（`30` §8.6.1）。**Android/iOSのAlert経路（cancel/destructive・確認押下時のみonConfirm）はコード確認のみ＝実機・TalkBackは最終APKで確認**
+
+## 17. Phase 16（2026-07-23 追加）
+
+Phase 16（`31`〜`33`）の確定仕様は `01-decisions-and-scope.md` §1.8 と `31`〜`33` を正本とする。確定事項の一覧は本ファイルへ転載しない（正本二重化を避ける）。
+
+Phase 16に関して本ファイルに残す**未決定事項**（参照のみ。全文は各正本）。
+
+* 保存後の再編集時の扱い（Phase 16で質問・報告を新規保存した後、`visibility` / `is_git_candidate` を変更可能にするか）は **§14 を正本**とする（本節へ全文を重複掲載しない）
+
+QMEMO-01〜14の実装・検証状態は未決定の製品判断ではないため本節では扱わない（`31` §16の実装状態表と `10-tasks.md` §21で管理する）。解消済みのレビュー履歴は `docs/worklog/current.md` に残し、open issuesには掲載しない。

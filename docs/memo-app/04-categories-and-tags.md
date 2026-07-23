@@ -38,6 +38,17 @@ familyカテゴリの扱い。
 
 なお、現場適応モードでは守秘優先のため、本ファイル §2 のカテゴリ別Git候補初期値に依らず、既定を `is_git_candidate=false` / `visibility=private` に上書きする（優先順位：現場適応モードの守秘ルール ＞ カテゴリ初期値。詳細は `23-workplace-adaptation-security-and-portfolio.md` §6.1）。
 
+### 1.2.1 現場適応モードの質問・報告の保存タグ（2026-07-23 Phase 16で確定）
+
+Phase 16B（`32`）・Phase 16C（`33`）で、現場適応モードの完成質問文・完成報告文を既存notesへ任意保存する場合のタグ・既定を次のとおり確定する（新typeは追加しない）。
+
+* 質問文の保存：`tags` = `workplace,workplace_question`
+* 報告文の保存：`tags` = `workplace,workplace_report`
+* いずれも `type` = `thought`、`visibility` = `private`、`is_git_candidate` = `false`
+* 現場適応の守秘既定（false / private）は、本ファイル §2 のカテゴリ初期値より優先する（`23` §6.1）
+
+`04` §1.2 で「場面タグの具体的な命名は未確定」としていたもののうち、質問（`workplace_question`）・報告（`workplace_report`）の保存タグはここで確定した。その他の場面タグ（作業開始・詰まり・終業前等）の命名は引き続き `11-open-issues.md` §14 で管理する。一般のtype・タグ定義（§1・§2）は再設計しない。
+
 ## 1.3 開発リファレンスのカテゴリ・タグ方針（参照）
 
 開発リファレンス（`24-development-reference.md`）は現場適応モードとは**別機能**の補助参照であり、初期実装では専用DB・専用カテゴリ・専用画面を作らず、既存の `command` カテゴリ（§1「コマンド・手順」）で運用する（案A正式採用。`24` §6.1）。新type・新カテゴリは追加しない。参照用タグは `dev-ref` を使う（2026-07-10決定。`11-open-issues.md` §15 / `24` §6）。Git候補・公開の扱いは `command` の初期値（§2、true）に従うが、現場固有情報・機密は登録しない（`24` §4・§5）。登録候補一覧は `25-development-reference-candidates.md`。

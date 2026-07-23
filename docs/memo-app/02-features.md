@@ -144,3 +144,15 @@
 基本ルール。
 
 `docs/notes/{project}/{date}_{type}_{slug}.md`
+
+## 11. Phase 16の機能追加（参照。2026-07-23追記。未実装）
+
+詳細仕様は本ファイルへ転載せず、各正本を参照する。
+
+* Phase 16A（さくっとメモ入力・ホーム操作性改善）の正本：`31-quick-memo-usability-improvement.md`
+* Phase 16B（質問タイミング判断支援）の正本：`32-workplace-question-timing-rules.md`
+* Phase 16C（外部AI・共有受け渡し）の正本：`33-external-handoff-and-sharing.md`
+* 既存のChatGPT整理プロンプトコピー（§9）は維持し、Phase 16CでOS／ブラウザ共有（`ChatGPTなどへ共有`）を追加する（自動送信ではない）
+* **Phase 16は未実装**（文書のみ承認済み）
+
+判定条件・守秘チェック全文・画面詳細は各正本を参照し、本ファイルへ重複掲載しない。

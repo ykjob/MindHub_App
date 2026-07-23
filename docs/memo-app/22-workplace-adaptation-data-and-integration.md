@@ -56,7 +56,7 @@
 
 案Aを採用する場合の、既存カラムでの表現方針（正式定義は `03`、カテゴリ値は `04`）。
 
-* 場面の区別：`tags` に場面タグを付ける（`workplace_start` / `workplace_stuck` / `workplace_question` / `workplace_report` / `workplace_end` は**確定名ではなく例**。具体的な命名は未確定事項として `11-open-issues.md` §14 で管理する）
+* 場面の区別：`tags` に場面タグを付ける。うち**質問・報告の保存タグは確定**（質問＝`workplace,workplace_question`／報告＝`workplace,workplace_report`。2026-07-23 Phase 16。`04` §1.2.1・本ファイル §8.1）。その他（`workplace_start` / `workplace_stuck` / `workplace_end` 等）は**確定名ではなく例**であり、具体的な命名は未確定事項として `11-open-issues.md` §14 で管理する
 * 現場の区別：`tags` に現場タグ（現場名。ただし顧客名・非公開情報は入れない。`23`）を付ける
 * `type`：既存type（worklog / thought 等）を再利用する。新type追加は次章の基準に従う
 * `visibility`：既定 private（守秘優先の上書き。`23` §6.1）
@@ -120,6 +120,18 @@
 
 ## 8. 出力物の扱い
 
-* 初期方針はコピー中心（`23`、`20` 10章）
+* コピーは引き続き利用できる（廃止しない。`23`、`20` 10章）
 * notesへ保存する場合の既定：visibility=private、is_git_candidate=false、公開HTML・配布用・家族用に含めない
-* 保存するかコピーのみかの最終判断は `11-open-issues.md` に未確定事項として残す
+
+### 8.1 質問・報告の保存方針（2026-07-23 Phase 16B/16C で確定）
+
+以前は本章で「質問・報告はコピーのみ」「保存するかコピーのみかの最終判断は未確定」としていたが、Phase 16B（`32`）・Phase 16C（`33`）で次のとおり確定した（変更日：2026-07-23。参照先：`32` §13〜§14・`33` §7.3〜7.4・`04` §1.2.1・`03` §8）。
+
+* **判定途中の入力・判定結果・チェック状態：一時データとして保存しない**（画面遷移中のみ保持）
+* **完成質問文：既存 `notes` へ任意保存できる**（`type=thought`／`tags=workplace,workplace_question`／`visibility=private`／`is_git_candidate=false`）
+* **完成報告文：共有確認画面から既存 `notes` へ任意保存できる**（`type=thought`／`tags=workplace,workplace_report`／`visibility=private`／`is_git_candidate=false`）
+* 保存は任意であり、コピー・共有に必須ではない。保存しなければ一時文章として破棄する
+* 専用テーブル・専用カラムは追加しない（既存notes再利用。案A）
+* 守秘既定（private・Git候補false）はカテゴリ初期値より優先する（`23` §6.1）
+
+歴史的経緯：MVP時点（Phase 14）は「出力はコピー中心・保存可否は未確定」だったが、現行仕様（Phase 16）で上記のとおり任意保存を確定した。再開メモ・その他場面メモの保存可否は引き続き `11-open-issues.md` §14 の範囲とする。

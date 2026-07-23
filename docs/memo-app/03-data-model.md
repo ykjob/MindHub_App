@@ -254,3 +254,13 @@ note_templates
 
 現場適応モード（`22-workplace-adaptation-data-and-integration.md`）は、初期実装で既存notesを再利用する方針（案A）のため、本ファイルへのスキーマ追加は行わない。
 将来、専用テーブル（案C）またはnotesカラム追加（案B）に移行する場合のみ、本ファイルを正本として定義を追加し、schema_version 方式（§6.5）に従う。既存notesの破壊的変更は行わない。
+
+## 8. Phase 16のデータ方針（参照。2026-07-23追記）
+
+Phase 16（`31`〜`33`）はDBスキーマを変更しない。新規カラム・テーブル・schema versionを追加しない。
+
+* Phase 16A（`31`）：`memos` テーブルを変更しない。音声入力由来かどうか・入力途中状態を新規保存しない
+* Phase 16B（`32`）：質問タイミングの判定途中入力・判定結果・チェック状態は保存しない（画面遷移中の一時データ）。ユーザーが確認した完成質問文だけ、既存 `notes` へ任意保存できる（`type=thought`／`tags=workplace,workplace_question`／`visibility=private`／`is_git_candidate=false`。正式定義は本ファイル §2〜§3、タグは `04-categories-and-tags.md`）
+* Phase 16C（`33`）：共有確認画面の一時文章・共有履歴・共有先アプリ名・共有日時は自動保存しない。任意保存する場合のみ既存 `notes` の新規レコードとして保存し、元データ（プロンプト定義・memos本文・質問/報告の元）を上書きしない
+
+いずれも既存 `notes` / `memos` の破壊的変更は行わない。将来スキーマ追加が必要になった場合のみ、本ファイルを正本として §6.5 の schema_version 方式に従う。

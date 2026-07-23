@@ -394,6 +394,14 @@ Phase 15全体の完了条件は以下。
 * 未確定事項（§17）が `11-open-issues.md` に記録されている
 * 実装コードは変更されていない
 
+## 18.1 Phase 15後の追加改善（Phase 16。2026-07-23追記。参照のみ）
+
+Phase 15のUX-01〜UX-16の判定・実績（§16の追跡表）は変更しない。以下はPhase 15後の追加改善として**参照のみ**を示す（Phase 15の完了・未完了判定には混在させない。いずれも未着手・正本は各ファイル）。
+
+* ホームの固定領域（主要4カード固定＋最近のさくっとメモ一覧だけスクロール）・長文入力の改善：Phase 16A＝`31-quick-memo-usability-improvement.md`
+* 質問タイミング判断支援：Phase 16B＝`32-workplace-question-timing-rules.md`
+* 外部AI・共有受け渡し（`ChatGPTなどへ共有`・共有確認画面）：Phase 16C＝`33-external-handoff-and-sharing.md`
+
 ## 19. 関連仕様書
 
 * `01-decisions-and-scope.md`：決定事項の正本（§1.6 名称方針。Phase 15採用の追記は後続）

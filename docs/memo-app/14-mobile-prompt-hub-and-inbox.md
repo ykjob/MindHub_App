@@ -155,6 +155,17 @@ DB同期なしで、スマホからすぐ使えるプロンプト集を用意す
 * 今回、新規プロンプトは追加していない。現行42件で不足する可能性がある後続候補は §15（将来候補）と `11-open-issues.md` §16に記録し、バッチ5では追加せず別タスクで判断する
 * 詳細な入口→ID対応は `28-ui-ux-quality-improvement.md` §10.1、確定経緯は `11-open-issues.md` §16
 
+### 1.9 Phase 16C 外部共有導線の追加（2026-07-23追記。未着手）
+
+Phase 16C（`33-external-handoff-and-sharing.md`）の初期対象4系統の1つが、**アプリ内プロンプト集（`app/prompts`）**である。
+
+* 既存42件・検索・状況別入口・コピーは維持する（変更しない）
+* 各プロンプトに `ChatGPTなどへ共有`（OS／ブラウザ共有）を追加する
+* 共有本文は選択したプロンプト本文とする（プロンプトIDや内部管理情報を強制的に含めない）
+* 共有確認画面・全文編集・Web fallback・共有前の任意保存の正本は `33`
+* プロンプト**定義自体**（本文・ID・件数42本・分類・生成処理 `promptHub.ts` / `mobilePrompts.ts` / `chatgptPrompts.ts` / `generate_prompt_hub.mjs`）は変更しない
+* Web用生成HTML（`docs/mobile-view/prompts.html`）へ同じ共有ボタンを追加するとは決めていない。Phase 16Cの初期対象は**アプリ内プロンプト集**であり、生成HTMLへの共有ボタン追加は本ファイルでは決定しない
+
 ## 2. mobile-inbox運用
 
 ### 2.1 方針

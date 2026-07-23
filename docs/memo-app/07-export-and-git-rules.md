@@ -150,3 +150,12 @@ scripts/export_git_notes.py --type command
 これは本ファイル2章・10章、`13-mobile-view-export.md`、`17-distribution-and-sharing.md` の既存ルールに従う。守秘方針の正本は `23`。
 
 なお、この既定 false は `04-categories-and-tags.md` §2 のカテゴリ別Git候補初期値（worklog 等は true）よりも優先される。優先順位と根拠は `23` §6.1 を参照。
+
+## 14. OS共有とGit・公開出力の境界（2026-07-23 Phase 16C 追記）
+
+Phase 16C（`33-external-handoff-and-sharing.md`）のOS／ブラウザ共有（`ChatGPTなどへ共有`）は、本ファイルのGit候補・Markdown書き出し・公開HTML（`13-mobile-view-export.md`）とは**別機能**である。
+
+* OS共有は、ユーザーが確認した1件の文章を外部アプリへ渡す操作であり、Git候補選別・Markdown書き出し・公開HTML生成には影響しない
+* 現場適応モードから任意保存した質問・報告（`workplace,workplace_question` / `workplace,workplace_report`。`04` §1.2.1）は、引き続き `is_git_candidate = false`（本ファイル §13・`23` §6.1）
+* 外部共有前の守秘確認は `23`／`33` を正本とする（現場適応は守秘チェック必須、通常系は注意文）
+* 本ファイルの既存Gitルール（自動pushしない・Git候補選別・公開出力条件）は変更しない
