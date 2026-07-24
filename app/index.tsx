@@ -120,18 +120,22 @@ export default function HomeScreen() {
         }
       />
 
+      {/* 固定領域：主要4カード＋見出しはFlatListのスクロール内容から外し、一覧の上に通常配置する（16A-3・QMEMO-10/11）。
+          読み込み中・空・取得失敗時も消えない。maxWidth 720・中央寄せ・左右paddingは一覧と揃える（QMEMO-13/4.5） */}
+      <View style={styles.fixedHomeSection}>
+        <FeatureCardGrid />
+        <Text style={styles.sectionTitle} accessibilityRole="header">
+          最近のさくっとメモ
+        </Text>
+      </View>
+
+      {/* 一覧領域：固定領域の下に残る高さ（flex:1）を使い、メモ一覧だけを縦スクロールする（QMEMO-12）。
+          loading/empty/errorは contentContainer の flexGrow:1 で残り領域に中央表示される */}
       <FlatList
+        style={styles.memoList}
         data={visibleMemos}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
-        ListHeaderComponent={
-          <View style={styles.sectionsHeader}>
-            <FeatureCardGrid />
-            <Text style={styles.sectionTitle} accessibilityRole="header">
-              最近のさくっとメモ
-            </Text>
-          </View>
-        }
         ListEmptyComponent={
           loading ? (
             <ListStateView status="loading" />
@@ -200,18 +204,31 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  list: {
-    padding: spacing.md,
-    // FABが最下部のメモ・展開切り替えを覆わないよう下余白を確保
-    paddingBottom: 96,
-    gap: spacing.sm,
+  // 一覧はflex:1で固定領域の下の残り高さを占有し、この領域内だけがスクロールする（QMEMO-12）
+  memoList: {
+    flex: 1,
     width: '100%',
     maxWidth: 720,
     alignSelf: 'center',
   },
-  sectionsHeader: {
+  list: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    // FABが最下部のメモ・展開切り替えを覆わないよう下余白を確保
+    paddingBottom: 96,
+    gap: spacing.sm,
+    // 少件数・空・loading・error時に残り領域を使って中央表示できるようにする
+    flexGrow: 1,
+  },
+  // 固定領域：主要4カード＋見出し。左右位置を一覧（maxWidth 720・中央寄せ・左右padding md）と揃える
+  fixedHomeSection: {
+    width: '100%',
+    maxWidth: 720,
+    alignSelf: 'center',
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
     gap: spacing.lg,
-    marginBottom: spacing.xs,
   },
   cardGrid: {
     flexDirection: 'row',

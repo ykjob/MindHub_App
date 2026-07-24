@@ -1,6 +1,71 @@
 # 最新作業ログ
 
-最終更新：2026-07-24（Phase 16文書統合の再レビュー残3点を文書修正＝文書のみ。下記）。前回：2026-07-23（Phase 16文書統合レビューの反映／新規仕様書3件の統合）／2026-07-15（現場適応キーボードの `on-drag` 副作用修正ほか）
+最終更新：2026-07-24（Phase 16A-3 ホーム領域分離を実装＝コード＋文書。下記）。前回：2026-07-24（Phase 16文書統合 再レビュー残3点の文書修正）／2026-07-23（文書統合レビュー反映・新規仕様書3件統合）／2026-07-15（現場適応キーボード修正ほか）
+
+## Phase 16A-3 ホーム領域分離 実装（2026-07-24、未コミット・確認待ち）
+
+### 今回の作業
+
+Phase 16A-3（`31` §7.3 QMEMO-10〜14）を実装。ホームの主要4カード＋見出しを固定領域へ分離し、「最近のさくっとメモ」一覧だけをスクロール可能にした。Phase 16A-1（入力挙動）・16A-2（キーボード・フッター）・16B・16Cには着手していない。
+
+### 変更前の構造（`app/index.tsx`）
+
+`<View container>` → `<AppHeader>` → `<FlatList>`。主要4カード（`FeatureCardGrid`）と「最近のさくっとメモ」見出しは `FlatList` の `ListHeaderComponent` 内にあり、メモ件数が増えて下スクロールするとカードも画面外へ移動していた。
+
+### 変更後の構造
+
+`<View container>` → `<AppHeader>` → **`<View fixedHomeSection>`（FeatureCardGrid＋見出し。固定）** → `<FlatList style={memoList}>` → `<FAB>`。
+
+* `ListHeaderComponent` を削除し、カード＋見出しを固定 `View` へ移動（通常レイアウト上で一覧の上に配置。`position:absolute`・sticky header・別ScrollViewは不使用）
+* **主要4カードの固定方法**：カード＋見出しを `FlatList` のスクロール内容から外し、`AppHeader` と `FlatList` の間の通常フローに置いた。`FlatList` は `style={{ flex:1, width:'100%', maxWidth:720, alignSelf:'center' }}` で固定領域の下の残り高さを占有
+* **一覧だけをスクロールさせる方法**：`FlatList` に `flex:1` を与え、この領域内だけが縦スクロール。`contentContainerStyle` に `flexGrow:1` を追加し、少件数・空・loading・error 時に残り領域へ中央表示できるようにした（`ListStateView` は `flex:1` 中央寄せ）
+* **3件／全件切替**：既存の `showAllMemos` による `slice(0,3)`／全件切替・`ListFooterComponent` の `すべて表示`／`3件に戻す` を維持。取得（`getAllMemos`）・並び順は無変更。**スクロール位置の明示リセットは追加しない**（技術判断：全件→3件で `data` が短くなり `FlatList` のオフセットは自動でクランプされるため不要。最小変更を優先）
+* **FAB対応**：`/memo/create` 遷移・accessibilityLabel「さくっとメモを作成」・`paddingBottom:96` を維持（位置・余白は無変更）
+* **状態表示**：loading／error（再試行）／empty（「さくっとメモがありません」）を従来どおり `ListEmptyComponent` で一覧領域内に表示。カード＋見出しは固定領域にあるため空・loading・error 時も消えない
+* **レイアウト幅**：固定領域と一覧の両方に `maxWidth:720`・`alignSelf:'center'`・左右 `spacing.md` を適用し、左右位置を揃えた
+
+無変更：カード名／説明／表示順（さくっとメモ→現場適応→記録確認→プロンプト集）／遷移先／2×2方針／accessibility label・hint／設定ボタン／AppHeader文言／`FEATURE_CARDS` 定義／`renderItem`／メモ取得・カテゴリ表示・日付表示・`SyncStatusBadge`。route・DB・依存・`app.json`・versionCodeは無変更。共通部品（`AppHeader`・`ListStateView`・`SyncStatusBadge`・`theme`）は無変更。
+
+### 機械確認
+
+* `npx tsc --noEmit` 合格
+* `npx expo export --platform web` 成功（バンドルエラー0・`dist` は確認後削除＝gitignore対象）
+* `npx expo-doctor` 17/18 合格。失敗1件は**既存のパッチ版差**（`expo` 期待 `~54.0.36`／検出 `54.0.35`）で**本変更と無関係**。`package.json`・依存は変更しないため未修正（推測で成功扱いにしない）
+* `git diff --check` 問題なし（LF/CRLF通知のみ）
+
+### Web確認（ヘッドレスChrome）
+
+他スレッド無干渉：専用ポート**8114**新規サーバー・使い捨て user-data-dir（使い捨てブラウザ内DB）・puppeteer-core はリポジトリ外 scratchpad に隔離インストール（repo の `package.json`/lock 無変更）。確認後に8114のみ停止。repo working tree にテスト依存・プロファイル・ログの混入なし（`git status` は `app/index.tsx` のみ）。
+
+合格（**Web確認済み**）：
+
+* 6幅（360/390/412/480/768/1024）で**横スクロールなし**・4カード表示
+* 空状態：4カード＋「最近のさくっとメモ」見出し＋「さくっとメモがありません」が**共存**（カード消えない）・カード表示順維持
+* UIから5件作成 → **初期3件表示** → `すべて表示`で**5件** → `3件に戻す`で**3件**、切替後もカード＋見出し固定
+* スクロール：一覧のスクロール可能コンテナが存在し scrollTop 増加、**主要カードの位置が不変（top 92→92）・見出しの位置が不変（`role=heading` top 295→295）** ＝固定領域として機能
+* FAB（さくっとメモを作成）存在
+* **console.error 0・pageerror 0・unhandledrejection 0・VirtualizedList入れ子警告 0**
+
+### 未確認（推測で合格にしない）
+
+* **読み込み中・取得失敗・再試行**の各状態はライブ再現せず**コードレビューのみ**。今回の変更は loading/error の判定・`ListStateView` 呼び出しを改変しておらず（基準版と同一経路）、カード＋見出しは `FlatList` の外＝どの一覧状態でも表示される構造だが、DB失敗注入によるライブ再現は本ターン未実施
+* **FABと最終項目・切替ボタンの重なり**は精密未測定（`paddingBottom:96` 維持・FABは右下 absolute で構造上非重複）
+* **Expo Go 未確認・EAS APK 未確認**：ネイティブ依存・Android設定・SDK・ビルド設定を変更していないためEASビルドは不要。Expo Go 実機確認は Phase 16A-1・16A-2 と合流後に Phase 16A 全体で行う想定
+
+### 状態区分
+
+* Web確認済み：QMEMO-10〜13の主要挙動・幅別・空・3件・全件・スクロール固定
+* コードレビュー済み：loading/error 状態表示・FAB非重複
+* Expo Go 未確認 / EAS APK 未確認：全項目
+* **Phase 16A-1・16A-2 は未着手。Phase 16A 全体は未完了**
+
+### 非対象・停止条件
+
+commit・push・versionCode変更・EAS/APKビルドは未実施。変更ファイルは `app/index.tsx`（コード）＋管理文書（`current-tasks.md`・本ファイル・`10` §21・`31` §16）のみ。
+
+---
+
+
 
 ## Phase 16文書統合 再レビュー残3点の修正（2026-07-24、文書のみ・未コミット）
 
