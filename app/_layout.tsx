@@ -2,6 +2,7 @@ import { Stack } from 'expo-router';
 import { SQLiteProvider, type SQLiteDatabase } from 'expo-sqlite';
 import { StatusBar } from 'expo-status-bar';
 import { Platform } from 'react-native';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { DB_NAME, runMigrations } from '../src/db/database';
 import NativeHeaderBackButton from '../src/components/NativeHeaderBackButton';
 
@@ -33,6 +34,9 @@ async function initDatabase(db: SQLiteDatabase): Promise<void> {
 
 export default function RootLayout() {
   return (
+    // KeyboardProvider は keyboard-controller の KeyboardAvoidingView（作成・編集画面）に必要。
+    // preload={false} で起動時のキーボード一瞬表示を避ける。既存構造はラップのみで無変更。
+    <KeyboardProvider preload={false}>
     <SQLiteProvider databaseName={DB_NAME} onInit={initDatabase} onError={handleDatabaseError}>
       <StatusBar style="dark" />
       <Stack
@@ -102,5 +106,6 @@ export default function RootLayout() {
         />
       </Stack>
     </SQLiteProvider>
+    </KeyboardProvider>
   );
 }

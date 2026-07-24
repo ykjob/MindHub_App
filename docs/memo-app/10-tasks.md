@@ -405,14 +405,17 @@ MVP実装（2026-07-09 実装。未コミット）。
 
 ### 16A：さくっとメモ入力・ホーム操作性改善（正本 `31`）
 
-* [ ] 16A-1 入力挙動（`31` §7.1・§15）：作成・編集の本文内スクロール／カーソル可視性／本文下部の安全余白
+* [x] 16A-1 入力挙動（`31` §7.1・§15）＝**完了（2026-07-24・Expo Go確認済み／EAS APK未確認）**：作成・編集の本文内スクロール／カーソル可視性／本文下部の安全余白
+  * 実装：`react-native-keyboard-controller`＋`reanimated`＋`worklets` 導入、`KeyboardProvider`（`_layout.tsx`）、単一 `KeyboardAvoidingView`（`behavior="height"`・Android限定・`keyboardVerticalOffset = insets.top+insets.bottom+spacing.sm`）、作成/編集の自動フォーカス（Android=InteractionManager／iOS=onAccessoryReady／Web=onAccessoryReady）、編集は初回カーソル末尾（selection一度制御→非制御へ）。QMEMO-01〜09すべて合格（`31` §16・§17）。tsc合格・expo export(web)成功・Web回帰合格・Android Expo Go実機確認済み・EAS APK未確認
   * 仕様書：`31`
   * 変更対象候補：`app/memo/create.tsx`・`app/memo/[id]/edit.tsx`・（必要なら）`src/components/FormFooterBar.tsx` または入力画面固有の小部品
   * 完了条件：`31` Gate B（入力画面Web確認）
   * Web確認：360/390/768幅・短文/長文・保存失敗時の入力維持
   * Android実機確認：`31` Gate D（音声入力/長文一括・キーボード表示中スクロール・現在行が隠れない）
   * 回帰確認：作成→詳細→編集→再表示、削除・本文コピー・GitHubアップロード導線
-* [ ] 16A-2 キーボード・フッター（`31` §7.2・§16）：Android/iOS/Webの保存・キャンセル操作／二重操作・失敗状態／入力欄との非重複
+* [x] 16A-2 キーボード・フッター（`31` §7.2・§16）＝**完了（2026-07-24・Expo Go確認済み／EAS APK未確認）**：Android/iOS/Webの保存・キャンセル操作／二重操作・失敗状態／入力欄との非重複
+  * 実装：キーボード表示中も保存・キャンセルを完全表示（`keyboardVerticalOffset` を Safe Area合計＋`spacing.sm(8dp)` とし、実機計測でフッター上下余白 12dp/12dp を確認）。`FormFooterBar` 本体は無変更（`FOOTER_PADDING=12`・`paddingBottom: FOOTER_PADDING+insets.bottom`・iOS `InputAccessoryView` 維持）。QMEMO-05/06/07 合格。保存処理（QMEMO-08）・キャンセル（QMEMO-09）は既存実装のまま無変更。tsc合格・expo export(web)成功・Web回帰合格・Android Expo Go実機確認済み・EAS APK未確認
+  * ＋詳細画面の下部Safe Area余白（今回同時対応）：`app/memo/[id]/index.tsx`・`app/notes/[id]/index.tsx` の ScrollView `contentContainerStyle` に `paddingBottom: spacing.lg + insets.bottom`（通常16dp＋端末下部Safe Area）を追加。左右・上padding・ボタン配置は無変更。両詳細画面 Android実機確認済み
   * 仕様書：`31`
   * 変更対象候補：`app/memo/create.tsx`・`app/memo/[id]/edit.tsx`・`src/components/FormFooterBar.tsx`
   * **既存の保存処理を新規に書き直すタスクにしない**：保存中の二重実行防止・保存中表示・保存失敗時の本文/カテゴリ維持・再保存（QMEMO-08）・iOS `InputAccessoryView`・`FormFooterBar` のSafe Area下部余白は既に実装済み（`31` §16）。まず既存実装を維持して検証し、受入条件を満たさない部分（主にAndroidのキーボード表示時操作・長文時の最終行可視性）だけを修正する。共通化を理由に保存ロジックを書き換えない

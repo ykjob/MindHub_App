@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import { router, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { spacing } from '../../../src/theme';
 import { getMemoById } from '../../../src/features/memos/memoRepository';
 import { deleteMemo } from '../../../src/features/memos/memoService';
 import { uploadMemo } from '../../../src/features/github/githubUploadService';
@@ -25,6 +27,7 @@ import { formatDisplayDate } from '../../../src/utils/date';
 export default function MemoDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const db = useSQLiteContext();
+  const insets = useSafeAreaInsets();
   const [memo, setMemo] = useState<Memo | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -119,7 +122,14 @@ export default function MemoDetailScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[
+        styles.content,
+        // 最下部の操作ボタンと画面下端の間に、通常余白(spacing.lg=16dp)＋端末の下部Safe Areaを確保する。
+        { paddingBottom: spacing.lg + insets.bottom },
+      ]}
+    >
       {/* 本文 */}
       <View style={styles.section}>
         <Text style={styles.bodyText}>{memo.body}</Text>

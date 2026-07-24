@@ -8,6 +8,8 @@ import {
 } from 'react-native';
 import { router, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { spacing } from '../../../src/theme';
 import { getNoteById } from '../../../src/features/notes/noteRepository';
 import {
   archiveNote,
@@ -35,6 +37,7 @@ import ListStateView from '../../../src/components/ListStateView';
 export default function NoteDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const db = useSQLiteContext();
+  const insets = useSafeAreaInsets();
   const [note, setNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -149,7 +152,14 @@ export default function NoteDetailScreen() {
   const hasBody = note.body.trim().length > 0;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[
+        styles.content,
+        // 最下部の操作ボタンと画面下端の間に、通常余白(spacing.lg=16dp)＋端末の下部Safe Areaを確保する。
+        { paddingBottom: spacing.lg + insets.bottom },
+      ]}
+    >
       <View style={styles.section}>
         <View style={styles.titleRow}>
           <Text style={styles.title} accessibilityRole="header">

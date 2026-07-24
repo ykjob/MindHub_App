@@ -1,6 +1,45 @@
 # 最新作業ログ
 
-最終更新：2026-07-24（Phase 16A-3 ホーム領域分離を実装＝コード＋文書。下記）。前回：2026-07-24（Phase 16文書統合 再レビュー残3点の文書修正）／2026-07-23（文書統合レビュー反映・新規仕様書3件統合）／2026-07-15（現場適応キーボード修正ほか）
+最終更新：2026-07-24（Phase 16A-1／16A-2 完了＝作成・編集画面のAndroidキーボード操作性改善＋詳細画面下部Safe Area。下記）。前回：2026-07-24（Phase 16A-3 ホーム領域分離）ほか
+
+## Phase 16A-1／16A-2 完了（2026-07-24、未コミット・commit承認待ち）
+
+### 問題
+Android実機で、さくっとメモ作成・編集画面のキーボード表示時に、保存・キャンセルがキーボードに隠れる／入力欄が縮まない／編集時のカーソルが中途半端になる／「編集」を押してもキーボードが自動で開かない、等の操作性問題があった。
+
+### 試したが不採用となった方式（簡潔）
+1. **手動 `Keyboard` event ＋ `measureInWindow` で inset 算出**：端末のナビ方式・edge-to-edge・resize挙動でズレるため不採用。
+2. **`react-native-keyboard-controller` の `KeyboardAvoidingView` `behavior="height"`（offsetなし）**：フッターの上昇不足。
+3. **`behavior="padding"` ＋ `keyboardVerticalOffset={headerHeight}`**：`useHeaderHeight()` が実機で異常値（114→299）を返し過剰縮小し本文が2行に。
+4. **入力領域KAV＋`KeyboardStickyView` 併用**：KAV縮小とStickyView平行移動が二重になりフッターが画面外へ。
+5. **`insets.top + insets.bottom` のみ**：実機計測で下余白が約4dpと不足。
+→ **最終的に `insets.top + insets.bottom + spacing.sm(8dp)` を採用**（下記）。
+
+### 実機診断方法・座標系補正
+- 一時診断コード（`[QMEMO-KBD-DIAG]`・`[QMEMO-FOOTER-GAP]`）を Android限定で仕込み、`measureInWindow`／`Keyboard` イベントで KAV・フッター・キーボードの実座標を Metro ログへ出力して原因を数値特定（現在は**削除済み・残存0件**）。
+- **座標系補正**：`measureInWindow`（アプリウィンドウ座標＝status bar 分下がる）と `keyboard.endCoordinates.screenY`（フルスクリーン座標）の原点差を `insets.top` で補正。補正後の実距離で `bottomGap≈4dp` を確認し、`+8dp(spacing.sm)` で **上下余白 12dp／12dp** に一致（実機計測）。
+
+### 採用した実装
+- **依存追加**：`react-native-keyboard-controller`（package.json `1.18.5`／lock `1.18.5`）、`react-native-reanimated`（`~4.1.1`／lock `4.1.7`）、`react-native-worklets`（`0.5.1`／lock `0.5.1`）。SDK54同梱ネイティブ・Babelは `babel-preset-expo` 自動設定（`babel.config.js` 新規なし）。
+- **`app/_layout.tsx`**：`<KeyboardProvider preload={false}>` で既存構造をラップ。
+- **作成・編集画面**：単一 `KeyboardAvoidingView`（`behavior="height"`・`enabled={Platform.OS==='android'}`）／`keyboardVerticalOffset = insets.top + insets.bottom + spacing.sm`。
+- **自動フォーカス**：Android＝画面遷移後 `InteractionManager.runAfterInteractions()`＋`requestAnimationFrame` で1回（固定`setTimeout`なし・二重focus防止ref・アンマウント後focus防止）。iOS＝`onAccessoryReady`（InputAccessoryView維持）。Web＝`onAccessoryReady`。`onAccessoryReady` は Android では早期return（二重focus防止）。
+- **編集時の初回末尾カーソル**：DBロード＆遷移完了後、初回だけカーソルを本文末尾へ（`selection` を一度制御→`onSelectionChange` で `undefined` に戻し非制御化）。本文途中の編集自由・入力中に末尾へ戻らない。作成画面は本文空のため selection制御なし。
+- **詳細画面 Safe Area**：`app/memo/[id]/index.tsx`・`app/notes/[id]/index.tsx` の ScrollView `contentContainerStyle` に `paddingBottom: spacing.lg + insets.bottom`（通常16dp＋端末下部Safe Area）。左右・上padding・ボタン配置は無変更。
+
+### 確認結果
+- **QMEMO-01〜09 すべて合格**（`31` §16・§17）。
+- **Android（Expo Go）**：作成・編集・両詳細画面すべて実機合格（自動キーボード表示・カーソル末尾・追記・フッター12/12・詳細下部余白）。
+- **Web**：`tsc` 合格・`expo export --platform web` 成功・ヘッドレスChrome回帰（作成/編集/自動フォーカス経路・カーソル末尾・中途編集で末尾へ戻らない・両詳細画面の下部余白＝Web insets.bottom=0で16px・console/pageerror/unhandledrejection 0）。
+- **expo-doctor**：17/18（失敗1件は既存の `expo 54.0.35` vs `~54.0.36` パッチ差＝本作業と無関係・未修正）。
+- **EAS APK：未確認。iOS実機・他Android機種：未確認。**
+
+### 非対象・停止条件
+`FormFooterBar` 本体・DB・route・保存処理・カテゴリ・app.json・eas.json・versionCode は無変更。新規依存は3件のみ。**stage・commit・push・EASビルド・versionCode変更は未実施（commit承認待ち）**。変更ファイル：`app/_layout.tsx`・`app/memo/create.tsx`・`app/memo/[id]/edit.tsx`・`app/memo/[id]/index.tsx`・`app/notes/[id]/index.tsx`・`package.json`・`package-lock.json`。
+
+---
+
+
 
 ## Phase 16A-3 ホーム領域分離 実装（2026-07-24、未コミット・確認待ち）
 
