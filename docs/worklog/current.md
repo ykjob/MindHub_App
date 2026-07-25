@@ -1,8 +1,22 @@
 # 最新作業ログ
 
-最終更新：2026-07-24（Phase 16A-1／16A-2 完了＝作成・編集画面のAndroidキーボード操作性改善＋詳細画面下部Safe Area。下記）。前回：2026-07-24（Phase 16A-3 ホーム領域分離）ほか
+最終更新：2026-07-25（状態更新のみ＝下記Phase 16Aエントリの「未コミット」表記を実状態に合わせて追記。コード変更なし）。前回：2026-07-24（Phase 16A-1／16A-2 完了＝作成・編集画面のAndroidキーボード操作性改善＋詳細画面下部Safe Area）、2026-07-24（Phase 16A-3 ホーム領域分離）ほか
 
-## Phase 16A-1／16A-2 完了（2026-07-24、未コミット・commit承認待ち）
+## 状態更新（2026-07-25、文書のみ）
+
+下記のPhase 16A関連エントリは、記録当時いずれも「未コミット・確認待ち」だったが、**その後commit・push済み**であることを追記する（当時の経過・計測値・確認結果は改変せず残す）。
+
+* 16A-3 commit：`130910c`（feat: separate home cards from memo list）
+* 16A-1／16A-2 commit：`d0e834be324f1c3909da3b1545c5eba7a215c269`（feat: improve quick memo keyboard UX and detail spacing）
+* HEAD = origin/main = `d0e834be324f1c3909da3b1545c5eba7a215c269`、ahead/behind 0/0、working tree clean
+* **Phase 16A（16A-1／16A-2／16A-3）は完了**
+* 未確認のまま残す事項：EAS APK／iOS実機／Pixel以外のAndroid機種／3ボタンナビ環境／Gboard以外のキーボード／16A-3の読み込み中・取得失敗・再試行状態のライブ再現（コードレビューのみ）
+* `expo-doctor` は 17/18（失敗1件は `expo 54.0.35` vs 期待 `~54.0.36` の既存パッチ差＝本作業と無関係。ユーザー承認なしに更新しない）
+* 今回の状態更新は文書のみ。commit・push・EASビルド・versionCode変更は未実施
+
+---
+
+## Phase 16A-1／16A-2 完了（2026-07-24、未コミット・commit承認待ち／その後commit・push済み＝上記「状態更新（2026-07-25）」参照）
 
 ### 問題
 Android実機で、さくっとメモ作成・編集画面のキーボード表示時に、保存・キャンセルがキーボードに隠れる／入力欄が縮まない／編集時のカーソルが中途半端になる／「編集」を押してもキーボードが自動で開かない、等の操作性問題があった。
@@ -35,13 +49,13 @@ Android実機で、さくっとメモ作成・編集画面のキーボード表�
 - **EAS APK：未確認。iOS実機・他Android機種：未確認。**
 
 ### 非対象・停止条件
-`FormFooterBar` 本体・DB・route・保存処理・カテゴリ・app.json・eas.json・versionCode は無変更。新規依存は3件のみ。**stage・commit・push・EASビルド・versionCode変更は未実施（commit承認待ち）**。変更ファイル：`app/_layout.tsx`・`app/memo/create.tsx`・`app/memo/[id]/edit.tsx`・`app/memo/[id]/index.tsx`・`app/notes/[id]/index.tsx`・`package.json`・`package-lock.json`。
+`FormFooterBar` 本体・DB・route・保存処理・カテゴリ・app.json・eas.json・versionCode は無変更。新規依存は3件のみ。**（記録当時）stage・commit・push・EASビルド・versionCode変更は未実施（commit承認待ち）→ その後 commit `d0e834be324f1c3909da3b1545c5eba7a215c269`・push済み（2026-07-25追記。HEAD = origin/main、ahead/behind 0/0、working tree clean）。EASビルド・versionCode変更は引き続き未実施**。変更ファイル：`app/_layout.tsx`・`app/memo/create.tsx`・`app/memo/[id]/edit.tsx`・`app/memo/[id]/index.tsx`・`app/notes/[id]/index.tsx`・`package.json`・`package-lock.json`。
 
 ---
 
 
 
-## Phase 16A-3 ホーム領域分離 実装（2026-07-24、未コミット・確認待ち）
+## Phase 16A-3 ホーム領域分離 実装（2026-07-24、未コミット・確認待ち／その後commit・push済み＝上記「状態更新（2026-07-25）」参照）
 
 ### 今回の作業
 
@@ -96,11 +110,11 @@ Phase 16A-3（`31` §7.3 QMEMO-10〜14）を実装。ホームの主要4カー�
 * Web確認済み：QMEMO-10〜13の主要挙動・幅別・空・3件・全件・スクロール固定
 * コードレビュー済み：loading/error 状態表示・FAB非重複
 * Expo Go 未確認 / EAS APK 未確認：全項目
-* **Phase 16A-1・16A-2 は未着手。Phase 16A 全体は未完了**
+* **（記録当時）Phase 16A-1・16A-2 は未着手。Phase 16A 全体は未完了** → その後 16A-1／16A-2 も実装・Android Expo Go確認・commit・push済みで、**Phase 16A（16A-1／16A-2／16A-3）は完了**（2026-07-25追記。上記「状態更新」参照。EAS APK等の未確認事項は残す）
 
 ### 非対象・停止条件
 
-commit・push・versionCode変更・EAS/APKビルドは未実施。変更ファイルは `app/index.tsx`（コード）＋管理文書（`current-tasks.md`・本ファイル・`10` §21・`31` §16）のみ。
+（記録当時）commit・push・versionCode変更・EAS/APKビルドは未実施 → その後 commit `130910c`・push済み（2026-07-25追記。HEAD = origin/main = `d0e834b`、ahead/behind 0/0、working tree clean）。versionCode変更・EAS/APKビルドは引き続き未実施。変更ファイルは `app/index.tsx`（コード）＋管理文書（`current-tasks.md`・本ファイル・`10` §21・`31` §16）のみ。
 
 ---
 
