@@ -464,3 +464,52 @@ Gate Dの共有・守秘確認は、共通共有基盤（16C-1）と現場適応
 - 保存の二重実行防止・保存失敗時の質問文維持
 - 共有確認画面（`ChatGPTなどへ共有`）への接続・必須守秘チェック・報告文の共有/保存は **16C-3** が担当する（`33` §19）。16B-3では共有処理を実装しない
 - Android実機・回帰確認は保存部分について行う
+
+## 21. 実装状況（2026-07-25 追記。未コミット・commit承認待ち）
+
+Phase 16B（16B-1／16B-2／16B-3）を関連1機能としてまとめて実装した。本章 §1〜§20 の製品判断は変更していない（実装状況の記録のみ）。Phase 16Cの共有・OS共有・守秘3チェック・報告文保存は実装していない（境界確認のみ）。
+
+### 実装ファイル
+- 新規：`src/features/workplace/questionTiming.ts`（16B-1 判定ロジック・純粋TS）／`src/features/workplace/workplaceHandoff.ts`（一時引き継ぎA/B分離・set/get(純粋読み取り)/clearの3操作＝Strict Mode安全）／`app/workplace/question-timing.tsx`（16B-2 判定画面・`/workplace/question-timing`）
+- 変更：`app/_layout.tsx`（Stack.Screen追加・戻るfallback `/workplace/stuck`）／`app/workplace/stuck.tsx`（出力後 `outputAction`「質問タイミングを確認」）／`app/workplace/question.tsx`（引き継ぎread＋`saveQuestionNote` の `onSave`＋`saveLabel="記録として保存"`＋`saveHint`＋`banner`）／`src/components/WorkplaceSceneForm.tsx`（optional `outputAction`・`saveHint`。未指定の既存5場面は挙動不変）／`src/features/workplace/workplaceService.ts`（`saveQuestionNote` 追加。module-private `saveWorkplaceNote` 共用で private・Git候補false・`workplace,workplace_question`・thought・source=manual を強制）／`src/features/workplace/workplaceTags.ts`（古いコメントのみ更新・定数値不変）
+- 無変更：DB・schema・依存・`app.json`・`eas.json`・versionCode・SDK。新規ネイティブ依存なし。
+
+### 実装上の設計判断
+- 判定ロジックはReact非依存の純粋関数。危険・影響条件は「未回答／該当なし／1件以上」を型（`MultiAnswer`）で区別し、空配列を自動で該当なしにしない（§4.3）。現場ルール優先は判定結果と独立のフラグ（§4.8）。
+- 質問タイミング確認画面は入力＋結果を同一1画面・選択式のみ・自由文入力なし・`KeyboardAvoidingView` を追加しない。画面内AppHeaderを持たずStackヘッダーのみ（二重ヘッダーなし）。
+- 一時引き継ぎはURL/params/SQLite/ログに本文を載せず、モジュール内一時変数で保持（§13）。set／get（純粋読み取り・副作用なし）／clear の3操作に分け、画面は `useState` 初期化関数で get・初回commit後に `useEffect` で clear する（React Strict Modeで初期化関数が複数回呼ばれても外部状態を削除しない安全構造）。
+- 保存は既存 `saveWorkplaceNote` を共用する安全ラッパー `saveQuestionNote` を追加し、呼び出し側から visibility・Git候補・場面タグを変更できない構造（§14・`23` §5.1）。報告文保存は16C-3で同じ内部処理を共用予定。
+
+### 確認結果
+- **判定ロジック単体（Gate A）＝合格**：リポジトリ外scratchpadで実モジュールをローカルtscコンパイル→node実行し、§15.2 全ケースを網羅（28/28）。ハーネス・生成物は確認後に完全削除。
+- **Strict Mode安全化の再検証（2026-07-25・commit前修正）**：引き継ぎを `consume`（読み取り＋削除）から `get`（純粋）＋`clear` へ分離後、実 `workplaceHandoff.ts`・`questionTiming.ts` をscratchpadで再コンパイル→node実行し、get純粋性（2回getで同値）・set上書き・clear冪等・A/B独立・Strict Mode相当の二重init read（clear前は同値）を含め **45/45合格**（handoff 17＋判定 28）。対象Web回帰24件合格（下記Web確認の「詰まり→判定→戻る→入力変更→再判定で最新入力」「質問再訪で古い値残留なし」「直アクセス残留なし」）。tsc・expo export web・expo-doctor 17/18を再実行し合格。
+- **機械確認**：`tsc --noEmit` 合格／`expo export --platform web` 成功（バンドルエラー0）／`expo-doctor` 17/18（失敗1件は既存 `expo 54.0.35` vs `~54.0.36` の無関係パッチ差）／`git diff --check` 問題なし。
+- **Web確認（Gate B・Gate C・Gate E）**：6幅横スクロールなし・6入力群到達・二重ヘッダーなし／詰まり→判定→質問の引き継ぎ（確認したいこと→聞きたいこと・状況→背景・エラー→背景末尾・試したこと→試したこと・判定→急ぎ度候補／checked空・decision空・理由は質問へ入らない・URL非露出）／入力変更で結果クリア／3結果再現と各からの質問遷移／investigate次に行うこと最大3／スキップ（入力不足でも可・急ぎ度空・理由なし）／保存（二重保存なし・保存後再保存不可・編集で再保存可・保存ヒントに終業前文言なし・`/notes` 詳細で type=thought/tags=workplace,workplace_question/visibility=private/Git候補false を確認）／回帰（5場面・入口カード不変・他場面に追加操作なし・終業前保存/翌朝再開/戻る維持）／選択状態は☑☐◉○グリフ＋roleで色以外にも判別可／console.error・pageerror・unhandledrejection・VirtualizedList警告0。
+- **Gate D（共有・守秘）**：16Cとの連携Gートのため16B単体では対象外（未合格を理由に16Bを不合格にしない）。
+- **Android実機（Gate B/C/E のAndroid部分）＝Android Expo Go（Pixel・2026-07-25）確認済み・合格**。**Gate A＝合格／Gate B・C・E＝Web・Android Expo Go合格**（新規ネイティブ依存なし＝EAS APK不要）。EAS APK・iOS・Pixel以外のAndroid機種は引き続き未確認。
+
+### 未確認
+- Android Expo Go（詰まり→判定→質問の遷移・6入力群の操作・3結果・スキップ・引き継ぎ・戻る・保存・保存後のコピー・長文と日本語・画面下部操作への到達）。
+- EAS APK・iOS・他Android機種。
+
+## 22. UX改善追加（2026-07-25 追記・commit前）
+
+現場適応モードの全画面遷移テスト（Web実測38件・**高重大度問題なし**）で、質問文作成後の完了導線不足と「整理する」後のキーボード残りを確認したため、次の2点を追加した。本章の判定条件・受入条件（§10〜§18）は変更していない。
+
+### 追加内容
+1. **整理するでキーボードを閉じる**：`src/components/WorkplaceSceneForm.tsx` の `handleBuild` 冒頭で `Keyboard.dismiss()`。対象＝作業開始/詰まり/質問/報告/終業前（テキスト入力のある5場面共通）。質問タイミング確認画面は選択式のため対象外。入力値・生成内容・保存/コピー処理は無変更（`setTimeout`・自動スクロール・KeyboardAvoidingView変更・依存追加なし）。
+2. **質問文作成後の完了導線**：`WorkplaceSceneForm` に optional `completionActions{primary, secondary}` を追加し、**質問文作成画面（`app/workplace/question.tsx`）だけ**に「完了後の移動」（主要＝ホームへ戻る＝`router.dismissTo('/')`／補助＝現場適応へ戻る＝`router.dismissTo('/workplace')`）を表示。中間画面（質問タイミング・詰まり）や重複入口を閉じて戻すため `dismissTo`（expo-router 6.0.24）を使用。outputがある間だけ表示（保存前後・失敗後も維持）・入力変更で非表示・コピー/保存とは別セクション・全幅縦配置・44相当。**保存後の自動遷移はしない**。他4場面には完了導線を追加しない。
+
+### 確認
+- `tsc --noEmit` 合格／`expo export --platform web` 成功／`expo-doctor` 17/18（既存パッチ差）／`git diff --check` 問題なし。
+- Web（専用ポート8114・Android用8115は維持・確認後8114停止）：追加分34件＋ブラウザ戻り内容確認8件合格。表示条件・ホーム/現場適応へ戻る（フロー/カード/直アクセス）・保存前後の完了導線・保存直後の自動移動なし・保存後コピー可・回帰（他4場面に完了導線なし・stuckの質問タイミングを確認維持・question のコピー/保存維持・終業前保存/翌朝再開・question-timingの戻る維持）・console/pageerror/unhandledrejection 0。ホーム起点フローでのブラウザ戻りで質問/判定/詰まりが復活しないことを内容ベースで確認。
+- **Android Expo Go：Pixel実機確認済み・合格（2026-07-25）**（整理する後のキーボード閉／完了導線表示／保存後の自動移動なし／保存後コピー・ホーム・現場適応へ戻る／Androidハードウェア戻りで中間画面が復活しない＝`dismissTo` のネイティブ意味）をすべて実機確認。
+
+### 結果生成後の自動スクロール（2026-07-25 追記・commit前）
+「整理する」「判定する」後、結果は同じ画面の下側に表示されるが手動スクロールが必要だったため、明示操作直後だけ結果欄の先頭へ自動スクロールする。判定条件・受入条件は変更していない。
+
+- **整理する**（全5場面・`WorkplaceSceneForm`）：`Keyboard.dismiss()` の後、**出力欄の先頭**へ自動スクロール。
+- **判定する**（`question-timing.tsx`）：判定成功時は**結果ブロック先頭**（`siteRulePriority` があれば現場ルール優先注意の先頭、なければ判定結果見出し）へ、入力不足時は**不足項目案内**へ自動スクロール。スキップ（判定せず質問文を作る）は別画面遷移のため対象外。
+- **方式**：ScrollViewのref＋出力/結果欄（ScrollViewの直接の子）の `onLayout` で得た content内Y座標＋明示操作直後だけ有効な待ちフラグ。`scrollTo({ y: max(y - 余白, 0), animated:true })`。**初回表示は onLayout＋待ちフラグ／再押下（結果表示済み・入力不変で onLayout が再発火しない場合）は ref 保持したY座標へ `requestAnimationFrame` で1回スクロール（unmount時に `cancelAnimationFrame` で解除）**。**固定setTimeout・measureInWindow・screenY/絶対座標の直接比較・本文長さ推測・レンダーごとのscrollToは不使用**。新規依存なし。
+- **自動スクロールしない**：入力変更でoutput/結果が消えるとき・コピー・保存・保存成功/失敗・完了後の移動・戻る復帰・直アクセス・通常再レンダー（待ちフラグを立てないため）。
+- **確認**：`tsc`／`expo export web`／`expo-doctor` 17/18／`git diff --check` 問題なし。Web（8114・8115維持・確認後停止）**47件合格**：5場面で出力見出しが上部・横スクロールなし・入力維持／長文で見出し＋本文先頭が上部（末尾に飛ばない）／判定3結果＋現場ルール優先で結果先頭が上部・操作到達／入力不足で不足案内へ・結果非生成・非クラッシュ／入力変更で結果消去＋下方向へ自動スクロールしない・再判定で1回再スクロール／回帰（スキップ・保存・保存後コピー・完了導線・詰まり導線・終業前/翌朝再開）／console・pageerror・unhandledrejection 0。**再押下スクロール修正（2026-07-25・commit前）**：結果表示済みで入力不変のまま再押下すると onLayout 非発火で再スクロールしない問題を確認し、Y座標ref＋rAF方式で修正。Web再確認＝再押下8件＋§6回帰15件すべて合格。**Android Expo Go：Pixel実機確認済み・合格（2026-07-25）**（実機での見え方・長文・繰り返さない・**初回と再押下いずれも移動**・戻る/入力変更で勝手に動かない・下部操作到達をすべて確認）。

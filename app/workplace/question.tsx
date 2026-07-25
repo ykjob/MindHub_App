@@ -1,11 +1,46 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { router } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
 import WorkplaceSceneForm from '../../src/components/WorkplaceSceneForm';
-import { buildQuestionText } from '../../src/features/workplace/workplaceService';
+import {
+  buildQuestionText,
+  saveQuestionNote,
+} from '../../src/features/workplace/workplaceService';
+import {
+  getQuestionFormHandoff,
+  clearQuestionFormHandoff,
+} from '../../src/features/workplace/workplaceHandoff';
 
 export default function WorkplaceQuestionScreen() {
+  const db = useSQLiteContext();
+
+  // 質問タイミング確認からの引き継ぎ。useState初期化関数では純粋に get するだけ（副作用なし＝Strict Mode安全）。
+  // 初回commit後に useEffect で1回だけ clear する（無ければ従来どおり空フォーム）。
+  const [handoff] = useState(() => getQuestionFormHandoff());
+  useEffect(() => {
+    clearQuestionFormHandoff();
+  }, []);
+
+  const initialValues = handoff
+    ? {
+        ask: handoff.ask,
+        background: handoff.background,
+        checked: handoff.checked,
+        tried: handoff.tried,
+        decision: handoff.decision,
+        urgency: handoff.urgency,
+      }
+    : undefined;
+
   return (
     <WorkplaceSceneForm
-      intro="質問する前に、相手が答えやすい形に整理します。出力はコピーしてチャットやメールに貼れます（保存はしません）。AI・チャット・メールに貼る前に、顧客名・会社名・個人名・内部URL・システム名・社内マニュアル本文・職場固有の判断基準は一般化してから使ってください。"
+      intro="質問する前に、相手が答えやすい形に整理します。出力はコピーしてチャットやメールに貼れます。AI・チャット・メールに貼る前に、顧客名・会社名・個人名・内部URL・システム名・社内マニュアル本文・職場固有の判断基準は一般化してから使ってください。"
+      banner={
+        handoff
+          ? '詰まり記録から内容を引き継ぎました。必要に応じて編集してください。'
+          : undefined
+      }
+      initialValues={initialValues}
       fields={[
         { key: 'ask', label: '聞きたいこと', placeholder: '結論として一番聞きたいこと' },
         { key: 'background', label: '背景', placeholder: 'どういう作業・状況での質問か' },
@@ -24,6 +59,23 @@ export default function WorkplaceQuestionScreen() {
           urgency: v.urgency,
         })
       }
+      onSave={(text) => saveQuestionNote(db, text).then(() => undefined)}
+      saveLabel="記録として保存"
+      saveHint="保存するとprivate・Git候補外で記録されます。"
+      // 質問文作成後の完了導線（Phase 16B）。中間画面（質問タイミング・詰まり等）を閉じて戻すため
+      // dismissTo を使う（back/push/replaceだと中間履歴や重複入口が残り得る）。自動遷移はしない。
+      completionActions={{
+        primary: {
+          label: 'ホームへ戻る',
+          accessibilityLabel: 'ホームへ戻る',
+          onPress: () => router.dismissTo('/'),
+        },
+        secondary: {
+          label: '現場適応へ戻る',
+          accessibilityLabel: '現場適応へ戻る',
+          onPress: () => router.dismissTo('/workplace'),
+        },
+      }}
     />
   );
 }

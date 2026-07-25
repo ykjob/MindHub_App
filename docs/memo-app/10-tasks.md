@@ -434,29 +434,33 @@ MVP実装（2026-07-09 実装。未コミット）。
 
 ### 16B：質問タイミング判断支援（正本 `32`）
 
-* [ ] 16B-1 判定ロジック（`32` §11・§20）：入力型／3段階判定／理由生成／単体確認
+**2026-07-25：16B-1／16B-2／16B-3 を関連1機能としてまとめて実装。Web＋判定単体＋Android Expo Go（Pixel・2026-07-25）確認済み・合格。Gate A＝合格／Gate B・C・E＝Web・Android Expo Go合格／Gate D＝16C連携Gートのため16B単体対象外。本内容を1commit（`feat: add workplace question timing guidance`）でcommit・push（＝今回のcommit対象）。EAS APK・iOS・Pixel以外のAndroid機種・3ボタンナビ・Gboard以外は引き続き未確認。詳細は `32` §21・`docs/worklog/current.md`・`current-tasks.md`。**
+
+**2026-07-25 UX改善追加（未コミット）**：全画面遷移テスト（Web38件・高重大度問題なし）を受け、(A) `WorkplaceSceneForm.handleBuild` で `整理する` 時に `Keyboard.dismiss()`（全5場面共通）、(B) 質問文作成画面（`question.tsx`）だけに完了導線「ホームへ戻る」（`router.dismissTo('/')`）・「現場適応へ戻る」（`router.dismissTo('/workplace')`）を追加（`WorkplaceSceneForm` の optional `completionActions`。outputがある間だけ表示・保存後の自動遷移なし・他4場面は追加なし）。Web追加確認合格・Android Expo Go確認済み・合格（Pixel・2026-07-25）。詳細は `32` §21・`docs/worklog/current.md`。
+
+**2026-07-25 自動スクロール追加（未コミット）**：(C) `整理する` 後に出力欄先頭へ自動スクロール（全5場面・`WorkplaceSceneForm`）、(D) `判定する` 成功時に判定結果ブロック先頭へ／入力不足時に不足案内へ自動スクロール（`question-timing.tsx`）。方式＝ScrollView ref＋出力/結果欄の `onLayout` の content内Y座標＋明示操作直後だけ有効な待ちフラグ。初回表示はonLayout、**再押下（結果表示済み・入力不変）は取得済みY座標へ `requestAnimationFrame` で1回スクロール・unmount時解除**（固定setTimeout・measureInWindow・絶対座標は不使用）。入力変更・保存・コピー・戻る・直アクセスでは自動スクロールしない。スキップは別画面遷移のため対象外。Web追加確認47件合格・Android Expo Go確認済み・合格（Pixel・2026-07-25）。詳細は `32` §22・`docs/worklog/current.md`。
+
+* [x] 16B-1 判定ロジック（`32` §11・§20）：入力型／3段階判定／理由生成／単体確認 — **実装済み**（`src/features/workplace/questionTiming.ts` 新規・純粋TS）
   * 仕様書：`32`
-  * 変更対象候補：判定用の純粋関数・型（配置は実装判断）
-  * 完了条件：`32` Gate A（判定ロジック単体）
-  * Web確認：判定結果の表示（危険条件1件で「すぐ確認する」等）
-  * Android実機確認：判定画面が操作不能にならない（16B-2と併せて）
-  * 回帰確認：現場適応5場面・終業前メモの既存導線
-* [ ] 16B-2 判定画面と導線（`32` §8・§12・§13）：詰まり→判定→質問／スキップ／一時引き継ぎ
+  * 変更対象：`src/features/workplace/questionTiming.ts`（新規）
+  * 完了条件：`32` Gate A（判定ロジック単体）＝**合格**（実モジュールをscratchpadでtsc→node、`32` §15.2 全ケース 28/28。ハーネス削除済み）
+  * Web確認：3結果の表示（危険1件→すぐ確認する 等）＝**確認済み**
+  * Android実機確認：判定画面が操作不能にならない（16B-2と併せて）＝**Expo Go確認済み・合格（Pixel・2026-07-25）**
+  * 回帰確認：現場適応5場面・終業前メモの既存導線＝**Web確認済み**
+* [x] 16B-2 判定画面と導線（`32` §8・§12・§13）：詰まり→判定→質問／スキップ／一時引き継ぎ — **実装済み**
   * 仕様書：`32`
-  * 変更対象候補：現場適応の質問タイミング確認画面・詰まり記録/質問文作成への接続（route params/context等は実装判断）
-  * 完了条件：`32` Gate B（画面フロー）
-  * Web確認：幅別・3結果それぞれから質問文作成へ進める・戻るで行き止まりにならない
-  * Android実機確認：判定→質問文作成の遷移
-  * 回帰確認：翌朝再開・終業前保存を壊さない
-* [ ] 16B-3 完成質問文の任意保存（`32` §14・§20）：完成質問文の任意保存**のみ**
+  * 変更対象：`app/workplace/question-timing.tsx`（新規・`/workplace/question-timing`）・`src/features/workplace/workplaceHandoff.ts`（新規・A/B分離・set/get(純粋)/clearの3操作＝Strict Mode安全）・`app/workplace/stuck.tsx`（outputAction追加）・`app/_layout.tsx`（Stack.Screen追加・fallback `/workplace/stuck`）・`src/components/WorkplaceSceneForm.tsx`（optional `outputAction`・`saveHint` 追加）
+  * 完了条件：`32` Gate B（画面フロー）＝**Web・Android Expo Go確認済み・合格**（幅別6・3結果から質問へ・戻る非行き止まり・スキップ・入力変更で結果クリア・直アクセス非クラッシュ・URL非露出）
+  * Android実機確認：判定→質問文作成の遷移＝**Expo Go確認済み・合格（Pixel・2026-07-25）**
+  * 回帰確認：翌朝再開・終業前保存を壊さない＝**Web確認済み**
+* [x] 16B-3 完成質問文の任意保存（`32` §14・§20）：完成質問文の任意保存**のみ** — **実装済み**（`saveQuestionNote`）
   * 仕様書：`32`
   * 依存：16B-2。**16C（共有基盤）には依存しない**
-  * 変更対象候補：完成質問文の保存処理（既存 `saveWorkplaceNote` 相当への統合・現場適応専用保存処理）
-  * 完了条件：`32` Gate C（保存）。※共有（`32` Gate D）は16C-1／16C-3統合時の連携Gateであり、本タスクの合否には含めない
-  * Web確認：判定途中データ非保存・完成質問文のみ任意保存・二重保存なし・private/Git候補false強制
-  * Android実機確認：保存の実機動作（`32` Gate E の保存部分）
-  * 回帰確認：DBスキーマ無変更・現場適応既存保存導線
-  * 非対象：共有確認画面への接続・必須守秘チェック・報告文保存（→ 16C-3）。同じ保存処理を16C-3と二重実装しない
+  * 変更対象：`src/features/workplace/workplaceService.ts`（`saveQuestionNote` 追加・`saveWorkplaceNote` 共用でprivate/Git候補false/`workplace,workplace_question`/thought強制）・`app/workplace/question.tsx`（引き継ぎread＋onSave＋saveLabel＋saveHint＋banner）
+  * 完了条件：`32` Gate C（保存）＝**Web・Android Expo Go確認済み・合格**（判定途中データ非保存・完成質問文のみ任意保存・二重保存なし・保存後再保存不可・編集で再保存可・`/notes` 詳細で type=thought/tags=workplace,workplace_question/visibility=private/Git候補false を確認）。※共有（`32` Gate D）は16C-1／16C-3統合時の連携Gateであり本タスクの合否に含めない
+  * Android実機確認：保存の実機動作（`32` Gate E の保存部分）＝**Expo Go確認済み・合格（Pixel・2026-07-25）**
+  * 回帰確認：DBスキーマ無変更・現場適応既存保存導線＝**Web確認済み**
+  * 非対象：共有確認画面への接続・必須守秘チェック・報告文保存（→ 16C-3）。同じ保存処理を16C-3と二重実装しない（`saveWorkplaceNote` を共用）
 
 ### 16C：外部AI・共有受け渡し（正本 `33`）
 

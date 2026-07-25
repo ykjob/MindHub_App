@@ -11,8 +11,9 @@ export const WORKPLACE_COMMON_TAG = 'workplace';
 export const WORKPLACE_START_TAG = 'workplace_start';
 export const WORKPLACE_STUCK_TAG = 'workplace_stuck';
 export const WORKPLACE_END_TAG = 'workplace_end';
-// 次点2場面。現状はコピーのみで保存しないが、命名の一貫性と
-// 将来保存する場合の前提維持のため定数のみ定義しておく。
+// 質問・報告タグ。Phase 16で「完成文の任意保存」が確定（22 §8.1・32 §14・33 §7.4）。
+// 質問文の任意保存はPhase 16B-3で実装済み（saveQuestionNote）。
+// 報告文の任意保存はPhase 16C-3で追加予定（saveReportNote）。定数はここで共用する。
 export const WORKPLACE_QUESTION_TAG = 'workplace_question';
 export const WORKPLACE_REPORT_TAG = 'workplace_report';
 

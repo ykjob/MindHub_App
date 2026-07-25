@@ -92,6 +92,12 @@ export default function RootLayout() {
           name="workplace/stuck"
           options={{ title: '行き詰まり記録', headerLeft: () => <NativeHeaderBackButton fallback="/workplace" /> }}
         />
+        {/* Phase 16B 質問タイミング確認。詰まり記録から遷移。直アクセス時の戻るは /workplace/stuck へ
+            フォールバック（通常遷移はStack/ブラウザ履歴で詰まり画面へ戻す。32 §8） */}
+        <Stack.Screen
+          name="workplace/question-timing"
+          options={{ title: '質問タイミング確認', headerLeft: () => <NativeHeaderBackButton fallback="/workplace/stuck" /> }}
+        />
         <Stack.Screen
           name="workplace/question"
           options={{ title: '質問文作成', headerLeft: () => <NativeHeaderBackButton fallback="/workplace" /> }}

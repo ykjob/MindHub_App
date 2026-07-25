@@ -1,6 +1,154 @@
 # 最新作業ログ
 
-最終更新：2026-07-25（状態更新のみ＝下記Phase 16Aエントリの「未コミット」表記を実状態に合わせて追記。コード変更なし）。前回：2026-07-24（Phase 16A-1／16A-2 完了＝作成・編集画面のAndroidキーボード操作性改善＋詳細画面下部Safe Area）、2026-07-24（Phase 16A-3 ホーム領域分離）ほか
+最終更新：2026-07-25（Phase 16B Android Expo Go実機確認・合格＝下記。本内容を1commit `feat: add workplace question timing guidance` でcommit・push）。前回：2026-07-25（自動スクロール追加・再押下修正）、2026-07-25（UX改善＝キーボード閉じる／完了導線）、2026-07-25（実装・Strict Mode安全化）ほか
+
+## Phase 16B Android Expo Go実機確認・合格（2026-07-25、commit対象）
+
+ユーザーがPixel実機（Expo Go・ポート8115・LAN）で Phase 16B の全項目を確認し、**すべて問題なし＝合格**。確認日 2026-07-25。
+
+確認内容（すべて問題なし）：
+- 整理する時の `Keyboard.dismiss()`（全5場面でキーボードが閉じる）
+- 結果先頭への自動スクロール（整理する初回／再押下）
+- 判定結果への自動スクロール（判定する初回／再押下）
+- 入力不足案内への自動スクロール（初回／再押下）
+- 入力変更・コピー・保存時に意図しないスクロールなし
+- 長文・日本語のスクロール（結果先頭・末尾に飛ばない・繰り返さない）
+- 質問作成後の「ホームへ戻る」「現場適応へ戻る」（`dismissTo`）
+- 保存後も自動遷移しない・保存後にコピーできる
+- `dismissTo` 後の Android ハードウェア戻るで途中画面（質問・判定・詰まり）が復活しない
+- 画面下部操作への到達
+
+**Gate状態（16B）**：Gate A＝合格／Gate B・Gate C・Gate E＝**Web・Android Expo Go 合格**／Gate D＝Phase 16C との連携Gートのため16B単体の完了判定に含めない。
+
+**Phase 16B（16B-1／16B-2／16B-3）＝実装・Web確認・Android Expo Go確認まで完了**。本内容（実装＋管理文書）を1commit（`feat: add workplace question timing guidance`）でcommit・push する（＝本エントリはそのcommit対象）。
+
+**引き続き未確認（合格扱いにしない）**：EAS APK／iOS実機／Pixel以外のAndroid機種／3ボタンナビ環境／Gboard以外のキーボード。新規ネイティブ依存なし＝EAS APKは作成しない。
+
+---
+
+## Phase 16B 結果生成後の自動スクロール追加（2026-07-25、commit対象）
+
+「整理する」「判定する」後、結果は同じ画面の下側に出るが手動スクロールが必要だったため、明示操作直後だけ結果欄の先頭へ自動スクロールする。製品判断・受入条件は変更していない。
+
+### 対象と動作
+1. **WorkplaceSceneForm の整理する**（全5場面＝作業開始/詰まり/質問/報告/終業前）：`Keyboard.dismiss()`（既存）→ 出力生成 → **出力欄の先頭へ自動スクロール**。
+2. **質問タイミング確認の判定する**：判定成功時は**結果ブロック先頭**（`result.siteRulePriority` があれば現場ルール優先注意の先頭、なければ判定結果見出し）へ、入力不足時は**不足項目案内**へ自動スクロール。スキップ（判定せず質問文を作る）は別画面遷移のため対象外。
+
+### 実装方式（onLayout＋待ちフラグ・座標系を混在させない）
+- `src/components/WorkplaceSceneForm.tsx`：`scrollRef`（ScrollViewのref）＋`pendingBuildScrollRef`。`handleBuild` で `pendingBuildScrollRef.current = true` → `setOutput`。出力欄（ScrollViewの直接の子）の `onLayout` で、pendingがtrueのときだけ `scrollTo({ y: Math.max(layout.y - RESULT_SCROLL_TOP_GAP(12), 0), animated:true })` し、フラグをfalseへ。`layout.y` はScrollView content内Y座標なので `measureInWindow`/`screenY`/絶対座標を使わない。
+- `app/workplace/question-timing.tsx`：`scrollRef`＋`pendingJudgeScrollRef`。`handleJudge` で判定/検証の前に `pendingJudgeScrollRef.current = true`。結果ブロック（`resultArea`）と不足案内（`missingBox`）はそれぞれ ScrollView の直接の子で、両方に `onLayout={(e)=>scrollToJudgeTarget(e.nativeEvent.layout.y)}`。結果と不足案内は排他表示のため、表示された方の onLayout が1回だけスクロールしフラグをfalseへ。余白は `spacing.md`。
+- **初回表示は onLayout＋待ちフラグ**、**再押下（結果表示済み・入力不変でonLayoutが再発火しない場合）は ref 保持した content内Y座標へ `requestAnimationFrame` で1回スクロール（unmount時に `cancelAnimationFrame` で解除）**。**固定setTimeout・measureInWindow・screenYとcontent座標の直接比較・本文長さによる推測・レンダーごとのscrollTo・常時scrollToは不使用**。新規依存なし。（当初は onLayout＋フラグのみ→再押下でスクロールしない問題を確認し、同日 rAF 経路を追加。下記「再押下スクロール修正」）
+
+### 自動スクロールしない条件（確認済み）
+入力変更でoutput/結果が消えるとき・コピー・保存・保存成功/失敗・完了後の移動ボタン・戻る操作での画面復帰・直アクセス・通常の再レンダー。いずれも待ちフラグを立てないため onLayout が発火してもスクロールしない。入力値・生成内容・保存/コピー処理・既存のアクセシビリティ（label/role/選択状態）は無変更。
+
+### 確認
+- 機械：`tsc --noEmit` 合格／`expo export --platform web` 成功（バンドルエラー0）／`expo-doctor` 17/18（既存 `expo 54.0.35` vs `~54.0.36` パッチ差）／`git diff --check` 問題なし。
+- Web（専用ポート**8114**・8115のAndroid用Metroは維持・puppeteer隔離・確認後8114停止）：**47件合格**。5場面で整理する後 出力見出しがビューポート上部（top実測 76〜257）・横スクロールなし・コピー到達可・入力維持／長文（1500字）でも出力見出し（top76）＋生成本文先頭（top117）が見える＝末尾に飛ばない／判定3結果（urgent/soon/investigate）と現場ルールありで結果ブロック/優先注意の先頭が上部（top 194〜372）・操作ボタン到達可／入力不足で不足案内へスクロール（可視）・結果非生成・非クラッシュ／入力変更で結果消去かつ下方向へ自動スクロールしない（scrollTop 1768→1431＝自然clampのみ・増加なし）・再判定で1回だけ再スクロール（top352）／回帰（スキップ→質問へ・質問保存・保存後コピー・ホーム/現場適応へ戻る・詰まりの質問タイミング導線・終業前保存＋翌朝再開メモ）／console.error・pageerror・unhandledrejection 0。
+- **Android Expo Go：Pixel実機確認済み・合格（2026-07-25）**（整理する後に結果欄が自動的に見える位置へ・判定後に結果が見える位置へ・不足案内へ・長文で結果先頭/末尾に飛ばない/繰り返さない・**初回と再押下いずれも移動**・戻る/入力変更で勝手に動かない・下部操作到達をすべて確認）。
+
+### 再押下スクロール修正（2026-07-25・commit前）
+結果表示済みで入力を変えずに `整理する`／`判定する` を再押下すると、`onLayout` が再発火せず再スクロールしない（かつ待ちフラグが残る）問題を確認したため、Y座標を ref 保持し、**初回表示は onLayout＋待ちフラグ／再押下は取得済みY座標へ `requestAnimationFrame` で1回スクロール**する方式に修正した。入力変更・出力クリア時に Y座標ref と待ちフラグを無効化し、unmount 時に予約済み rAF を `cancelAnimationFrame` で解除する。固定setTimeout・measureInWindow・screenY・絶対座標は引き続き不使用。Web再確認：再押下8件（整理する×3・判定する・入力不足・コピー/保存後に遅延誤スクロールなし）＋§6回帰15件（初回整理/判定で移動・不足案内へ・入力変更/コピー/保存で移動しない・ホーム/現場適応へ戻る・スキップ・console/pageerror/unhandledrejection 0）すべて合格。変更ファイルは `src/components/WorkplaceSceneForm.tsx`・`app/workplace/question-timing.tsx` のみ。
+
+### 非対象・停止条件
+- DB・依存・`app.json`・`eas.json`・versionCode・SDK・Expo無変更。診断コード不使用。変更ファイル：`src/components/WorkplaceSceneForm.tsx`・`app/workplace/question-timing.tsx`＋管理文書（`current-tasks.md`・本ファイル・`10` §21・`32` §21）。**stage・commit・push・EASビルドは未実施（commit承認待ち）**。8115のAndroid用Metroは停止・再起動していない。
+
+---
+
+## Phase 16B UX改善追加（2026-07-25、未コミット・commit承認待ち）
+
+全画面遷移テスト（現場適応モード・Web実測38件で**高重大度問題なし**、ただし質問文作成後の完了導線不足・整理する後のキーボード残りを確認）を受け、次の2点を追加した。製品判断・受入条件は変更していない。
+
+### 1. 整理するでキーボードを閉じる（全5場面共通）
+- `src/components/WorkplaceSceneForm.tsx` の `handleBuild` 冒頭で `Keyboard.dismiss()` を実行してから出力生成。対象＝作業開始/詰まり/質問/報告/終業前（テキスト入力のある5場面）。質問タイミング確認画面は選択式のため対象外。
+- 入力値・生成内容・保存/コピー処理は無変更。`setTimeout`・待機・自動スクロール・KeyboardAvoidingView変更・依存追加なし。入力不足でも整理する時点で閉じる。
+
+### 2. 質問文作成後の完了導線（質問画面のみ）
+- `WorkplaceSceneForm` に optional `completionActions{primary, secondary}`（各 `{label, accessibilityLabel, onPress}`）を追加。**outputが存在する間だけ**「完了後の移動」セクションを表示（`saveState` に依存せず・保存前/成功後/失敗後いずれも表示・入力変更でoutputごと消え非表示・再生成で再表示）。コピー/保存とは別セクション（上に区切り線）・全幅ボタン縦配置・主要/補助・44相当・色以外の区別。既存 `outputAction`（詰まりの「質問タイミングを確認」）とは役割を分離。**prop未指定の既存5場面は挙動不変**。
+- `app/workplace/question.tsx` だけに接続：主要「ホームへ戻る」＝`router.dismissTo('/')`／補助「現場適応へ戻る」＝`router.dismissTo('/workplace')`。中間画面（質問タイミング・詰まり）・重複入口を閉じて戻すため `dismissTo` を使用（`back`/`push`/`replace` は使わない）。`dismissTo` は expo-router 6.0.24 の `router.dismissTo(href, options?)` を型定義で確認（「hrefまで dismiss、無ければ現在画面を href で replace」）。
+- **保存後の自動遷移はしない**（保存後もコピー・ホーム/現場適応へ戻る操作が可能）。他4場面（start/stuck/report/end）には完了導線を追加していない（16B新フローの完了導線を先に解決。全場面横断は別UX判断）。ただし `Keyboard.dismiss()` は共通フォーム経由で全5場面に適用。
+
+### 表示構造
+```
+出力内容
+[コピー] [記録として保存]      ← 内容操作（既存配置維持）
+──────────
+完了後の移動                    ← 画面フロー操作（新セクション）
+[ホームへ戻る]（主要・全幅）
+[現場適応へ戻る]（補助・全幅）
+```
+Phase 16Cで共有ボタンが増えても「内容操作（コピー/保存/共有）」と「画面フロー操作（戻る）」を分離できる構造。
+
+### 確認
+- 機械：`tsc --noEmit` 合格／`expo export --platform web` 成功（バンドルエラー0）／`expo-doctor` 17/18（既存 `expo 54.0.35` vs `~54.0.36` パッチ差＝無関係・未更新）／`git diff --check` 問題なし。
+- Web（専用ポート**8114**・8115のAndroid用Metroは維持・puppeteer隔離・確認後8114停止）：**追加分34件＋ブラウザ戻り内容確認8件＝合格**。表示条件（入力中非表示→整理する後表示→入力変更で消える→再生成で再表示）／ホームへ戻る＝`/`（フロー/カード/直アクセス）／現場適応へ戻る＝`/workplace`（フロー/カード/直アクセス）／保存前後にホーム・現場適応へ戻れる・保存直後の自動移動なし・保存後コピー可／回帰（stuckの「質問タイミングを確認」維持・他4場面に完了導線なし・question のコピー/保存維持・終業前保存＋翌朝再開メモ表示・question-timingの「判定せず質問文を作る」維持）／console.error・pageerror・unhandledrejection 0。
+- **Webブラウザ戻りの非復活**：要件どおりホーム起点（`/`→クリック遷移でstuck→timing→question）のフローで、ホームへ戻る／現場適応へ戻る後に**ブラウザ戻るしても質問・判定・詰まり画面が復活しないこと**を内容ベースで確認（8/8合格・route=blank または `/`、中間画面のボタン/入力なし）。補足：`goto` で履歴基点を作った人工的なケースではブラウザ戻りの pathname が中間URLになり得るが、これは expo-router web の History API 挙動であり、実利用のホーム起点フローでは中間画面は復活しない。
+- **Android Expo Go：Pixel実機確認済み・合格（2026-07-25）**（新規ネイティブ依存なし＝EAS APK不要）。整理する後のキーボードが閉じること・完了導線表示・保存後の自動移動なし・保存後コピー/ホーム/現場適応へ戻る・**Androidハードウェア戻るで質問/判定/詰まりが復活しない**（`dismissTo` のネイティブ意味）をすべて実機確認。
+
+### 非対象・停止条件
+- DB・依存・`app.json`・`eas.json`・versionCode・SDK・Expo無変更。診断コード不使用。変更ファイル：`src/components/WorkplaceSceneForm.tsx`・`app/workplace/question.tsx`＋管理文書（`current-tasks.md`・本ファイル・`10` §21・`32` §21）。**stage・commit・push・EASビルドは未実施（commit承認待ち）**。8115のAndroid用Metroは停止・再起動していない。
+
+---
+
+## Phase 16B 質問タイミング判断支援 実装（2026-07-25、未コミット・commit承認待ち）
+
+### 今回の作業
+現場適応モードに「質問タイミング判断支援」（`32`）を追加。16B-1／16B-2／16B-3を関連1機能としてまとめて実装し、確認結果は3単位で分けて記録する。16Cの共有・OS共有・守秘3チェック・報告文保存は実装せず境界確認のみ。
+
+### 16B-1 判定ロジック（`src/features/workplace/questionTiming.ts` 新規）
+- 純粋TypeScript（React/Expo Router非依存）。入力型・選択肢キー/表示・入力検証・3段階判定・理由生成・次に行うこと生成・急ぎ度候補・現場ルール優先フラグを責務とする。
+- 判定：`urgent`（すぐ確認する）＞`soon`（早めに質問する）＞`investigate`（もう少し調査する）。QT-RULE-01 危険条件1件以上→urgent（理由は選択キー→定型文・最大3）。QT-RULE-02 完全停止10分以上／通常20分以上／期限・他者・手戻り・仕様判断・裁量超え／一般確認すべて済み→soon。QT-RULE-03 上記なし→investigate（未実施の確認から次に行うこと最大3・カウントダウン表現なし）。
+- 危険条件・影響条件は `MultiAnswer = {kind:'unanswered'|'none'|'selected'}` で「未回答／該当なし／1件以上」を型で区別（空配列を自動で該当なし扱いしない）。現場ルールありは `siteRulePriority=true` を返すが3段階判定は変えない（本文入力・保存・推測なし）。急ぎ度候補＝urgent「作業を進める前に確認したい」／soon「早めに確認したい」／investigate なし。
+- 危険条件の削除・弱体化・10分/20分変更・AI自動判定はしていない。
+
+### 16B-2 判定画面と導線
+- `app/workplace/question-timing.tsx`（新規・`/workplace/question-timing`）。Stackヘッダーのみ（画面内AppHeaderなし＝二重ヘッダーなし）。ScrollView＋下部 `spacing.xl + insets.bottom`。**選択式のみ・自由文入力なし・KeyboardAvoidingView追加なし**（自由文がないためキーボード関連コードは足さない）。
+- 6入力群（現場ルール/危険・高影響条件/作業停止状態/経過時間/期限・周囲への影響/最低限の確認）。ラジオ＝現場ルール・停止状態・経過時間、複数選択＝危険・影響・最低限。危険と影響の「該当なし」は他選択と排他。選択状態は色だけに依存せず☑☐◉○グリフ＋`role=checkbox/radio`＋`accessibilityState`併用（`44`相当）。
+- `判定する`（検証：現場ルール/危険/停止/経過/影響が未回答なら結果を出さず不足案内・クラッシュしない）。`判定せず質問文を作る`（入力不足でも可・判定結果や急ぎ度を自動決定せず詰まり内容だけ引き継ぐ）。入力変更で古い判定結果をクリアし再判定が必要な状態へ戻す。
+- 結果表示：現場ルール優先注意（判定結果より上）→判定結果→判定理由（最大3）→次に行うこと→注意文→操作。urgent/soon＝主要`質問文を作る`＋`詰まり記録へ戻る`／`現場適応へ戻る`。investigate＝主要`調査内容を見直す`＋`質問文を作る`／`現場適応へ戻る`（判定で質問作成を禁止しない）。戻るは履歴あれば `router.back()`、無ければ `/workplace/stuck`。現場適応へ戻るは `/workplace`。直アクセスでも操作可（クラッシュ・空白・無限遷移なし）。
+- 一時引き継ぎ `src/features/workplace/workplaceHandoff.ts`（新規）：A（詰まり→判定＝`QuestionTimingHandoff`）とB（判定→質問＝`QuestionFormHandoff`）を型と関数名で分離。各領域に **set／get（純粋読み取り）／clear** の3操作を用意（set＝上書き・get＝現在値を返すだけで変更削除なし・clear＝nullへ戻し複数回でも安全）。URL/params/SQLite/ログ/エラー非露出・リロードで失われてよい・直アクセスでnullでもクラッシュしない。画面側は `useState` 初期化関数で **get（副作用なし＝Strict Mode安全）** し、初回commit後に `useEffect` で1回だけ clear する（読み取り副作用のある consume は持たない）。
+
+  - **Strict Mode安全化（2026-07-25 修正・commit前）**：当初は `consume`（読み取りと同時に削除）を `useState` 初期化関数で呼んでいた。React開発時は初期化関数が複数回呼ばれ得るため、初期化中に外部状態を削除しない構造へ変更（`consume`→`get`＋`clear` に分離）。A/B分離・非露出（URL/DB/ログ）は維持。実モジュールをscratchpadでtscコンパイル→node実行し、get純粋性（2回getで同値）・set上書き・clear冪等・A/B独立・Strict Mode相当の二重init read（clear前は同値）を確認（handoff 17件＋判定28件＝**45/45合格**、ハーネス削除済み）。対象Web回帰（下記 §Web確認の追記）も合格。
+- `app/workplace/stuck.tsx`：出力後の `outputAction`「質問タイミングを確認」を追加（`situation/tried/wantToConfirm/error` の現在値をAへ保存し `/workplace/question-timing` へ）。既存のコピー・整理は不変。`判定せず質問文を作る` は詰まり画面には置かない（質問タイミング画面のみ）。
+
+### 16B-3 完成質問文の任意保存
+- `src/features/workplace/workplaceService.ts`：`saveQuestionNote(db, body)` を追加。module-private `saveWorkplaceNote` を共用し、`title=質問メモ YYYY-MM-DD`・`type=thought`・`tags=workplace,workplace_question`・`source=manual`・`visibility=private`・`is_git_candidate=false` を強制（呼び出し側から解除不可＝既存 `saveEndNote` と同じ安全ラッパー）。`saveWorkplaceNote` はpublic化しない。報告文保存（`saveReportNote`）は16C-3で同じ内部処理を共用予定（今回は未追加）。
+- `app/workplace/question.tsx`：質問フォーム引き継ぎ（B）を `useState` 初期化関数で get（純粋読み取り）→ `initialValues` へ、初回commit後に `useEffect` で clear、`onSave=saveQuestionNote`、`saveLabel="記録として保存"`、`saveHint="保存するとprivate・Git候補外で記録されます。"`、引き継ぎ時 `banner`。既存コピーは維持。二重実行防止・保存済み後の再押下防止・失敗時の出力維持・編集/再生成後の再保存許可は `WorkplaceSceneForm` の既存挙動を利用。
+- 質問フォーム項目対応：ask←確認したいこと／background←状況（＋エラー非空なら「エラー内容：\n…」を末尾追記）／checked空／tried←試したこと／decision空／urgency←判定結果の急ぎ度候補（スキップ時空）。同一内容の複数欄重複なし・判定理由は質問文へ自動挿入しない。
+
+### 共通部品変更（`WorkplaceSceneForm`）
+- optional `outputAction`（固定形式 `{label, accessibilityLabel, onPress({values,output})}`。出力表示後のみ・下段全幅・44相当・既存コピー/保存の横へ詰め込まない）と optional `saveHint`（未指定時は既存の終業前向け文言を維持）を追加。**prop未指定の既存5場面は表示・挙動を完全維持**。
+
+### `workplaceTags.ts`
+- 「質問・報告は現状コピーのみで保存しない」の古いコメントをPhase 16の現況（質問=16B-3実装済み／報告=16C-3予定）に更新。定数値は不変。
+
+### 判定ロジック単体確認（新規依存なし）
+- リポジトリ外scratchpadで**実モジュール**（コピーでなく `questionTiming.ts` そのもの）をローカルtscでJSへコンパイル→nodeで実行。`32` §15.2 の全ケースを網羅し **28/28合格**（危険1/複数→urgent＋理由≤3・完全停止10-20→soon・通常20+→soon・期限→soon・仕様判断→soon・全確認済→soon・安全＋未確認→investigate＋次に行うこと≤3・危険×時間→urgent・現場ルール優先フラグ・急ぎ度候補3種・未回答は該当なし扱いしない・全必須未回答で5件不足）。ハーネス・生成物は確認後に完全削除（残存0）。
+
+### 機械確認
+- `npx tsc --noEmit` 合格／`npx expo export --platform web` 成功（バンドルエラー0）／`npx expo-doctor` 17/18（失敗1件は既存 `expo 54.0.35` vs 期待 `~54.0.36` のパッチ差＝本作業と無関係・Expo更新せず）／`git diff --check` 問題なし（LF/CRLF通知のみ）。
+
+### Web確認（ヘッドレスChrome・専用ポート8115・puppeteerはscratchpad隔離・確認後停止）
+- 6幅（360/390/412/480/768/1024）で横スクロールなし・6入力群到達・下部操作到達・二重ヘッダーなし。
+- 導線：詰まり入力→整理する→質問タイミングを確認→判定→質問文を作る、で引き継ぎ（確認したいこと→聞きたいこと／状況→背景／エラー→背景末尾「エラー内容：」／試したこと→試したこと／判定→急ぎ度候補）・checked空・decision空・判定理由は質問フォームに入らない・banner表示・URLに詰まり/質問本文なし。
+- 入力変更で古い判定結果クリア。3結果（urgent/soon/investigate）を再現し各から質問へ。investigateは次に行うこと最大3。スキップは入力不足でも利用可・詰まり内容引き継ぎ・急ぎ度空・理由なし。
+- 保存：`記録として保存`表示・二重押下で二重保存なし・保存後は `保存しました`＋`aria-disabled`で再保存不可・フィールド編集で結果クリア→再生成で再保存可・保存ヒントに終業前文言なし・コピー併用可。**保存レコードを `/notes` 詳細で確認＝カテゴリ思考メモ（type=thought）・タグ `workplace,workplace_question`・source手入力・visibility private・Git候補対象外**。
+- 回帰：現場適応入口の5カード表示・質問タイミングは入口カードでない・報告/開始/終業前に「質問タイミングを確認」操作なし・報告/開始はコピーのみ維持・終業前の保存ヒント不変・終業前保存動作・翌朝再開メモ表示・戻るで詰まり入力維持・現場適応へ戻ると `/workplace`・直アクセスの質問画面は空フォーム＋bannerなし。
+- 選択状態は☑☐◉○グリフ＋roleで色以外にも判別可能（`accessibilityState` はネイティブのTalkBack等へ反映。web版RNWは `aria-checked` をDOMへ出さないためグリフとroleで担保）。
+- console.error・pageerror・unhandledrejection・VirtualizedList警告いずれも **0**。
+- **Strict Mode安全化後の対象Web回帰（2026-07-25・24件合格）**：通常判定フローの引き継ぎ（確認したいこと→聞きたいこと・状況→背景・エラー→背景末尾・試したこと→試したこと・判定→急ぎ度候補・checked空・decision空・banner・判定理由非混入）／スキップ（詰まり内容引き継ぎ・急ぎ度空）／**詰まり→質問タイミング→詰まりへ戻り→入力変更→再度質問タイミング＝最新入力が使われ古い引き継ぎが残らない**／**質問フォーム再訪（現場適応入口経由＋直アクセス）で前回引き継ぎ値が再表示されず空フォーム・banner非表示**／`/workplace/question-timing`・`/workplace/question` 直アクセスで非クラッシュ・残留なし／URLに本文なし／console.error・pageerror・unhandledrejection **0**。
+
+### Android Expo Go
+- **確認待ち**。新規ネイティブ依存なし＝EAS APK不要。ユーザーがExpo Go（LAN・ポート8115/8114）で確認するまで合格扱いにしない。Web確認済みでもAndroid固有の操作性は未確認。
+
+### Gate状態
+- Gate A（判定単体）・Gate B（画面フロー）・Gate C（保存）・Gate E（回帰）＝Web＋単体で確認済み。Gate D（共有・守秘）は16Cとの連携Gートのため**16B単体の完了条件に含めない**（未合格を理由に16Bを不合格としない）。Android Expo Go確認は各Gateで残課題として保持。
+
+### 非対象・停止条件
+- DB・schema・依存・`app.json`・`eas.json`・versionCode・SDK・Expo無変更。診断コードは実装に不使用（`app/`・`src/` に console.log/measureInWindow等なし）。**stage・commit・push・EASビルドは未実施（commit承認待ち）**。
+- 変更ファイル：新規`src/features/workplace/questionTiming.ts`・`src/features/workplace/workplaceHandoff.ts`・`app/workplace/question-timing.tsx`／変更`app/_layout.tsx`・`app/workplace/stuck.tsx`・`app/workplace/question.tsx`・`src/components/WorkplaceSceneForm.tsx`・`src/features/workplace/workplaceService.ts`・`src/features/workplace/workplaceTags.ts`＋管理文書（`current-tasks.md`・本ファイル・`10` §21・`32` §21）。
+
+---
 
 ## 状態更新（2026-07-25、文書のみ）
 

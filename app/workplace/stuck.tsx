@@ -1,6 +1,8 @@
 import React from 'react';
+import { router } from 'expo-router';
 import WorkplaceSceneForm from '../../src/components/WorkplaceSceneForm';
 import { buildStuckText } from '../../src/features/workplace/workplaceService';
+import { setQuestionTimingHandoff } from '../../src/features/workplace/workplaceHandoff';
 
 export default function WorkplaceStuckScreen() {
   return (
@@ -20,6 +22,20 @@ export default function WorkplaceStuckScreen() {
           error: v.error,
         })
       }
+      // 出力後に「質問タイミングを確認」へ進む導線（Phase 16B）。詰まりの現在値を一時領域へ渡す。
+      outputAction={{
+        label: '質問タイミングを確認',
+        accessibilityLabel: '質問タイミングを確認する',
+        onPress: ({ values }) => {
+          setQuestionTimingHandoff({
+            situation: values.situation ?? '',
+            tried: values.tried ?? '',
+            wantToConfirm: values.wantToConfirm ?? '',
+            error: values.error ?? '',
+          });
+          router.push('/workplace/question-timing');
+        },
+      }}
     />
   );
 }
