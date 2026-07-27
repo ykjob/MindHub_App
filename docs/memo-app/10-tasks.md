@@ -278,6 +278,28 @@ MVP実装（2026-07-09 実装。未コミット）。
 
 今回の非対象：app.json・package.json・ルート名・DB・実装コードの名称変更（表示名等を実際に MindHub へ変更する時期は未確定。`01` §1.6）、コミット・push。
 
+### 18.1 名称整理（2026-07-27、実装＋Codex初回レビュー反映済み・Codex再レビュー待ち）
+
+利用者向け名称を MindHub／さくっとメモへ統一し、FlowDock を旧名称・内部由来・旧形式互換・歴史的記録に限定する。**名称境界の詳細な正本は `01` §1.10**（§1.6・§1.7 は歴史的記録）。状態：初回実装をコミット→Codex初回レビュー「要修正・再レビュー」→本作業で文書整合と設定画面補足を修正し初回コミットを amend→Codex再レビュー待ち。
+
+初回実装（コミット済み）。
+
+* [x] app.json `name`：`"FlowDock"` → `"MindHub"`（公開名称・Web表示名・Androidランチャー名の出所。`slug` / `scheme` / `android.package` / `projectId` / `versionCode` は無変更）
+* [x] `01` §1.10 新設。`CLAUDE.md`・`AGENTS.md`・`00_START_HERE.md` の名称方針を §1.10 へ更新
+* [x] 利用者向け表示の再確認：ホーム（`app/index.tsx`）と Web document title（`app/_layout.tsx`）は Phase 15/16A で既に MindHub／さくっとメモへ移行済み＝追加変更なし
+
+Codex初回レビュー反映（今回追加。旧名称方針が現行仕様書に規範文として残る問題等を修正）。
+
+* [x] `01` §1.6・§1.7：見出し直下に「当時の歴史的記録・現在は §1.10 優先」を明示（過去本文は改変しない）
+* [x] `28`（UI・UX）：§11・§6.1・課題表 UX-04・§14 非対象・§17 実装前決定#6・§19 参照を §1.10 基準へ更新（新規表示で FlowDock 不使用・app.json name 変更済み・「時期未確定」を解消）
+* [x] `11`（未解決事項）：内部名記述・「表示名はFlowDockのまま変更しない」・「app.json 表示名変更の時期」を「決定済み・§1.10」へ（過去の未確定は歴史記録として保持）
+* [x] `08`・`30`：現行の利用者向け「クイックメモ」→「さくっとメモ」（`30` §8.5 見出しは「旧『クイックメモ』表記」と明示。歴史的検証結果は改変しない）
+* [x] `app/settings.tsx`：Repository 欄に補足文追加（`例: FlowDock_Notes` プレースホルダは既存privateリポジトリ名の例示のため維持・既定値と誤認させない・所有者名や実リポジトリ名を新たに表示しない・GitHub設定/保存値/設定キー/アップロード処理は無変更）
+* [x] 検索件数の表記を base（`68c5e130`）値と修正後値に区別（files/matching lines/occurrences。詳細は `docs/worklog/current.md`）
+
+* 互換・歴史・内部由来の FlowDock は維持（詳細は `01` §1.10）：DB名 `flowdock.db`・`source: FlowDock`・`FlowDock_Notes`・npm名・`scripts` 内 `flowdock.db` 参照・歴史文書・由来コメント
+* 非対象：DB migration・保存/取得/GitHub/バックアップ/共有ロジック・依存・SDK・EAS設定・ルート構成・EASビルド・push・main反映・Phase 16C
+
 ## 19. メモ管理画面の不具合修正（2026-07-13）
 
 `/notes` の不具合2件のバグ修正（実装コード変更あり・schema無変更・未コミット）。

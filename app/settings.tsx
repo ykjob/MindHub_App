@@ -114,6 +114,9 @@ export default function SettingsScreen() {
           placeholder="例: FlowDock_Notes"
           autoCapitalize="none"
         />
+        <Text style={styles.fieldNote}>
+          ※ 例はリポジトリ名の書式の目安です。すでにGitHubへアップロードしている場合は、現在使っているリポジトリ名をそのまま入力してください（名称整理のために作り直す必要はありません）。
+        </Text>
         <Field
           label="Branch"
           value={branch}
@@ -222,6 +225,7 @@ const styles = StyleSheet.create({
   },
   fieldWrapper: { gap: 6 },
   fieldLabel: { fontSize: 13, fontWeight: '500', color: '#374151' },
+  fieldNote: { fontSize: 11, color: '#6B7280', lineHeight: 16, marginTop: -6 },
   input: {
     borderWidth: 1,
     borderColor: '#D1D5DB',

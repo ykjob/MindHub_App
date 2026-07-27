@@ -1,6 +1,45 @@
 # 最新作業ログ
 
-最終更新：2026-07-27（バックアップ・復元・外部取り込み仕様（34）の既存文書反映・commit/push完了）。前回：2026-07-25（Phase 16B Android Expo Go実機確認・合格）、2026-07-25（自動スクロール追加・再押下修正）ほか
+最終更新：2026-07-27（名称整理：MindHub／さくっとメモ統一。Codex初回レビュー（要修正・再レビュー）を反映し文書整合と設定画面補足を修正、初回コミットを amend・Codex再レビュー待ち。作業ブランチ `chore/mindhub-naming-cleanup`）。前回：2026-07-27（バックアップ・復元・外部取り込み仕様（34）の既存文書反映・commit/push完了）、2026-07-25（Phase 16B Android Expo Go実機確認・合格）ほか
+
+## 名称整理：利用者向け名称の MindHub／さくっとメモ統一（2026-07-27、実装＋Codex初回レビュー反映済み・Codex再レビュー待ち）
+
+### 目的と正本
+利用者向けの現在の表記を、アプリ全体＝MindHub、`/memo` 系機能＝さくっとメモへ統一する。FlowDock は旧名称・内部由来・旧形式互換・歴史的記録として必要な箇所だけに残し、新しい利用者向け表示では使用しない。単純な一括置換ではなく各出現の責務を確認して判断した。**名称境界の詳細な正本は `01` §1.10**（本ログは作業状態と検証結果を中心にし、識別子一覧は §1.10 を参照）。
+
+### 経緯・状態
+* 作業前：branch=main、HEAD=`68c5e1306038268dd06c10ba53db8246da7f26be`、origin/main=HEADと一致、ahead/behind 0/0、working tree clean。main から `chore/mindhub-naming-cleanup` を作成
+* 初回実装：app.json `name` を MindHub 化＋§1.10 新設ほか文書更新でコミット（`chore: align public naming with MindHub`）
+* Codex初回レビュー：**要修正・再レビュー**（ランタイム・DB・Android更新・GitHub Markdown・保存先の互換は問題なし。指摘は「現行仕様書に旧名称方針が規範文として残る」「設定画面の説明不足」「検索件数の表記」）
+* 今回（Codex初回レビュー反映）：文書整合と設定画面の補足を修正し、初回コミットを **amend**。**Codex再レビュー待ち**。作業ブランチ上・main未反映・push未実施・EASビルド未実施・Phase 16C未開始
+
+### コードの変更（利用者向け・公開名称）
+* app.json `name`：`"FlowDock"` → `"MindHub"`（公開名称・Web表示名・Androidランチャー名の出所。`slug` / `scheme` / `package` / `projectId` / `versionCode` は維持＝§1.10）
+* `app/settings.tsx`：GitHub Repository 入力欄の直下に補足文を追加（プレースホルダ `例: FlowDock_Notes` は既存privateリポジトリ名の例示のため維持。補足＝「例は書式の目安。既にアップロード運用中なら現在のリポジトリ名をそのまま入力。名称整理のために作り直す必要はない」）。既定値と誤認させない・所有者名や実リポジトリ名を新たに表示しない・GitHub設定/保存値/設定キー/アップロード処理は無変更。ホーム（`app/index.tsx`）と Web document title（`app/_layout.tsx`）は Phase 15/16A で既に移行済み＝追加のコード変更なし
+
+### 文書の変更（旧名称方針が現在の規範として読めない状態にする）
+* `01` §1.6・§1.7：見出し直下に「2026-07-12／2026-07-13 当時の歴史的記録・現在は §1.10 優先」と明示。過去本文は改変せず、優先関係を読み始めで示す
+* `01` §1.10：現在の名称境界の正本（初回で新設。今回維持）
+* `28`（UI・UX）：§11 と §6.1・課題表 UX-04・§14 非対象・§17 実装前決定#6・§19 参照を §1.10 基準へ更新（app.json name は変更済み・新規表示で FlowDock 不使用・app.json 変更「時期未確定」を解消）
+* `11`（未解決事項）：§1 技術構成の内部名記述・「表示名はFlowDockのまま変更しない」・「app.json 表示名を変更する時期」を **決定済み・§1.10 参照** へ更新（過去の未確定は歴史記録として残す）
+* `08`（UIフロー）§1：ホーム導線の「クイックメモ」→「さくっとメモ」（`/memo` 系＝FlowDock由来の内部注記は残す）
+* `30`（検証チェックリスト）§8.1・§8.5：現在の検証項目の「クイックメモ」→「さくっとメモ」、FlowDock を現在UIへ表示してよいと読める条件を「MindHub／さくっとメモで統一・新規表示に FlowDock を出さない」へ更新。歴史的検証結果は当時の記録として保持
+* `CLAUDE.md`・`AGENTS.md`・`00_START_HERE.md`：初回で §1.10 へ更新済み（今回追加変更なし）
+* `10-tasks.md` §18.1・`current-tasks.md`・本ファイル：作業状態を更新
+
+### 維持（名称だけを理由に変更しない。詳細は §1.10）
+DB名 `flowdock.db`、旧Markdownの `source: FlowDock`、`FlowDock_Notes` プレースホルダ、`slug` / `scheme`（`flowdock`）・`android.package`・`projectId`・`versionCode`、npm名 `flowdock`、`scripts` の `flowdock.db` 参照、由来コメント「（旧FlowDock）」、歴史的仕様書・作業ログ。
+
+### 名称検索（大文字小文字を区別しない）
+* 対象語：FlowDock / flowdock / FLOWDOCK / MindHub / さくっとメモ / 軽量メモ / クイックメモ。除外：node_modules・dist・.git・生成物
+* `flowdock`（大小無視。`FlowDock`/`flowdock`/`FLOWDOCK` を含む）件数の比較（同一手法＝`git grep`、追跡ファイル対象。node_modules/dist/.git は未追跡＝対象外）：
+  * **変更前 base `68c5e130`：34 ファイル / 151 matching lines / 163 occurrences**（Codex報告の「151箇所」は matching lines に相当）
+  * **修正後（本コミットの最終状態）：34 ファイル / 186 matching lines / 232 occurrences**
+  * 増加分は本作業の記録（本ログ・タスク文書・仕様書に FlowDock を説明・注記として追記したこと）による。ファイル数は不変。利用者向けの現在表示に残る FlowDock は無し（後述の分類 10・11 は 0 件）
+* 現行仕様上の「クイックメモ」：現在の利用者向け名称としては残っていない（`08`・`30` を さくっとメモへ統一。過去バッチの旧表記言及と `30` §8.5 の見出しは「旧『クイックメモ』表記」と明示して traceability を残す）
+
+### 検証
+`git diff --check`（base..HEAD／working tree）問題なし／`npx tsc --noEmit` 合格／`npx expo export --platform web` 成功・Webタイトル `MindHub`／`npx expo-doctor` は既存パッチ差（`expo 54.0.35` vs `~54.0.36`）のみ＝新規問題なし／設定画面 Web 確認（画面表示・Repository欄・プレースホルダ維持・補足文表示・既存導線・スマホ幅・console/pageerror/unhandledrejection 0）。DB・migration・ルート・テーブル名・依存・EAS設定は無変更。EASビルド未実施・push未実施・main未反映。既存インストール済みAPKのランチャー名が FlowDock のままなのは既存APKに埋め込まれた名称であり、今回のソース変更失敗ではない。Android実機のランチャー名・補足文の実機表示は次回ビルド／実機で確認（今回はEASビルドしない）。
 
 ## バックアップ・復元・外部取り込み仕様（34）の既存文書反映（2026-07-27、文書整備完了）
 

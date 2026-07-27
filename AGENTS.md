@@ -9,12 +9,13 @@ Expo（React Native + expo-router）製のメモアプリ。
 * 既存機能：軽量メモ（memosテーブル、`app/memo/*` 画面）＋ GitHub手動アップロード。スマホ向けに作られた
 * 拡張機能：PC用Webアプリとして使うメモ管理機能（notesテーブル、`app/notes/*` 画面）。仕様は `docs/memo-app/` 配下
 
-名称方針（詳細は `docs/memo-app/01-decisions-and-scope.md` §1.6）：
+名称方針（現在の正本は `docs/memo-app/01-decisions-and-scope.md` §1.10。§1.6 は歴史的経緯の記録）：
 
-* MindHub＝アプリ全体名（思考メモ・作業ログ・AI活用・プロンプト集・現場適応モードのハブ）
-* FlowDock＝初期からある軽量メモ機能（`/memo` 系）の説明名。消さずに残す
-* `/memo` 系＝FlowDock由来の既存軽量メモ機能、`/notes` 系＝メモ管理機能、`/workplace` 系＝現場適応モード
-* app.json・package.json・ルート名・DB・実装コードの名称は現時点では変更しない
+* MindHub＝アプリ全体の公開名称（思考メモ・作業ログ・AI活用・プロンプト集・現場適応モードのハブ）。app.json `name` も `"MindHub"`
+* さくっとメモ＝`/memo` 系機能（memosテーブル、`app/memo/*`）の利用者向け名称。ホーム等の表示名はこの名称を用いる
+* `/memo` 系＝FlowDock由来の既存軽量メモ機能（内部由来）、`/notes` 系＝メモ管理機能、`/workplace` 系＝現場適応モード
+* FlowDock＝旧名称・内部由来・旧形式互換・歴史的記録として必要な箇所だけに残す。新しい利用者向け表示では使用しない
+* 識別子・互換は名称だけを理由に変更しない：`slug` / `scheme`（`flowdock`）・`android.package`（`com.ykjob.mindhub`）・`projectId`・`versionCode`・DB名 `flowdock.db`・テーブル名・ルート名・旧Markdownの `source: FlowDock`・`package.json` の npm名 `flowdock`
 
 実行方法：
 
