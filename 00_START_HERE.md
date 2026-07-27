@@ -104,6 +104,15 @@ JSONエクスポート・インポート（PC⇔Android移行）を触る場合�
 * docs/memo-app/18-json-import-export.md
 * docs/memo-app/03-data-model.md
 
+バックアップ・復元・JSON移行・GitHub Markdown取り込み・共有コピーを扱う場合。
+
+* docs/memo-app/34-backup-restore-and-external-import.md（正本。将来候補・実装時期未定・現在Phase対象外。完全バックアップはJSON／Markdownは閲覧・共有・個別取り込み用／復元時の元ID維持／共有コピーは新ID）
+* docs/memo-app/18-json-import-export.md（notes向け初期のPC⇔Android手動移行。34の下位仕様）
+* docs/memo-app/03-data-model.md（IDの将来方針）
+* docs/memo-app/07-export-and-git-rules.md（Markdown・Git・OS共有の境界）
+* docs/memo-app/16-platform-and-distribution.md（端末別運用・同期対象外方針）
+* docs/memo-app/17-distribution-and-sharing.md（配布区分と共有コピーの境界）
+
 実装順を確認する場合。
 
 * docs/memo-app/09-roadmap.md

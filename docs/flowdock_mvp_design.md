@@ -294,6 +294,17 @@ SQLiteには保存しない。
 
 ---
 
+## 6.1.1 後続仕様注記（2026-07-27追記。将来方針）
+
+本設計書のGitHub連携はMVP当時の記述であり、削除せず歴史的記録として残す。以下は将来の方針であり、**現在のコード・保存形式・アップロード方向を変更するものではない**（未実装。正本は各ファイル）。
+
+* MVPのGitHub連携は、メモ詳細から1件ずつ行う**一方向の手動アップロード**である（この点は現状のまま）
+* 将来のGitHub Markdownからの**逆取り込み**（GitHub上のMarkdownをMindHubへ戻す）は**別機能**であり、`34-backup-restore-and-external-import.md` を正本とする。自動同期・削除同期ではない
+* §6.5のMarkdown形式（`createdAt` / `updatedAt` / `category` / `source: FlowDock` のfront matter）は**旧形式**として互換対象として残す。新形式・復元・競合の扱いの正本は `34`
+* 上記はいずれも将来候補・実装時期未定であり、memosテーブル・GitHubアップロード処理・Markdown生成の現行仕様は変更しない
+
+---
+
 ## 6.2 GitHub保存ルート
 
 GitHub保存ルートは以下で固定。
