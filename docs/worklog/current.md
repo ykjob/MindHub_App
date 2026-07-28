@@ -1,8 +1,8 @@
 # 最新作業ログ
 
-最終更新：2026-07-27（名称整理：MindHub／さくっとメモ統一。Codex初回レビュー（要修正・再レビュー）を反映し文書整合と設定画面補足を修正、初回コミットを amend・Codex再レビュー待ち。作業ブランチ `chore/mindhub-naming-cleanup`）。前回：2026-07-27（バックアップ・復元・外部取り込み仕様（34）の既存文書反映・commit/push完了）、2026-07-25（Phase 16B Android Expo Go実機確認・合格）ほか
+最終更新：2026-07-28（名称整理：MindHub／さくっとメモ統一が **Codex最終再レビュー合格**（Critical/High/Medium/Low すべて0件・合格対象コミット `1f36867`）。管理文書を合格・main反映待ちへ更新し、作業ブランチ `chore/mindhub-naming-cleanup` をpush。main未反映）。前回：2026-07-27（名称整理の実装・Codexレビュー指摘反映）、2026-07-27（バックアップ・復元・外部取り込み仕様（34）の既存文書反映）ほか
 
-## 名称整理：利用者向け名称の MindHub／さくっとメモ統一（2026-07-27、実装＋Codex初回レビュー反映済み・Codex再レビュー待ち）
+## 名称整理：利用者向け名称の MindHub／さくっとメモ統一（2026-07-27実装／2026-07-28 Codex最終再レビュー合格・main反映待ち）
 
 ### 目的と正本
 利用者向けの現在の表記を、アプリ全体＝MindHub、`/memo` 系機能＝さくっとメモへ統一する。FlowDock は旧名称・内部由来・旧形式互換・歴史的記録として必要な箇所だけに残し、新しい利用者向け表示では使用しない。単純な一括置換ではなく各出現の責務を確認して判断した。**名称境界の詳細な正本は `01` §1.10**（本ログは作業状態と検証結果を中心にし、識別子一覧は §1.10 を参照）。
@@ -11,7 +11,9 @@
 * 作業前：branch=main、HEAD=`68c5e1306038268dd06c10ba53db8246da7f26be`、origin/main=HEADと一致、ahead/behind 0/0、working tree clean。main から `chore/mindhub-naming-cleanup` を作成
 * 初回実装：app.json `name` を MindHub 化＋§1.10 新設ほか文書更新でコミット（`chore: align public naming with MindHub`）
 * Codex初回レビュー：**要修正・再レビュー**（ランタイム・DB・Android更新・GitHub Markdown・保存先の互換は問題なし。指摘は「現行仕様書に旧名称方針が規範文として残る」「設定画面の説明不足」「検索件数の表記」）
-* 今回（Codex初回レビュー反映）：文書整合と設定画面の補足を修正し、初回コミットを **amend**。**Codex再レビュー待ち**。作業ブランチ上・main未反映・push未実施・EASビルド未実施・Phase 16C未開始
+* Codex初回レビュー反映：文書整合と設定画面の補足を修正し amend
+* Codex2回目レビュー：Medium 1件（`30` §14 UX-04表の「app.json変更は時期未確定」）を確認→修正し amend（合格対象コミット `1f368673337834336b98f4285a054b8da7a6de45`）
+* **Codex最終再レビュー（2026-07-28）：合格。Critical/High/Medium/Low すべて0件。** 前回Medium指摘（`30` §14 の「app.json変更は時期未確定」）は解消済み。製品コード・DB・Android識別子・旧Markdown互換（`source: FlowDock`）・GitHub連携の互換性に問題なし。Web実表示のCodex独立確認は検証環境上未実施だったが、合格を妨げる問題ではない（Web export の title＝MindHub は本作業で確認済み）。Androidランチャー表示名は次回ネイティブ／EAS APKビルド後に確認。**main反映待ち・EAS APKビルド未実施・Phase 16C未開始**。合格結果を管理文書へ反映し、作業ブランチ `chore/mindhub-naming-cleanup` を push（mainへは未反映・未merge）
 
 ### コードの変更（利用者向け・公開名称）
 * app.json `name`：`"FlowDock"` → `"MindHub"`（公開名称・Web表示名・Androidランチャー名の出所。`slug` / `scheme` / `package` / `projectId` / `versionCode` は維持＝§1.10）
@@ -39,7 +41,7 @@ DB名 `flowdock.db`、旧Markdownの `source: FlowDock`、`FlowDock_Notes` プ�
 * 現行仕様上の「クイックメモ」：現在の利用者向け名称としては残っていない（`08`・`30` を さくっとメモへ統一。過去バッチの旧表記言及と `30` §8.5 の見出しは「旧『クイックメモ』表記」と明示して traceability を残す）
 
 ### 検証
-`git diff --check`（base..HEAD／working tree）問題なし／`npx tsc --noEmit` 合格／`npx expo export --platform web` 成功・Webタイトル `MindHub`／`npx expo-doctor` は既存パッチ差（`expo 54.0.35` vs `~54.0.36`）のみ＝新規問題なし／設定画面 Web 確認（画面表示・Repository欄・プレースホルダ維持・補足文表示・既存導線・スマホ幅・console/pageerror/unhandledrejection 0）。DB・migration・ルート・テーブル名・依存・EAS設定は無変更。EASビルド未実施・push未実施・main未反映。既存インストール済みAPKのランチャー名が FlowDock のままなのは既存APKに埋め込まれた名称であり、今回のソース変更失敗ではない。Android実機のランチャー名・補足文の実機表示は次回ビルド／実機で確認（今回はEASビルドしない）。
+`git diff --check`（base..HEAD／working tree）問題なし／`npx tsc --noEmit` 合格／`npx expo export --platform web` 成功・Webタイトル `MindHub`／`npx expo-doctor` は既存パッチ差（`expo 54.0.35` vs `~54.0.36`）のみ＝新規問題なし／設定画面 Web 確認（画面表示・Repository欄・プレースホルダ維持・補足文表示・既存導線・スマホ幅・console/pageerror/unhandledrejection 0）。DB・migration・ルート・テーブル名・依存・EAS設定は無変更。EAS APKビルド未実施。main反映待ち（作業ブランチ `chore/mindhub-naming-cleanup` をpush・main未反映）。既存インストール済みAPKのランチャー名が FlowDock のままなのは既存APKに埋め込まれた名称であり、今回のソース変更失敗ではない。Android実機のランチャー名・補足文の実機表示は次回ビルド／実機で確認（今回はEASビルドしない）。
 
 ## バックアップ・復元・外部取り込み仕様（34）の既存文書反映（2026-07-27、文書整備完了）
 
