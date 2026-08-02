@@ -4,7 +4,7 @@
 
 確認結果（2026-07-03 実装時確認）。
 
-* MindHub_App（リポジトリ名。アプリ内部名は FlowDock）は Expo SDK 56 / React Native 0.85 / expo-router 構成
+* MindHub_App（リポジトリ名）は Expo SDK 56 / React Native 0.85 / expo-router 構成。※現在の公開名称は MindHub（app.json `name`。`01` §1.10）。`slug` / `scheme`（`flowdock`）等の内部識別子は名称だけを理由に変更しない
 * ルーティングは expo-router（ファイルベース）
 * 既存保存方式は expo-sqlite（`flowdock.db`、memos / ai_outputs / settings テーブル、schema_version=1）
 * 既存メモ機能あり（body + category のみの軽量メモ、GitHub手動アップロード連携付き）
@@ -118,7 +118,7 @@
 * JSONインポートの仕様：`18-json-import-export.md` で具体化済み（形式・schemaVersion・重複ID処理・件数表示・責務分担）。実装は未着手
 * APK初版の機能範囲：現行機能のみで作る。テンプレート管理・JSONインポートは初版に含めない。確認チェックリストと既知の制約（アプリ内コピー・Markdown書き出しはWeb専用実装のためAPKでは動かない想定）は16 §2.5に整理済み
 * eas.json / app.json整備済み
-* Androidパッケージ名は `com.ykjob.mindhub` で確定（2026-07-07決定。アプリ全体がFlowDock単体でなくメモ管理・プロンプト集・家族共有・配布用データ等を含む方向のため。表示名 / slug / scheme はFlowDockのまま変更しない）
+* Androidパッケージ名は `com.ykjob.mindhub` で確定（2026-07-07決定。アプリ全体がFlowDock単体でなくメモ管理・プロンプト集・家族共有・配布用データ等を含む方向のため）。`slug` / `scheme`（`flowdock`）は名称だけを理由に変更しない。**表示名（app.json `name`）は 2026-07-27 の名称整理で MindHub へ変更済み（`01` §1.10）**
 
 残る未確定。
 
@@ -217,7 +217,7 @@ Phase 15内では確定しない（保留のまま）もの。
 * **アイコン導入の最終判断**：視覚仕上げ段階（VISUAL-03）で再判断。第一候補は `@expo/vector-icons`（未インストール）。導入時は事前承認・package.json差分確認・Web確認・APK再確認を必須とする（`29` §9）
 * **特殊画面での例外的な文字サイズ**：FAB以外に必要になった場合に個別判断（`29` §12）
 * **ホームFABと「すぐメモする」カードの役割重複**（2026-07-14 IA判断時に整理）：→ **解消（2026-07-14 APK確認2）**。既存FABはスクロール位置にかかわらず軽量メモ作成へ進める即時入力導線として維持（カード＝機能の発見性、FAB＝即時操作性。`28` §7.2）。Web確認に加え、Android実機（versionCode 6）でもFABが正しく遷移し、一覧や展開操作（「すべて表示／3件に戻す」）を妨げないことを確認。FAB維持＋カード併存で問題なしとして評価完了（`30` §12.1）
-* **app.json の表示名（name / slug / scheme）を MindHub へ変更する時期**：Androidランチャー名・EASビルドへ波及するため、画面内文言の整理とは別判断（`01` §1.6・§1.7）。Phase 15の必須条件にしない
+* **app.json の表示名を MindHub へ変更する時期** → **決定済み・対応済み（2026-07-27 名称整理）**：app.json `name` を MindHub へ変更済み（公開名称・Web表示名・Androidランチャー名の出所）。`slug` / `scheme`（`flowdock`）・`android.package`・`projectId`・`versionCode` は互換目的で維持。現在の名称正本は `01` §1.10（§1.6・§1.7 は歴史的記録）。Androidランチャー名は次回ビルドで反映（既存インストール済みAPKには埋め込み済み名称が残る）
 * **ConfirmDialogとWeb対応ダイアログの二重実装** → **解決（2026-07-15 バッチ6B-1）**。実態：`src/components/ConfirmDialog.tsx` の `showConfirmDialog`（`Alert.alert` を直接使用。RN Webでは複数ボタン非対応）は**さくっとメモ詳細（`app/memo/[id]/index.tsx`）の削除確認**で使用しており、Webで削除確認が正常に機能しない状態だった（※以前この項目に「memo詳細のアーカイブ確認」と誤記していたが、memo詳細にアーカイブはなく削除であり、アーカイブは記録確認詳細＝`notes/[id]` 側で、そちらは元から `dialog.ts` の `confirmDialog`＝Web対応済み）。対応：`src/utils/dialog.ts` の `confirmDialog` を確認ダイアログの**正本**とし（`cancelLabel` を追加。Web=`window.confirm`／Android・iOS=`Alert.alert`で `style='cancel'`/`'destructive'`）、`ConfirmDialog.tsx` は `showConfirmDialog` の**薄い互換ラッパー**として `confirmDialog` へ委譲（ファイル削除・API名変更はしない）。設定画面（`app/settings.tsx`）のGitHubトークン削除の複数ボタン `Alert.alert` も `confirmDialog` へ統一（Android/iOS経路の整合。WebはGitHubトークン保存が非対応＝getToken/saveToken/deleteTokenがWeb無効で削除ボタン自体が非表示のため、Web実害は主にメモ削除側）。**WebのGitHubトークン保存対応・SecureStore・githubTokenStore.ts・トークン入力/設定保存仕様は無変更**。制約：ブラウザ標準の `window.confirm` はボタン文言を変更できないため、Webでは `confirmLabel`/`cancelLabel` は反映されない（title・messageのみ表示。コード・`29` §12に明記）。Web確認：さくっとメモ削除の確認・キャンセル両経路（`window.confirm` にtitle「メモを削除」＋本文が含まれる・キャンセルで残存・確認で削除しホームへ）・設定画面の通常表示と削除ボタン非表示・コンソールエラー0件（`30` §8.6.1）。**Android/iOSのAlert経路（cancel/destructive・確認押下時のみonConfirm）はコード確認のみ＝実機・TalkBackは最終APKで確認**
 
 ## 17. Phase 16（2026-07-23 追加）

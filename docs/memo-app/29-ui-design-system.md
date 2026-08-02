@@ -144,7 +144,7 @@
 * メモ作成（`app/notes/create.tsx`）
 * メモ詳細（`app/notes/[id]/index.tsx`）
 * メモ編集（`app/notes/[id]/edit.tsx`）
-* クイックメモ系画面（`app/memo/*` 全画面）
+* さくっとメモ系画面（`app/memo/*` 全画面）
 * 現場適応の各入力画面（`app/workplace/start・stuck・question・report・end`）
 * 設定画面（`app/settings.tsx`）
 
@@ -373,7 +373,7 @@ Phase 15の構造改善と主要画面改修では、**アイコンライブラ�
 
 * `28-ui-ux-quality-improvement.md`：Phase 15の画面別改善と情報設計の正本。変更してよい範囲・してはいけない範囲（§13・§14）の正本
 * `30-ui-validation-checklist.md`（後続作成予定）：検証チェックリストの正本（幅別・状態別・回帰・Android実機手順・TalkBack手順）
-* `01-decisions-and-scope.md`：決定事項の正本（§1.6 名称方針・§5 判断ルール）
+* `01-decisions-and-scope.md`：決定事項の正本（名称方針の現在の正本は §1.10。§1.6 は歴史的記録。§5 判断ルール）
 * `08-ui-flow.md`：画面構成の横断正本
 * `21-workplace-adaptation-flows-and-ui.md`：現場適応モードのUI正本（§5に旧スタイル踏襲の記述があり、Phase 15では本ファイルのトークンへ読み替える。同文書の更新は後続の文書整備で行う)
 * `16-platform-and-distribution.md`：Android APK運用・実機確認チェックリスト（§2.5）
