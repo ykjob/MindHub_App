@@ -80,6 +80,16 @@ export default function RootLayout() {
         />
         <Stack.Screen name="notes/[id]/edit" options={{ title: 'メモ編集' }} />
         <Stack.Screen name="prompts/index" options={{ title: 'プロンプト集', headerShown: false }} />
+        {/* Phase 16C 共通共有確認画面。プロンプト集・さくっとメモ・現場適応の質問/報告から再利用する。
+            共有対象はURLクエリではなくモジュール変数（shareHandoff）で渡すため、直アクセス時は
+            画面側で空状態を表示する。戻るは履歴なしならホームへ（33 §13） */}
+        <Stack.Screen
+          name="share/confirm"
+          options={{
+            title: '外部で使う内容を確認',
+            headerLeft: () => <NativeHeaderBackButton fallback="/" />,
+          }}
+        />
         <Stack.Screen name="workplace/index" options={{ title: '現場適応モード', headerShown: false }} />
         {/* 現場適応の5入力画面も、Web既定のマスク画像戻るボタンが視認できず／直アクセス時に描画されない
             ため、テキスト「← 戻る」のheaderLeftを設定（履歴なしは /workplace へ）。ルート・クエリ

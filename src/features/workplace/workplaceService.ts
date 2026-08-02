@@ -6,6 +6,7 @@ import { getDateString } from '../../utils/date';
 import {
   WORKPLACE_END_TAG,
   WORKPLACE_QUESTION_TAG,
+  WORKPLACE_REPORT_TAG,
   WORKPLACE_FORCED_GIT_CANDIDATE,
   WORKPLACE_FORCED_VISIBILITY,
   buildWorkplaceTags,
@@ -45,7 +46,6 @@ export async function saveEndNote(
 // 完成質問文を任意保存する（Phase 16B-3）。saveWorkplaceNote 経由で
 // visibility=private・is_git_candidate=false・tags=workplace,workplace_question を強制し、
 // 呼び出し側からは body と定型タイトルしか渡せない（守秘既定を外せない構造。23 §5.1）。
-// 報告文保存（saveReportNote）はPhase 16C-3で同じ saveWorkplaceNote を共用して追加する。
 export async function saveQuestionNote(
   db: SQLiteDatabase,
   body: string
@@ -54,6 +54,21 @@ export async function saveQuestionNote(
     title: `質問メモ ${getDateString()}`,
     body,
     sceneTag: WORKPLACE_QUESTION_TAG,
+  });
+}
+
+// 完成報告文を任意保存する（Phase 16C-3）。質問文保存と同じ module-private
+// saveWorkplaceNote を共用し、private・Git候補false・tags=workplace,workplace_report・
+// type=thought・一般的な日付入りタイトルを強制する（33 §7.4・§11 SHARE-SAVE-03）。
+// 保存処理を16B-3と二重実装しない。
+export async function saveReportNote(
+  db: SQLiteDatabase,
+  body: string
+): Promise<Note> {
+  return saveWorkplaceNote(db, {
+    title: `進捗報告メモ ${getDateString()}`,
+    body,
+    sceneTag: WORKPLACE_REPORT_TAG,
   });
 }
 

@@ -7,8 +7,10 @@ import {
   SectionList,
   StyleSheet,
 } from 'react-native';
+import { router } from 'expo-router';
 import { getPromptGroups, type PromptEntry } from '../../src/features/notes/promptHub';
 import { copyToClipboard } from '../../src/utils/clipboard';
+import { setSharePayload } from '../../src/features/share/shareHandoff';
 import AppHeader from '../../src/components/AppHeader';
 import FilterChip from '../../src/components/FilterChip';
 import StatusMessage from '../../src/components/StatusMessage';
@@ -167,6 +169,18 @@ export default function PromptHubScreen() {
     return () => clearTimeout(timer);
   }, [copyResult]);
 
+  // 共有確認画面へは選択したプロンプト本文だけを渡し、プロンプト名は出所として表示する。
+  // プロンプトID・内部管理情報は共有文章へ入れない（33 §7.1 SHARE-PROMPT-01）。
+  // 既存のコピー・検索・絞り込み・展開・42件の内容は変更しない。
+  function handleShare(entry: PromptEntry) {
+    setSharePayload({
+      kind: 'prompt',
+      originLabel: entry.name,
+      baseText: entry.promptBody,
+    });
+    router.push('/share/confirm');
+  }
+
   async function handleCopy(entry: PromptEntry) {
     if (copyingId) return; // コピー処理中は二重操作を防止
     setCopyingId(entry.id);
@@ -300,6 +314,17 @@ export default function PromptHubScreen() {
 
               {item.note ? <Text style={styles.note}>{item.note}</Text> : null}
 
+              {/* コピーは維持したまま、外部アプリへ渡す導線を追加する（33 §7.1 SHARE-PROMPT-02）。
+                  狭い幅でも名称と競合しないよう、カード内の全幅ボタンとして下段に置く */}
+              <TouchableOpacity
+                style={styles.shareBtn}
+                onPress={() => handleShare(item)}
+                accessibilityRole="button"
+                accessibilityLabel={`${item.name}をChatGPTなどへ共有`}
+              >
+                <Text style={styles.shareBtnText}>ChatGPTなどへ共有</Text>
+              </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.toggle}
                 onPress={() => setExpandedId(expanded ? null : item.id)}
@@ -423,6 +448,16 @@ const styles = StyleSheet.create({
   },
   copyBtnDisabled: { opacity: 0.5 },
   copyBtnText: { fontSize: 13, fontWeight: '600', color: '#FFFFFF' },
+  shareBtn: {
+    borderWidth: 1,
+    borderColor: '#2563EB',
+    borderRadius: 8,
+    paddingVertical: 10,
+    minHeight: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shareBtnText: { fontSize: 13, fontWeight: '600', color: '#2563EB' },
   toggle: { paddingVertical: 2 },
   toggleText: { fontSize: 13, color: '#2563EB' },
   bodyBox: {

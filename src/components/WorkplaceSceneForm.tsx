@@ -52,7 +52,8 @@ interface Props {
   // 保存が必要な場面のみ渡す（現場適応モードでは終業前メモ・質問文）。
   onSave?: (text: string) => Promise<void>;
   saveLabel?: string;
-  // 保存ヒント文の上書き（未指定時は既存の終業前メモ向け文言を維持）。
+  // 保存ヒント文の上書き（未指定時は既存文言を維持：onSaveありは終業前メモ向け、
+  // onSaveなしは「この場面はコピーのみです」）。
   saveHint?: string;
   // 初期入力（翌朝再開・詰まり記録からの引き継ぎなど）。マウント時のみ反映する。
   initialValues?: Record<string, string>;
@@ -336,7 +337,7 @@ export default function WorkplaceSceneForm({
             </Text>
           ) : (
             <Text style={styles.saveHint}>
-              この場面はコピーのみです（保存はしません）。
+              {saveHint ?? 'この場面はコピーのみです（保存はしません）。'}
             </Text>
           )}
 

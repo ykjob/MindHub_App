@@ -1,6 +1,45 @@
 # 最新作業ログ
 
-最終更新：2026-08-02（さくっとメモのブレインダンプ整理・外部AI受け渡し拡張構想（`35`）を**未承認・未実装の構想**として文書体系へ整備。**Codex再々レビュー＝PASS（指摘0件）**。承認対象コミット `c927364`。作業ブランチをGitHubへpush後、PR作成待ち。文書のみ）。前回：2026-07-28（名称整理 Codex最終再レビュー合格・作業ブランチpush・main反映待ち）、2026-07-27（名称整理の実装・Codexレビュー指摘反映）ほか
+最終更新：2026-08-02（**Phase 16C（外部AI・共有受け渡し）を実装**。16C-1／16C-2／16C-3を1バッチ。機械確認・用途マッピング単体・Web確認まで完了。**Codexレビュー待ち・EAS APK更新待ち・更新APKでのPixel最終確認待ち**）。前回：2026-08-02（`35` 構想の文書体系整備。Codex再々レビューPASS・**PR #2 merge済み・main反映済み**）、2026-07-28（名称整理 Codex最終再レビュー合格）ほか
+
+## Phase 16C：外部AI・共有受け渡しの実装（2026-08-02）
+
+### 前提（作業開始時のGit状態）
+
+`35` 構想文書の **PR #2 は merge済み・closed**。main／origin/main ＝ `d1a06003c89c52caa8ce8651bf9e15ee29458e06`、working tree clean、旧作業ブランチはローカル・リモートとも削除済み。この状態から作業ブランチ `feat/phase-16c-external-handoff-sharing` を作成した。PR作成・mainへのmergeは行わない。
+
+### 実装内容（正本 `33`。実装記録は `33` §20）
+
+* **16C-1 共通共有基盤**：`app/share/confirm.tsx`（route `/share/confirm`）を新設。出所表示／用途選択（さくっとメモのみ）／編集可能な全文／通常注意または現場適応の守秘3チェック／コピー／ChatGPTなどへ共有／新しい記録として保存／キャンセル。一時引き継ぎは `src/features/share/shareHandoff.ts`（共有対象 `SharePayload` と記録作成prefill `NoteDraftHandoff` を別スロットで保持。URLクエリ・DB・ログへ本文を出さない。`useState` 初期化で純粋get→初回commit後の `useEffect` でclear＝Strict Mode安全）。共有起動は `src/utils/share.ts`（native＝React Native標準 `Share`／web＝`navigator.share` の有無を検出。**新規依存なし**）
+* **16C-2 プロンプト集・さくっとメモ**：`app/prompts/index.tsx`（各カードに全幅の「ChatGPTなどへ共有」を追加。コピー・検索・絞り込み・展開・42件は無変更）、`app/memo/[id]/index.tsx`（「本文をコピー」の下に共有導線。本文が空のときは理由表示のみ）、`src/features/share/shareTargets.ts`（5用途の固定マッピングと共有文章の組み立て）、`app/notes/create.tsx`（prefill受け取り）
+* **16C-3 現場適応**：`app/workplace/question.tsx`・`app/workplace/report.tsx` に `outputAction` として共有導線を追加（既存コピー・保存・完了導線は無変更）。`src/features/workplace/workplaceService.ts` に `saveReportNote` を追加し、16B-3の module-private `saveWorkplaceNote` を共用（private・Git候補false・`workplace,workplace_report`・type=thought・`進捗報告メモ YYYY-MM-DD` を強制）。`src/components/WorkplaceSceneForm.tsx` は `onSave` 未指定時も `saveHint` を上書きできるようにした（未指定なら従来文言のまま＝他4場面は無変更）
+
+### 用途マッピングと用途3の例外
+
+* 用途1＝`thought`／用途2＝`brain_dump_to_action`／用途4＝`claude_prompt` を、`getPromptGroups()` から**IDで参照**（本文を別定数へ複製しない）。用途5は依頼文なし
+* **用途3「質問内容を整理する」だけは既存42件に意味の合う定義がないため、共有専用の固定依頼文**（`shareTargets.ts` の `QUESTION_ORGANIZE_REQUEST`）を新設。プロンプト集42件・`MOBILE_PROMPTS`・`NOTE_CATEGORIES`・Prompt Hubの検索/分類・DBテンプレート・ユーザー編集可能なプロンプト・`35` の編集対象には**含めない**。`buildQuestionText` は呼び出さない
+* 用途1・2・4では、既存プロンプト本文の**末尾に完全一致する入力待ち行**（`整理対象：` / `整理対象（説明文）：`）だけを表示用に除去し、`【依頼内容】`＋`【整理対象】` の共通形式にする。プロンプト定義・42件・生成HTMLは無変更
+
+### 判断B（守秘チェックの範囲）
+
+守秘3チェックを必須にするのは**共有確認画面内のコピー・共有のみ**。`/workplace/question`・`/workplace/report` の既存コピーには追加しない（既存機能を壊さない・既存画面には守秘注意文が常時表示。`33` §20.5）。
+
+### 検証
+
+* `npx tsc --noEmit` 合格／`npx expo export --platform web` 成功（`dist` が別プロセスに使用中だったため出力先をリポジトリ外のscratchpadへ指定）／`npx expo-doctor` 17/18（失敗1件は既存の `expo 54.0.35` vs `~54.0.36` パッチ差＝無関係・未修正）／`git diff --check` 問題なし
+* 用途マッピング・末尾行除去の単体確認（実モジュールをコンパイルしてNode実行・確認後ハーネスはリポジトリ外に隔離）＝**32/32合格**
+* Web確認（ヘッドレスChrome・専用ポート8117・使い捨てuser-data-dir・puppeteerはscratchpad隔離。他スレッドのポート・`dist` を止めない）＝**82項目中80合格**。5用途と既定・共有文章の構造・元メモ非変更・空文字時の無効化・共有結果4分岐（成功／キャンセル／失敗／非対応）・禁止文言なし・6幅で横スクロールなし・記録作成prefillとリロード非復元・直アクセス空状態と戻る・42件維持・守秘3チェックの無効化と解除・報告文保存のprivate/`workplace_report`/Git候補外・質問画面の既存導線維持・console.error/pageerror/unhandledrejection 0件
+* **不合格2件はいずれもコピー成功経路**で、ヘッドレスChromeが `clipboard-write` を拒否する環境制約（`permissions.query`＝denied、`navigator.clipboard.writeText`＝NotAllowedError）。アプリ側は「コピーできませんでした」を表示し一定時間後に通常状態へ戻ることを確認（Phase 15と同じ既知事象）
+
+### 未確認・次にやること
+
+* **Codexレビュー**（実装差分）
+* **EAS APK更新**：新規ネイティブ依存はないため実装commit前のビルドは不要。ただし**Phase 16Cのコード変更を配布APKへ反映するにはCodexレビュー合格後にPhase 16全体を含むEAS APK更新が必要**（「新規依存がないため不要」ではない）
+* **Android実機確認**：Expo Go確認は**未実施**。Expo Go確認は事前確認であり、**最終確認は更新APKをPixelへインストールして行う**
+* `33` Gate D（Android共有）・`32` Gate D（共有・守秘）は**未通過**。Gate A・B・C・E・F・GはWeb範囲で確認済み
+* コピー成功経路（通常ブラウザ・実機で要確認）
+
+DB・`schema.ts`・`migrations.ts`・新規npm依存・`app.json`・`eas.json`・versionCode・既存ルート名は無変更。`35` は未承認・未実装の将来構想のまま（新Phase番号なし）。
 
 ## さくっとメモのブレインダンプ整理・外部AI受け渡し拡張構想（35）の体系整備（2026-08-02、文書のみ・Codex再々レビューPASS・PR作成待ち）
 
