@@ -174,11 +174,19 @@ export default function ShareConfirmScreen() {
   }
 
   // 文章が変わったら、直前のコピー結果・共有結果・保存結果はすべて現在の文章のものではない。
+  // 現場適応系では守秘3チェックも「編集前の文章」に対する確認なので未選択へ戻し、
+  // 編集後の最終文章を再確認しないとコピー・共有できないようにする（23 §5.1・33 §8.4）。
+  // 保存（private・Git候補外の記録作成）は守秘チェックと連動させない（33 §20.5）。
   function handleTextChange(next: string) {
+    // 実際に変わったときだけ状態を解除する（同じ文字列の再通知では何もしない）。
+    if (next === text) return;
     setText(next);
     copy.reset();
     clearShareResult();
     resetSaveState();
+    if (isWorkplace) {
+      setChecked((prev) => (prev.some(Boolean) ? prev.map(() => false) : prev));
+    }
   }
 
   // 用途を適用して共有文章を組み立て直す（元のさくっとメモ本文は変更しない）。
@@ -454,6 +462,9 @@ export default function ShareConfirmScreen() {
                 accessibilityRole="checkbox"
                 accessibilityLabel={label}
                 accessibilityState={{ checked: checked[index] }}
+                // react-native-web は accessibilityState.checked を aria-checked へ反映しないため、
+                // Webのスクリーンリーダー向けに明示する（nativeでは同じ値がaccessibilityStateへ写る）。
+                aria-checked={checked[index]}
               >
                 <Text style={styles.checkGlyph}>
                   {checked[index] ? '☑' : '☐'}

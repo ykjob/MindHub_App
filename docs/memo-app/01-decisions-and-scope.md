@@ -171,7 +171,7 @@ UI・UX品質改善をPhase 15として実施する。
 
 ## 1.8 追加決定事項（2026-07-23 Phase 16）
 
-Phase 16をユーザー承認済みの追加仕様として採用する。仕様の正本は `31-quick-memo-usability-improvement.md`（16A）・`32-workplace-question-timing-rules.md`（16B）・`33-external-handoff-and-sharing.md`（16C）。現時点では文書のみで、実装は未着手。
+Phase 16をユーザー承認済みの追加仕様として採用する。仕様の正本は `31-quick-memo-usability-improvement.md`（16A）・`32-workplace-question-timing-rules.md`（16B）・`33-external-handoff-and-sharing.md`（16C）。実装状態は `09-roadmap.md` Phase 16 と `10-tasks.md` §21 を参照する（本節は採用決定の記録であり、進捗は転記しない）。
 
 構成。
 

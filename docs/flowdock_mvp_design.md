@@ -193,7 +193,7 @@ GitHubアップロード操作は、このメモ詳細画面から1件ずつ手�
 
 ## 4.4.1 後続仕様による追加（Phase 16A / 16C。2026-07-23追記）
 
-本設計書はFlowDock（`/memo` 系）MVP当時の仕様であり、以下は削除せず歴史的記述として残す。MVP後にPhase 16で次の改善・拡張を追加する（未実装。正本は各ファイル）。
+本設計書はFlowDock（`/memo` 系）MVP当時の仕様であり、以下は削除せず歴史的記述として残す。MVP後にPhase 16A／16Cで次の改善・拡張を追加した（**コード実装済み**。16CはCodexレビューと更新APKでのAndroid最終確認が残っている。仕様の正本は各ファイル、実装・受入状態の正本は `31`・`33`・`docs/memo-app/10-tasks.md` §21・`current-tasks.md`）。
 
 * メモ作成（4.2）・メモ編集（4.4）：長文入力・音声入力後の長文編集・本文内スクロール・キーボード表示中の保存/キャンセル操作の詳細は `docs/memo-app/31-quick-memo-usability-improvement.md`（Phase 16A）を正本とする
 * メモ詳細（4.3）：本文コピー導線は維持する。加えて `ChatGPTなどへ共有`（OS／ブラウザ共有）を追加する。共有確認・用途選択・編集・Web fallback・共有前の任意保存の詳細は `docs/memo-app/33-external-handoff-and-sharing.md`（Phase 16C）を正本とする。共有はChatGPT等への自動送信ではなく、コピー機能は廃止しない

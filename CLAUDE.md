@@ -56,7 +56,7 @@ npx expo start --web   # PC用Webアプリとして起動
 | 実装順の確認 | `docs/memo-app/09-roadmap.md`、`10-tasks.md` |
 | 判断に迷った | `docs/memo-app/01-decisions-and-scope.md`、`11-open-issues.md`、`docs/worklog/current.md` |
 | 現場適応モード（現場適応・5場面導線・現場プロファイル・守秘） | `docs/memo-app/20-workplace-adaptation-overview.md`〜`23`、`08-ui-flow.md`、`03-data-model.md`、`04-categories-and-tags.md`、`07-export-and-git-rules.md`、`17-distribution-and-sharing.md` |
-| Phase 16（未着手・文書のみ承認済み）：さくっとメモ入力・ホーム操作性（16A）／質問タイミング判断支援（16B）／外部AI・共有受け渡し（16C） | まず `docs/memo-app/31-quick-memo-usability-improvement.md`〜`33`。関連正本：16Aは`08-ui-flow.md`・`flowdock_mvp_design.md`・`28`〜`30`／16Bは`20`〜`23`・`03`・`04`／16Cは`06-chatgpt-prompt-copy.md`・`14`・`21`〜`23`・`07` |
+| Phase 16（16A・16Bは実装済み／16Cもコード実装済み・Codexレビューと更新APKでのAndroid最終確認待ち。状態の正本は `09-roadmap.md` Phase 16・`10-tasks.md` §21）：さくっとメモ入力・ホーム操作性（16A）／質問タイミング判断支援（16B）／外部AI・共有受け渡し（16C） | まず `docs/memo-app/31-quick-memo-usability-improvement.md`〜`33`。関連正本：16Aは`08-ui-flow.md`・`flowdock_mvp_design.md`・`28`〜`30`／16Bは`20`〜`23`・`03`・`04`／16Cは`06-chatgpt-prompt-copy.md`・`14`・`21`〜`23`・`07` |
 | さくっとメモのブレインダンプ整理・プロンプト編集・AI結果保存などの拡張を検討する場合（**未承認構想**） | `docs/memo-app/35-quick-memo-brain-dump-and-ai-handoff.md`。**未承認・未実装の構想**。Phase 16Cの正式仕様は`33`。関連：入力=`31`／共有=`33`／テンプレDB=`12`（Phase 8〜9）／プロンプト集=`14`／バックアップ=`34`。35だけを根拠にコード・DB・migration・Phase追加へ着手しない。新Phase番号は作らない |
 
 ## 既存機能（FlowDock由来）のドキュメント
