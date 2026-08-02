@@ -53,7 +53,7 @@ export const QUESTION_ORGANIZE_REQUEST = `以下のメモから、相手が答�
 ## 追加で確認が必要な情報`;
 
 /** 依頼文の取得元。prompt＝既存定義をIDで参照、fixed＝共有専用固定文、none＝依頼文なし */
-type PurposeRequestSource =
+export type PurposeRequestSource =
   | { type: 'prompt'; promptId: string }
   | { type: 'fixed'; body: string }
   | { type: 'none' };
@@ -134,26 +134,55 @@ function getPromptBodyById(id: string): string | null {
   return promptBodyCache.get(id) ?? null;
 }
 
-/** 用途に対応する依頼文を返す。依頼文なし（用途5）・定義が見つからない場合は null */
-export function getPurposeRequestText(key: MemoSharePurposeKey): string | null {
-  const { request } = getMemoSharePurpose(key);
-  if (request.type === 'none') return null;
-  if (request.type === 'fixed') return request.body;
-  const body = getPromptBodyById(request.promptId);
-  return body ? stripTrailingTargetPlaceholder(body) : null;
+// 「依頼文なし（用途5＝正常）」と「依頼文を取得できなかった（異常）」を型で区別する。
+// 取得失敗を本文だけのフォールバックへ吸収すると、利用者が別用途の文章と誤認するため。
+export type ShareRequestResult =
+  /** request が null のときは依頼文を付けない用途（自由に編集する） */
+  | { ok: true; request: string | null }
+  | { ok: false; message: string };
+
+export type ShareTextResult =
+  | { ok: true; text: string }
+  | { ok: false; message: string };
+
+/** 取得失敗時の利用者向け表示文（内部ID・本文は含めない） */
+export const SHARE_REQUEST_UNAVAILABLE_MESSAGE =
+  '選択した用途の文章を準備できませんでした。別の用途を選んでください。';
+
+/** 取得元から依頼文を解決する（用途定義に依らず単体確認できるよう公開する） */
+export function resolvePurposeRequest(
+  source: PurposeRequestSource
+): ShareRequestResult {
+  if (source.type === 'none') return { ok: true, request: null };
+  if (source.type === 'fixed') return { ok: true, request: source.body };
+  const body = getPromptBodyById(source.promptId);
+  if (!body) return { ok: false, message: SHARE_REQUEST_UNAVAILABLE_MESSAGE };
+  return { ok: true, request: stripTrailingTargetPlaceholder(body) };
+}
+
+/** 用途に対応する依頼文を返す。用途5は `{ ok: true, request: null }`、取得失敗は `ok: false` */
+export function getPurposeRequest(
+  key: MemoSharePurposeKey
+): ShareRequestResult {
+  return resolvePurposeRequest(getMemoSharePurpose(key).request);
 }
 
 /**
  * さくっとメモの共有文章を組み立てる（33 §7.2）。
  *   【依頼内容】＜用途に対応する依頼文＞
  *   【整理対象】＜さくっとメモ本文＞
- * 依頼文がない用途（自由に編集する）と、依頼文を取得できなかった場合は本文だけを返す。
+ * 用途5（自由に編集する）は本文のみ。既存プロンプトを取得できなかった場合は
+ * 本文だけへフォールバックせず `ok: false` を返し、呼び出し側が理由を表示する。
  */
 export function buildMemoShareText(
   key: MemoSharePurposeKey,
   memoBody: string
-): string {
-  const request = getPurposeRequestText(key);
-  if (!request) return memoBody;
-  return `【依頼内容】\n${request}\n\n【整理対象】\n${memoBody}`;
+): ShareTextResult {
+  const result = getPurposeRequest(key);
+  if (!result.ok) return { ok: false, message: result.message };
+  if (result.request === null) return { ok: true, text: memoBody };
+  return {
+    ok: true,
+    text: `【依頼内容】\n${result.request}\n\n【整理対象】\n${memoBody}`,
+  };
 }

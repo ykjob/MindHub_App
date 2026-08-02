@@ -2,9 +2,16 @@ import React from 'react';
 import { router } from 'expo-router';
 import WorkplaceSceneForm from '../../src/components/WorkplaceSceneForm';
 import { buildReportText } from '../../src/features/workplace/workplaceService';
-import { setSharePayload } from '../../src/features/share/shareHandoff';
+import {
+  setSharePayload,
+  clearSharePayload,
+} from '../../src/features/share/shareHandoff';
+import { useNavigationLock } from '../../src/hooks/useNavigationLock';
 
 export default function WorkplaceReportScreen() {
+  // 共有確認画面への二重遷移防止（画面へ戻ると自動で解除される）。
+  const shareNavigation = useNavigationLock();
+
   return (
     <WorkplaceSceneForm
       intro="進捗報告を、結論から短く分かりやすい形に整理します。出力はコピーしてチャットや日報に貼れます（この画面では保存しません）。AI・チャット・メールに貼る前に、顧客名・会社名・個人名・内部URL・システム名・社内マニュアル本文・職場固有の判断基準は一般化してから使ってください。"
@@ -35,13 +42,20 @@ export default function WorkplaceReportScreen() {
       outputAction={{
         label: 'ChatGPTなどへ共有',
         accessibilityLabel: 'ChatGPTなどへ共有',
+        busy: shareNavigation.navigating,
+        busyLabel: '共有確認画面へ移動しています…',
         onPress: ({ output }) => {
-          setSharePayload({
-            kind: 'workplace_report',
-            originLabel: '現場適応・報告',
-            baseText: output,
-          });
-          router.push('/share/confirm');
+          shareNavigation.run(
+            () => {
+              setSharePayload({
+                kind: 'workplace_report',
+                originLabel: '現場適応・報告',
+                baseText: output,
+              });
+              router.push('/share/confirm');
+            },
+            () => clearSharePayload()
+          );
         },
       }}
     />

@@ -309,7 +309,7 @@ MVP優先。
 
 ## Phase 16：さくっとメモ・質問タイミング・外部共有（2026-07-23 追加）
 
-ユーザー承認済みの追加仕様。正本は `31-quick-memo-usability-improvement.md`（16A）・`32-workplace-question-timing-rules.md`（16B）・`33-external-handoff-and-sharing.md`（16C）。**状態（2026-08-02）**：16A・16Bは実装済み（Android Expo Go確認済み・EAS APK未確認）、16Cは**実装済み・Web確認済み**（Codexレビュー待ち・EAS APK更新待ち・更新APKでのPixel最終確認待ち）。**Phase 16全体の完了は、更新APKでのAndroid確認まで行っていない**。Phase 15の完了状態・過去記録は書き換えない。
+ユーザー承認済みの追加仕様。正本は `31-quick-memo-usability-improvement.md`（16A）・`32-workplace-question-timing-rules.md`（16B）・`33-external-handoff-and-sharing.md`（16C）。**状態（2026-08-02）**：16A・16Bは実装済み（Android Expo Go確認済み・EAS APK未確認）、16Cは**実装済み・Web確認済み**（Codex初回レビューのMedium 4・Low 4を修正済み・**再レビュー待ち**・EAS APK更新待ち・更新APKでのPixel最終確認待ち）。**Phase 16全体の完了は、更新APKでのAndroid確認まで行っていない**。Phase 15の完了状態・過去記録は書き換えない。
 
 ### Phase 16A：さくっとメモ入力・ホーム操作性改善
 
@@ -342,7 +342,7 @@ MVP優先。
 
 完了条件：`33` の受入条件（Gate A〜G）。コピーは維持し、自動送信・共有履歴保存・元データ上書きはしない。
 
-状態（2026-08-02）：16C-1／16C-2／16C-3を実装し、機械確認（tsc・Web export・expo-doctor・diff --check）・用途マッピングの単体確認・Web確認まで完了。**Gate A・B・C・E・F・GはWeb範囲で確認済み、Gate D（Android共有）は未確認**。実装記録・未確認項目は `33` §20。新規ネイティブ依存はないが、配布APKへ反映するにはCodexレビュー合格後にPhase 16全体を含むEAS APK更新が必要。
+状態（2026-08-02）：16C-1／16C-2／16C-3を実装し、機械確認（tsc・Web export・expo-doctor・diff --check）・用途マッピングの単体確認・Web確認まで完了。**Gate A・B・C・E・F・GはWeb範囲で確認済み、Gate D（Android共有）は未確認**。実装記録・未確認項目は `33` §20、Codex初回レビュー（Medium 4・Low 4）への対応は `33` §21。新規ネイティブ依存はないが、配布APKへ反映するにはCodexレビュー合格後にPhase 16全体を含むEAS APK更新が必要。
 
 ### Phase 16の依存関係・実装順
 

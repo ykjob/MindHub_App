@@ -10,7 +10,11 @@ import {
 import { router } from 'expo-router';
 import { getPromptGroups, type PromptEntry } from '../../src/features/notes/promptHub';
 import { copyToClipboard } from '../../src/utils/clipboard';
-import { setSharePayload } from '../../src/features/share/shareHandoff';
+import {
+  setSharePayload,
+  clearSharePayload,
+} from '../../src/features/share/shareHandoff';
+import { useNavigationLock } from '../../src/hooks/useNavigationLock';
 import AppHeader from '../../src/components/AppHeader';
 import FilterChip from '../../src/components/FilterChip';
 import StatusMessage from '../../src/components/StatusMessage';
@@ -124,6 +128,8 @@ export default function PromptHubScreen() {
   // コピー中のID（二重操作防止）と、直近のコピー結果（StatusMessage表示用）
   const [copyingId, setCopyingId] = useState<string | null>(null);
   const [copyResult, setCopyResult] = useState<CopyResult | null>(null);
+  // 共有確認画面への二重遷移防止（画面へ戻ると自動で解除される）。
+  const shareNavigation = useNavigationLock();
 
   const sections: Section[] = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
@@ -172,13 +178,19 @@ export default function PromptHubScreen() {
   // 共有確認画面へは選択したプロンプト本文だけを渡し、プロンプト名は出所として表示する。
   // プロンプトID・内部管理情報は共有文章へ入れない（33 §7.1 SHARE-PROMPT-01）。
   // 既存のコピー・検索・絞り込み・展開・42件の内容は変更しない。
+  // 高速二重押下でも遷移は1回だけ（同期ロック。画面へ戻ると解除される）。
   function handleShare(entry: PromptEntry) {
-    setSharePayload({
-      kind: 'prompt',
-      originLabel: entry.name,
-      baseText: entry.promptBody,
-    });
-    router.push('/share/confirm');
+    shareNavigation.run(
+      () => {
+        setSharePayload({
+          kind: 'prompt',
+          originLabel: entry.name,
+          baseText: entry.promptBody,
+        });
+        router.push('/share/confirm');
+      },
+      () => clearSharePayload()
+    );
   }
 
   async function handleCopy(entry: PromptEntry) {
@@ -317,12 +329,29 @@ export default function PromptHubScreen() {
               {/* コピーは維持したまま、外部アプリへ渡す導線を追加する（33 §7.1 SHARE-PROMPT-02）。
                   狭い幅でも名称と競合しないよう、カード内の全幅ボタンとして下段に置く */}
               <TouchableOpacity
-                style={styles.shareBtn}
+                style={[
+                  styles.shareBtn,
+                  shareNavigation.navigating && styles.shareBtnDisabled,
+                ]}
                 onPress={() => handleShare(item)}
+                disabled={shareNavigation.navigating}
                 accessibilityRole="button"
                 accessibilityLabel={`${item.name}をChatGPTなどへ共有`}
+                accessibilityState={{
+                  disabled: shareNavigation.navigating,
+                  busy: shareNavigation.navigating,
+                }}
               >
-                <Text style={styles.shareBtnText}>ChatGPTなどへ共有</Text>
+                <Text
+                  style={[
+                    styles.shareBtnText,
+                    shareNavigation.navigating && styles.shareBtnTextDisabled,
+                  ]}
+                >
+                  {shareNavigation.navigating
+                    ? '共有確認画面へ移動しています…'
+                    : 'ChatGPTなどへ共有'}
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -457,7 +486,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  shareBtnDisabled: { borderColor: '#D1D5DB' },
   shareBtnText: { fontSize: 13, fontWeight: '600', color: '#2563EB' },
+  shareBtnTextDisabled: { color: '#9CA3AF' },
   toggle: { paddingVertical: 2 },
   toggleText: { fontSize: 13, color: '#2563EB' },
   bodyBox: {

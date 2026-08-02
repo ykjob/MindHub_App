@@ -10,10 +10,16 @@ import {
   getQuestionFormHandoff,
   clearQuestionFormHandoff,
 } from '../../src/features/workplace/workplaceHandoff';
-import { setSharePayload } from '../../src/features/share/shareHandoff';
+import {
+  setSharePayload,
+  clearSharePayload,
+} from '../../src/features/share/shareHandoff';
+import { useNavigationLock } from '../../src/hooks/useNavigationLock';
 
 export default function WorkplaceQuestionScreen() {
   const db = useSQLiteContext();
+  // 共有確認画面への二重遷移防止（画面へ戻ると自動で解除される）。
+  const shareNavigation = useNavigationLock();
 
   // 質問タイミング確認からの引き継ぎ。useState初期化関数では純粋に get するだけ（副作用なし＝Strict Mode安全）。
   // 初回commit後に useEffect で1回だけ clear する（無ければ従来どおり空フォーム）。
@@ -68,13 +74,20 @@ export default function WorkplaceQuestionScreen() {
       outputAction={{
         label: 'ChatGPTなどへ共有',
         accessibilityLabel: 'ChatGPTなどへ共有',
+        busy: shareNavigation.navigating,
+        busyLabel: '共有確認画面へ移動しています…',
         onPress: ({ output }) => {
-          setSharePayload({
-            kind: 'workplace_question',
-            originLabel: '現場適応・質問',
-            baseText: output,
-          });
-          router.push('/share/confirm');
+          shareNavigation.run(
+            () => {
+              setSharePayload({
+                kind: 'workplace_question',
+                originLabel: '現場適応・質問',
+                baseText: output,
+              });
+              router.push('/share/confirm');
+            },
+            () => clearSharePayload()
+          );
         },
       }}
       // 質問文作成後の完了導線（Phase 16B）。中間画面（質問タイミング・詰まり等）を閉じて戻すため

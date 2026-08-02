@@ -1,6 +1,35 @@
 # 最新作業ログ
 
-最終更新：2026-08-02（**Phase 16C（外部AI・共有受け渡し）を実装**。16C-1／16C-2／16C-3を1バッチ。機械確認・用途マッピング単体・Web確認まで完了。**Codexレビュー待ち・EAS APK更新待ち・更新APKでのPixel最終確認待ち**）。前回：2026-08-02（`35` 構想の文書体系整備。Codex再々レビューPASS・**PR #2 merge済み・main反映済み**）、2026-07-28（名称整理 Codex最終再レビュー合格）ほか
+最終更新：2026-08-02（**Phase 16C のCodex初回レビュー指摘（Medium 4・Low 4）を修正**。8件すべて対応し再検証。**Codex再レビュー待ち・EAS APK更新待ち・Expo Go事前確認待ち・更新APKでのPixel最終確認待ち**）。前回：2026-08-02（**Phase 16C（外部AI・共有受け渡し）を実装**。16C-1／16C-2／16C-3を1バッチ）、2026-08-02（`35` 構想の文書体系整備。**PR #2 merge済み・main反映済み**）ほか
+
+## Phase 16C：Codex初回レビュー指摘の修正（2026-08-02）
+
+対象＝初回実装コミット `5e76a291a0eebad57b5e0285102ab3cedad7598b`。初回レビュー結果＝Critical 0／High 0／**Medium 4**／**Low 4**／Note 4、判定「要修正・再レビュー」。**8件すべてを修正**し、初回コミットはamendせず追加コミットとした。仕様（`33` §1〜§19）の製品判断は変更していない。詳細な対応表は `33` §21。
+
+### Medium
+
+* **M1 用途変更で編集内容を確認なしに失う**（`app/share/confirm.tsx`）：用途適用時の文章を `baseline` として保持し、`text !== baseline` で編集済みを判定。**同じ用途の再選択はno-op**（状態を一切変えない）、未編集なら確認なしで即時変更、編集済みなら既存の `confirmDialog`（Web＝`window.confirm`／Android・iOS＝`Alert.alert`）で「用途を変更／用途を変更すると、現在の編集内容は破棄されます。変更しますか？」を確認。キャンセルでは用途・文章・baseline・コピー／共有／保存表示のいずれも変更しない。用途ごとに編集文章を保持する構造は作らない（最小対応）
+* **M2 通常系保存の二重push**／**M3 4入口の遷移二重操作**：共通hook `src/hooks/useNavigationLock.ts` を新設（**同期refでロック**＝Reactの再描画を待たずに2回目を無視／UI用のboolean state／`useFocusEffect` で画面復帰時に解除／`navigate` の同期例外で解除＋`onError` 後始末／アンマウント後はstate更新しない／本文を引数・ログへ残さない）。適用は5経路＝プロンプト集・さくっとメモ詳細・現場適応の質問／報告の共有入口と、共有確認画面の通常系保存。保存は「ロック → `setNoteDraftHandoff` → `router.push('/notes/create')`」の順で、同期失敗時は `clearNoteDraftHandoff()`。各ボタンは遷移中 `disabled` ＋ `accessibilityState.disabled` / `busy` ＋処理中ラベル
+* **M4 保存後の状態が残る**（`app/share/confirm.tsx`）：現場適応の保存中は全文入力欄を `editable=false`（`accessibilityState.disabled`）にし、**保存開始時点の文章のスナップショットを保存処理へ渡す**。文章変更時は保存タイマーを解除して `idle` へ戻し、「保存しました」「保存失敗」の表示を解除して再保存できるようにした。通常系（prompt／memo）の保存は記録作成画面への遷移操作であり、現場適応のDB保存状態とは表示・無効化条件を分離した
+
+### Low
+
+* **L5 コピー結果が残る**（`src/hooks/useCopyFeedback.ts`）：`reset()` と**世代（generation）管理**を追加。文章変更時・用途変更確定時に `reset()` を呼ぶ。コピー処理中に文章が変わっても進行中の処理は中断しないが、完了時に世代が異なれば `done`／`failed` を表示せず `idle` へ戻す（古い文章の結果を新しい文章へ出さない）。`copying` 中のロックは解除しないため二重コピー防止は維持。既存利用箇所（さくっとメモ詳細・記録詳細・NoteForm・WorkplaceSceneForm）は従来どおり動作する後方互換API
+* **L6 プロンプトID取得失敗の無言フォールバック**（`src/features/share/shareTargets.ts`・`app/share/confirm.tsx`）：`ShareRequestResult` / `ShareTextResult` の判別可能ユニオンへ変更し、**用途5の「依頼文なし」と取得失敗を型で区別**。失敗時は本文だけへフォールバックせず `選択した用途の文章を準備できませんでした。別の用途を選んでください。` を表示し、コピー・共有・保存を無効化（内部ID・本文はメッセージへ含めない）。別用途を選べば復旧できる。単体確認用に `resolvePurposeRequest` を公開
+* **L7 `git diff --check`**：`33` 冒頭の変更行から末尾2スペースを外し、通常の空行で表示を維持。`33` §20.8・`current-tasks.md`・本ファイルの記述を実際の結果（初回コミットで通知1件／レビュー修正で解消）へ訂正
+* **L8 コメント不一致**（`src/features/workplace/workplaceTags.ts`）：「報告文の任意保存はPhase 16C-3で追加予定」→「実装済み」。定数値・タグ値は無変更
+
+### 検証（レビュー修正後）
+
+* `npx tsc --noEmit` 合格／`npx expo export --platform web` 成功（`dist` が別プロセス使用中のため出力先はリポジトリ外）／`npx expo-doctor` 17/18（失敗1件は既存の `expo` パッチ差＝無関係）
+* `git diff --check`：作業ツリー・`git diff --check d1a0600..HEAD` とも **exit 0**
+* 単体確認（実モジュールをコンパイルしてNode実行）＝**43/43合格**。42件維持・ID重複なし・用途1/2/4は既存本文と一致（末尾の入力待ち行のみ除去）・用途3は共有専用固定依頼文・**用途5の「依頼文なし」と取得失敗の区別**・失敗メッセージに内部IDを含まない
+* レビュー修正分のWeb確認（ヘッドレスChrome・専用ポート8117・puppeteerはscratchpad隔離）＝**41/41合格**。同一用途の再タップno-op／未編集の即時変更／編集済みの確認表示・キャンセルで文章と用途を維持・確定で再生成／5経路の高速二重押下でpushは1回・戻ると再操作可／保存中は入力不可・保存後の編集でidle復帰・再保存で新規レコード（`/notes` に2件）／文章変更でコピー・共有結果を解除・用途変更キャンセルでは解除しない／console.error・pageerror・unhandledrejection 0
+* 初回実装分のWeb確認を回帰実行＝**83項目中81合格**。不合格2件は**コピー成功経路のみ**で、ヘッドレスChromeが `clipboard-write` を拒否する既知の環境制約（アプリは失敗表示→通常状態へ復帰することを確認済み）
+
+### 未実施・次にやること
+
+Codex**再レビュー**／EAS APK更新（レビュー合格後にPhase 16全体を含む更新が必要）／Expo Go事前確認／更新APKでのPixel最終確認。`33` Gate D・`32` Gate Dは未通過のまま。**Phase 16Cは最終完了としない**。DB・schema・migration・依存・lockfile・`app.json`・`eas.json`・versionCodeは無変更。`35` は未承認・未実装の将来構想のまま（新Phase番号なし）。
 
 ## Phase 16C：外部AI・共有受け渡しの実装（2026-08-02）
 
@@ -26,7 +55,7 @@
 
 ### 検証
 
-* `npx tsc --noEmit` 合格／`npx expo export --platform web` 成功（`dist` が別プロセスに使用中だったため出力先をリポジトリ外のscratchpadへ指定）／`npx expo-doctor` 17/18（失敗1件は既存の `expo 54.0.35` vs `~54.0.36` パッチ差＝無関係・未修正）／`git diff --check` 問題なし
+* `npx tsc --noEmit` 合格／`npx expo export --platform web` 成功（`dist` が別プロセスに使用中だったため出力先をリポジトリ外のscratchpadへ指定）／`npx expo-doctor` 17/18（失敗1件は既存の `expo 54.0.35` vs `~54.0.36` パッチ差＝無関係・未修正）／`git diff --check` は**この時点で末尾空白の通知1件**（`33` 冒頭のMarkdownハード改行2スペース。Codexレビュー指摘L7としてレビュー修正コミットで解消）
 * 用途マッピング・末尾行除去の単体確認（実モジュールをコンパイルしてNode実行・確認後ハーネスはリポジトリ外に隔離）＝**32/32合格**
 * Web確認（ヘッドレスChrome・専用ポート8117・使い捨てuser-data-dir・puppeteerはscratchpad隔離。他スレッドのポート・`dist` を止めない）＝**82項目中80合格**。5用途と既定・共有文章の構造・元メモ非変更・空文字時の無効化・共有結果4分岐（成功／キャンセル／失敗／非対応）・禁止文言なし・6幅で横スクロールなし・記録作成prefillとリロード非復元・直アクセス空状態と戻る・42件維持・守秘3チェックの無効化と解除・報告文保存のprivate/`workplace_report`/Git候補外・質問画面の既存導線維持・console.error/pageerror/unhandledrejection 0件
 * **不合格2件はいずれもコピー成功経路**で、ヘッドレスChromeが `clipboard-write` を拒否する環境制約（`permissions.query`＝denied、`navigator.clipboard.writeText`＝NotAllowedError）。アプリ側は「コピーできませんでした」を表示し一定時間後に通常状態へ戻ることを確認（Phase 15と同じ既知事象）

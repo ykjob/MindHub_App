@@ -14,11 +14,14 @@ import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { colors, radius, spacing, touchTarget, typography } from '../../src/theme';
 import { useCopyFeedback } from '../../src/hooks/useCopyFeedback';
+import { useNavigationLock } from '../../src/hooks/useNavigationLock';
+import { confirmDialog } from '../../src/utils/dialog';
 import { openShareSheet, type ShareOutcome } from '../../src/utils/share';
 import {
   getSharePayload,
   clearSharePayload,
   setNoteDraftHandoff,
+  clearNoteDraftHandoff,
   type SharePayload,
 } from '../../src/features/share/shareHandoff';
 import {
@@ -66,6 +69,23 @@ function isWorkplaceKind(payload: SharePayload): boolean {
   );
 }
 
+// 初期表示内容。さくっとメモは既定用途で組み立て、既存プロンプトを取得できなかった場合は
+// 本文だけへフォールバックせず、理由を表示して操作を無効にする（`33` §20.2）。
+function buildInitialContent(payload: SharePayload | null): {
+  text: string;
+  error: string | null;
+} {
+  if (!payload) return { text: '', error: null };
+  if (payload.kind !== 'memo') return { text: payload.baseText, error: null };
+  const result = buildMemoShareText(
+    DEFAULT_MEMO_SHARE_PURPOSE,
+    payload.baseText
+  );
+  return result.ok
+    ? { text: result.text, error: null }
+    : { text: '', error: result.message };
+}
+
 export default function ShareConfirmScreen() {
   const db = useSQLiteContext();
   const insets = useSafeAreaInsets();
@@ -80,18 +100,22 @@ export default function ShareConfirmScreen() {
   const [purpose, setPurpose] = useState<MemoSharePurposeKey>(
     DEFAULT_MEMO_SHARE_PURPOSE
   );
+  const [initialContent] = useState(() => buildInitialContent(payload));
   // 共有用の編集文章（一時データ）。元データは書き換えない。
-  const [text, setText] = useState(() => {
-    if (!payload) return '';
-    return payload.kind === 'memo'
-      ? buildMemoShareText(DEFAULT_MEMO_SHARE_PURPOSE, payload.baseText)
-      : payload.baseText;
-  });
+  const [text, setText] = useState(initialContent.text);
+  // 現在の用途で生成した直後の文章。text と異なれば利用者が編集している。
+  const [baseline, setBaseline] = useState(initialContent.text);
+  // 用途に対応する依頼文を準備できなかった場合の理由（内部ID・本文は含めない）。
+  const [purposeError, setPurposeError] = useState<string | null>(
+    initialContent.error
+  );
   const [checked, setChecked] = useState<boolean[]>(() =>
     WORKPLACE_CONFIDENTIAL_CHECKS.map(() => false)
   );
 
   const copy = useCopyFeedback();
+  // 記録作成画面への遷移（通常系の保存）の二重push防止。
+  const saveNavigation = useNavigationLock();
   const [shareResult, setShareResult] = useState<ShareOutcome | null>(null);
   const [sharing, setSharing] = useState(false);
   const [saveState, setSaveState] = useState<SaveState>('idle');
@@ -122,16 +146,77 @@ export default function ShareConfirmScreen() {
 
   const isMemo = payload?.kind === 'memo';
   const isWorkplace = payload ? isWorkplaceKind(payload) : false;
+  const isNormalKind = payload
+    ? payload.kind === 'prompt' || payload.kind === 'memo'
+    : false;
   const hasText = text.trim().length > 0;
+  // 依頼文を準備できていない場合は、本文だけを正常な生成結果として扱わない。
+  const contentReady = hasText && purposeError === null;
   const checksDone = !isWorkplace || checked.every(Boolean);
-  const canCopyOrShare = hasText && checksDone;
+  const canCopyOrShare = contentReady && checksDone;
+  const saving = saveState === 'saving';
 
-  // 用途を変えると共有文章を組み立て直す（元のさくっとメモ本文は変更しない）。
+  function clearShareResult() {
+    if (shareTimerRef.current) {
+      clearTimeout(shareTimerRef.current);
+      shareTimerRef.current = null;
+    }
+    setShareResult(null);
+  }
+
+  // 保存結果の表示・タイマーを現在の文章に合わせて解除する（古い結果を残さない）。
+  function resetSaveState() {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+    setSaveState((prev) => (prev === 'saving' ? prev : 'idle'));
+  }
+
+  // 文章が変わったら、直前のコピー結果・共有結果・保存結果はすべて現在の文章のものではない。
+  function handleTextChange(next: string) {
+    setText(next);
+    copy.reset();
+    clearShareResult();
+    resetSaveState();
+  }
+
+  // 用途を適用して共有文章を組み立て直す（元のさくっとメモ本文は変更しない）。
+  function applyPurpose(key: MemoSharePurposeKey) {
+    if (!payload || payload.kind !== 'memo') return;
+    const result = buildMemoShareText(key, payload.baseText);
+    setPurpose(key);
+    if (result.ok) {
+      setText(result.text);
+      setBaseline(result.text);
+      setPurposeError(null);
+    } else {
+      // 取得失敗時は本文だけへフォールバックせず、理由を表示して操作を無効にする。
+      setText('');
+      setBaseline('');
+      setPurposeError(result.message);
+    }
+    copy.reset();
+    clearShareResult();
+    resetSaveState();
+  }
+
+  // 同じ用途の再選択は何も変更しない（no-op）。別用途は編集済みなら確認してから破棄する。
   function handlePurposeChange(key: MemoSharePurposeKey) {
     if (!payload || payload.kind !== 'memo') return;
-    setPurpose(key);
-    setText(buildMemoShareText(key, payload.baseText));
-    setShareResult(null);
+    if (key === purpose) return;
+    if (text === baseline) {
+      applyPurpose(key);
+      return;
+    }
+    confirmDialog({
+      title: '用途を変更',
+      message:
+        '用途を変更すると、現在の編集内容は破棄されます。変更しますか？',
+      confirmLabel: '変更する',
+      cancelLabel: 'キャンセル',
+      onConfirm: () => applyPurpose(key),
+    });
   }
 
   function toggleCheck(index: number) {
@@ -174,19 +259,31 @@ export default function ShareConfirmScreen() {
   }
 
   async function handleSave() {
-    if (!payload || !hasText) return;
+    if (!payload || !contentReady) return;
     if (savingRef.current || saveState === 'saving' || saveState === 'done') {
       return;
     }
     // 通常系（プロンプト・さくっとメモ）は記録作成画面へ本文を引き継ぎ、
     // タイトル・カテゴリ・公開範囲はユーザーが確認して保存する（33 §11 SHARE-SAVE-02）。
+    // 高速二重押下でも push は1回だけにする（ロック → 引き継ぎ → push の順）。
     if (payload.kind === 'prompt' || payload.kind === 'memo') {
-      setNoteDraftHandoff({ body: text });
-      router.push('/notes/create');
+      const body = text;
+      saveNavigation.run(
+        () => {
+          setNoteDraftHandoff({ body });
+          router.push('/notes/create');
+        },
+        () => {
+          // 遷移が同期的に失敗した場合は引き継ぎを残さない（本文はログ・表示へ出さない）。
+          clearNoteDraftHandoff();
+        }
+      );
       return;
     }
     // 現場適応系は一般の記録作成画面へ渡さず、専用保存処理で
     // private・Git候補false・現場適応タグを強制する（23 §5.1・33 §11 SHARE-SAVE-03）。
+    // 保存開始時点の文章を確定させ、保存中は入力欄を編集不可にする（競合防止）。
+    const snapshot = text;
     savingRef.current = true;
     if (saveTimerRef.current) {
       clearTimeout(saveTimerRef.current);
@@ -195,9 +292,9 @@ export default function ShareConfirmScreen() {
     setSaveState('saving');
     try {
       if (payload.kind === 'workplace_question') {
-        await saveQuestionNote(db, text);
+        await saveQuestionNote(db, snapshot);
       } else {
-        await saveReportNote(db, text);
+        await saveReportNote(db, snapshot);
       }
       if (mountedRef.current) setSaveState('done');
     } catch {
@@ -234,16 +331,22 @@ export default function ShareConfirmScreen() {
     );
   }
 
-  const saveLabel =
-    payload.kind === 'prompt' || payload.kind === 'memo'
-      ? '新しい記録として保存'
-      : saveState === 'saving'
-        ? '保存中…'
-        : saveState === 'done'
-          ? '保存しました'
-          : saveState === 'failed'
-            ? '保存失敗'
-            : '新しい記録として保存';
+  // 通常系の保存は記録作成画面への遷移操作、現場適応系はこの画面でのDB保存。
+  // 表示・無効化条件を混同しない。
+  const saveLabel = isNormalKind
+    ? saveNavigation.navigating
+      ? '記録作成画面へ移動しています…'
+      : '新しい記録として保存'
+    : saveState === 'saving'
+      ? '保存中…'
+      : saveState === 'done'
+        ? '保存しました'
+        : saveState === 'failed'
+          ? '保存失敗'
+          : '新しい記録として保存';
+  const saveDisabled = isNormalKind
+    ? !contentReady || saveNavigation.navigating
+    : !contentReady || saving || saveState === 'done';
 
   return (
     <KeyboardAvoidingView
@@ -311,22 +414,29 @@ export default function ShareConfirmScreen() {
             外部で使う文章
           </Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, saving && styles.inputDisabled]}
             value={text}
-            onChangeText={(t) => {
-              setText(t);
-              setShareResult(null);
-            }}
+            onChangeText={handleTextChange}
             multiline
             textAlignVertical="top"
             placeholder="共有する文章"
             placeholderTextColor={colors.textFaint}
             accessibilityLabel="外部で使う文章"
+            // 保存中は入力を止め、保存対象と表示中の文章がずれないようにする。
+            editable={!saving}
+            accessibilityState={{ disabled: saving }}
           />
-          {!hasText ? (
+          {purposeError ? (
+            <Text style={styles.warnText} accessibilityLiveRegion="polite">
+              {purposeError}
+            </Text>
+          ) : !hasText ? (
             <Text style={styles.warnText}>
               文章が空のため、コピー・共有・保存はできません。
             </Text>
+          ) : null}
+          {saving ? (
+            <Text style={styles.hint}>保存中は文章を編集できません。</Text>
           ) : null}
         </View>
 
@@ -432,18 +542,17 @@ export default function ShareConfirmScreen() {
           <TouchableOpacity
             style={[
               styles.saveBtn,
-              !hasText && styles.saveBtnDisabled,
+              saveDisabled && styles.saveBtnDisabled,
               saveState === 'done' && styles.saveBtnDone,
               saveState === 'failed' && styles.saveBtnFailed,
             ]}
             onPress={handleSave}
-            disabled={!hasText || saveState === 'saving' || saveState === 'done'}
+            disabled={saveDisabled}
             accessibilityRole="button"
             accessibilityLabel={saveLabel}
             accessibilityState={{
-              disabled:
-                !hasText || saveState === 'saving' || saveState === 'done',
-              busy: saveState === 'saving',
+              disabled: saveDisabled,
+              busy: isNormalKind ? saveNavigation.navigating : saving,
             }}
             accessibilityLiveRegion="polite"
           >
@@ -554,6 +663,7 @@ const styles = StyleSheet.create({
     minHeight: 220,
     maxHeight: 420,
   },
+  inputDisabled: { backgroundColor: '#F3F4F6', color: colors.textSecondary },
   notice: {
     backgroundColor: colors.warningSoft,
     borderWidth: 1,
