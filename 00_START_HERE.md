@@ -137,6 +137,10 @@ Phase 16（未着手。文書のみ承認済み・実装前）を触る場合。
 * 質問タイミング判断支援（Phase 16B）：docs/memo-app/32-workplace-question-timing-rules.md ＋ docs/memo-app/20〜23
 * コピー・外部共有（Phase 16C）：docs/memo-app/33-external-handoff-and-sharing.md ＋ docs/memo-app/06-chatgpt-prompt-copy.md ＋ docs/memo-app/23-workplace-adaptation-security-and-portfolio.md
 
+さくっとメモのブレインダンプ整理・外部AI受け渡し拡張構想（35）を検討する場合。
+
+* docs/memo-app/35-quick-memo-brain-dump-and-ai-handoff.md（**未承認・未実装の構想**。Phase 16Cの正式仕様ではない。Phase 16C完了後の将来候補。承認済み仕様は31・32・33。35だけを根拠にコード・DB・Phase追加へ着手しない）
+
 既存機能（memos / GitHub連携）を触る場合。
 
 * docs/flowdock_mvp_design.md
