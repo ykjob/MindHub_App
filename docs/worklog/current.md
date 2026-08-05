@@ -1,6 +1,210 @@
 # 最新作業ログ
 
-最終更新：2026-08-02（さくっとメモのブレインダンプ整理・外部AI受け渡し拡張構想（`35`）を**未承認・未実装の構想**として文書体系へ整備。**Codex再々レビュー＝PASS（指摘0件）**。承認対象コミット `c927364`。作業ブランチをGitHubへpush後、PR作成待ち。文書のみ）。前回：2026-07-28（名称整理 Codex最終再レビュー合格・作業ブランチpush・main反映待ち）、2026-07-27（名称整理の実装・Codexレビュー指摘反映）ほか
+最終更新：2026-08-05（**Codex最終文書再確認＝PASS**（Critical/High/Medium/Low/Note すべて0）。製品コードと文書のレビュー工程は完了し、**PR作成・main反映へ進める状態**。ただし**Expo Go事前確認・EAS APK更新・更新APKでのPixel最終確認は未実施**で、**Phase 16Cは最終完了ではない**）。前回：2026-08-05（最終文書再確認で残った文書Low 2件を修正）、2026-08-02（最終文書確認で残った文書Low 2件を修正）、2026-08-02（再々レビューで残った文書Low 1件を修正）、2026-08-02（Codex再レビュー指摘 High 1・Low 1 を修正）、2026-08-02（**Phase 16C を実装**）ほか
+
+## Phase 16C：Codex最終文書再確認PASS（2026-08-05）
+
+対象HEAD＝`c387df13ac94193ed56a21e9bbede7db810770ff`。結果＝Critical 0／High 0／Medium 0／**Low 0**／Note 0、**最終判定＝PASS**。
+
+* **製品コードのCodex指摘はすべて解消済み**（初回Medium 4・Low 4／再レビューHigh 1・Low 1／再々レビューLow 1／最終文書確認Low 2をいずれも修正）
+* **文書上の現在状態も整合済み**：`current-tasks.md`・`10-tasks.md` §21・`33` 冒頭と §23.3〜§23.5・本ファイルの現在状態が一致
+* **新規問題なし・追加修正不要**
+* **Phase 16CはPR作成・main反映へ進めるレビュー状態**
+* ただし**Android受入（Expo Go事前確認・EAS APK更新・更新APKでのPixel最終確認）は未実施**で、`33` Gate D・`32` Gate D は未通過。**Phase 16Cは最終完了ではない**
+
+### 今回の作業
+
+PASS結果の文書記録のみ（`current-tasks.md`・`docs/memo-app/10-tasks.md` §21と16C-1〜3・`docs/memo-app/33-external-handoff-and-sharing.md` 冒頭と §23.5 追加・本ファイル）。**コード変更なし**（DB・schema・migration・依存・lockfile・`app.json`・`eas.json`・versionCode も無変更）。16C-1〜16C-3 の `[ ]`・Gate D未確認・Expo Go未実施・EAS APK未更新の記載は維持している。
+
+**この回に実行していない検証**：`npx tsc --noEmit`／`expo export`／`expo-doctor`／Webブラウザ確認／単体テスト／H1確認／EAS build／Expo Go／Pixel確認。
+**この回に実行した確認**：文書検索（修正前後）・文書間の相互確認・内部参照確認・`git diff --check`。過去コミットで実施した検証結果（tsc合格・expo export成功・expo-doctor 17/18・単体43/43・H1 Web 48/48・回帰41/41・初回実装回帰83中81）は、この回では再実行していない。
+
+### 次の段階
+
+main向けPull Requestを作成する（**mergeはしない**）。merge後にExpo Go事前確認 → EAS APK更新 → 更新APKでのPixel最終確認 → `33` Gate D・`32` Gate D の判定 → Phase 16C最終完了判定、の順で進める。
+
+## Phase 16C：Codex最終文書再確認のLow 2件修正（2026-08-05）
+
+対象HEAD＝`c1828b5ab615467918226ee0ef0fef0f38ea5b55`。Codex結果＝Critical 0／High 0／Medium 0／**Low 2**／Note 5、判定「要修正・再レビュー」。**製品コード上の指摘なし**。前回のL1（`10-tasks.md` §21と16C-1〜3の古いレビュー段階）は**解消**を確認（`[ ]`・Gate D未通過・Android未確認の維持も適切）。
+
+### 残った2件と今回の修正（3文書）
+
+1. **`current-tasks.md` で `78625c4` と `c1828b5` のtsc実行時系列が不明確** → 先頭項目に検証実績を**コミット単位**で明記
+2. **`33` 冒頭が「Codex最終文書確認待ち」のまま** → 冒頭の実装状態を2026-08-05時点へ更新し、最終文書確認の実施・Low 2件修正済み・**Codex最終文書再確認待ち**へ整合
+
+修正した文書＝`current-tasks.md`・`docs/memo-app/33-external-handoff-and-sharing.md`（冒頭＋§23.3への履歴注記＋**§23.4を追加**。新しいトップレベル章は作らない）・本ファイル。**`10-tasks.md` は今回のCodex確認で合格しているため変更していない**。**コード変更なし**（DB・schema・migration・依存・lockfile・`app.json`・`eas.json`・versionCodeも無変更）。
+
+### 検証実績の区別
+
+* **`78625c4`（文書整合）の回**：`npx tsc --noEmit` 実行済み・合格／`git diff --check` 実行済み・合格／古い表現の検索・章番号／内部参照の確認を実施
+* **`c1828b5`（レビュー記録修正）の回**：**tscは再実行せず**／`git diff --check`・文書検索・文書間の相互確認・見出し／内部参照の確認を実施
+* **今回（2026-08-05）の回**：**tscは実行していない**／実行したのは `git diff --check`・文書検索（修正前後）・文書間の相互確認（`current-tasks.md` と `33` 冒頭、`current-tasks.md` とworklogの検証時系列、`33` 冒頭と §23.4、§23.3 から §23.4 への参照）・Markdown見出し重複と内部参照の確認
+* `expo export`・`expo-doctor`・Webブラウザ確認・単体43/43・H1のWeb確認48/48・回帰41/41・初回実装回帰83中81は、**いずれの回も再実行していない**（既存の検証結果を維持）
+
+### 補足修正（同日・Codex最終文書再確認へ出す前の自主確認）
+
+GitHub上での自主確認で、`current-tasks.md` 先頭の「現在状態」項目内に、**旧段階の「現在は Codex最終文書確認待ち」が残っている**ことを確認した。同じ項目の冒頭では現在状態を「Codex最終文書再確認待ち」としているため、同一項目内で現在状態が矛盾して読める。該当箇所（再々レビュー結果の説明）を簡略化し、**過去レビューの詳細は `33` §23.3〜§23.4 と本ファイルへ委ねて**、current-tasks.md の現在状態を**「Codex最終文書再確認待ち」に一本化**した。検証時系列のコミット単位表記・未確認事項（Expo Go／EAS APK／Pixel／Gate D／PR・main）はそのまま維持している。**コード・DB・依存・設定・`33`・`10-tasks.md` は無変更**（この補足修正で実行した確認は `git diff --check`・検索・文書間の相互確認・内部参照確認のみで、tsc・expo export・expo-doctor・Web・単体は実行していない）。
+
+### 現在状態・未実施
+
+Codex**最終文書再確認待ち**／Expo Go事前確認／EAS APK更新／更新APKでのPixel最終確認（Android受入）／`33` Gate D・`32` Gate D／PR作成／mainへのmerge はいずれも**未実施**。**Phase 16Cは最終完了としない**。`35` は未承認・未実装の将来構想のまま。
+
+## Phase 16C：Codex最終文書確認の結果と文書Low 2件の修正（2026-08-02）
+
+対象HEAD＝`78625c444b0a1c45da88317eeb9f146167e9fe5e`（文書整合コミット）。最終文書確認結果＝Critical 0／High 0／Medium 0／**Low 2**／Note 5、判定「要修正・再レビュー」。
+
+### 確認済み（指摘なし）
+
+* 前回修正した名称整理本文（PR #1 merge済み・main反映済み）
+* `33` 冒頭の実装状態
+* `33` §8.4.1 と §23 の整合
+* H1（守秘チェックの編集後再確認）は解消済み
+* **製品コード上の新規問題なし**
+
+### 残件（Low 2件）と今回の修正
+
+1. **`10-tasks.md` §21のPhase 16C現在状態が「再々レビュー待ち」のまま**：§21冒頭の16C状態を「実装済み・Web確認済み／製品コードのCodex指摘は解消済み（再々レビューでH1解消・初回8件の非回帰・`aria-checked` 問題なし・追加指摘なしを確認）／文書整合も修正済みで**Codex最終文書再確認待ち**・EAS APK更新待ち・更新APKでのPixel確認待ち」へ更新し、参照を `33` §21・§22・**§23**＋本ファイルへ。16C-1／16C-2／16C-3 の各行も「製品コードレビュー指摘解消済み・文書整合修正済み・Codex最終文書再確認待ち・EAS APK更新待ち・更新APKでのPixel確認待ち」へ統一。**`[ ]` のまま維持し、Android Gate未確認・Expo Go未実施・更新APK未作成・Gate D未通過・Web確認済みの結果・仕様/実装ファイル/Gate説明は変更していない**
+2. **tsc再実行記録の矛盾**：前回（`78625c4`）の作業について、`current-tasks.md` の「`git diff --check` のみ再実行」という記述と、本ファイルの「tscは再実行していない／任意でtscを実行し合格」という併記を、**実際の事実**へ統一した。事実＝コード変更なしのため `expo export`・`expo-doctor`・単体43/43・H1のWeb確認48/48・回帰41/41・初回実装回帰83中81は**再実行せず既存結果を維持**、その回に実行したのは**任意の `npx tsc --noEmit`（合格）・`git diff --check`（合格）・古い表現の検索・章番号／内部参照の確認**
+
+### 今回（本セクションの作業）の検証
+
+* 文書のみの修正のため、**`npx tsc --noEmit` は今回は再実行していない**（前回 `78625c4` の作業で実行・合格済み）。`expo export`・`expo-doctor`・Web確認・単体43件・H1確認も再実行していない
+* 今回実行：`git diff --check`（作業ツリー・`d1a0600..HEAD` とも exit 0）／指定の2種類の検索（修正前後）／`current-tasks.md` 先頭と `10` §21の相互確認／`10` §21と `33` §23の相互確認／`current-tasks.md` と本ファイルの検証記録の相互確認／Markdown見出し・内部参照の確認
+* 変更は3文書のみ（`current-tasks.md`・`docs/memo-app/10-tasks.md`・本ファイル）。`33` は前回確認で合格しているため**変更していない**
+
+### 未実施
+
+Codex**最終文書再確認**／Expo Go事前確認／EAS APK更新／更新APKでのPixel最終確認／`33` Gate D／`32` Gate D／PR作成／mainへのmerge。**Phase 16Cは最終完了としない**。コード・DB・schema・migration・依存・lockfile・`app.json`・`eas.json`・versionCode・`35` はいずれも無変更。
+
+## Phase 16C：Codex再々レビュー結果と文書Low 1件の修正（2026-08-02）
+
+対象HEAD＝`32303cb4fb4626d61c4269f8ab23adc06f343f34`（再レビュー対応コミット）。再々レビュー結果＝Critical 0／High 0／Medium 0／**Low 1**／Note 4、判定「要修正・再レビュー」。
+
+### 判定内容
+
+* **H1（守秘チェックが編集後も維持される）は解消**
+* 初回レビュー8件に**回帰なし**
+* `aria-checked` の追加に**問題なし**
+* **製品コード上の追加指摘なし**
+* 残件は**文書の現在状態不一致（Low 1件）のみ**
+
+### 今回の修正（文書のみ）
+
+* `current-tasks.md`：先頭の現在フェーズを本コミット後の状態（製品コードの指摘は解消済み・文書Low 1件も修正・Codex最終文書確認待ち・Expo Go／EAS APK／Pixel未実施・Gate D未通過・PR／main反映前・最終完了ではない）へ更新。名称整理エントリ本文に残っていた「main反映待ち」「Phase 16C未開始」を、**PR #1 merge済み・main反映済み／ランチャー表示名は次回の更新APKで最終確認**へ訂正
+* `docs/memo-app/10-tasks.md` §18.1：同じ本文の古い状態を同様に訂正（見出しは前回コミットで訂正済み）
+* `docs/memo-app/33-external-handoff-and-sharing.md`：冒頭の実装状態を「Codex再レビュー待ち」→再々レビュー結果と**Codex最終文書確認待ち**へ更新。参照先を §20〜§23 に整合。「§1〜§19の仕様内容は変更していない」を、**当初の製品判断・責務分担は維持しつつ §8.4.1 の安全補強を追加した**旨へ修正し、§20・§21 の同種の記述は**その時点の記録**であることを明示。§22.4 の壊れた内部参照（「結果は §22.5」）を実際の結果値へ差し替え。**§23（再々レビュー結果と文書修正）を追加**
+* 本ファイル：本回の記録を追加（過去回の記録は時系列として維持）
+
+### 検証
+
+* **コード変更なしのため、`expo export`・`expo-doctor`・単体43/43・H1のWeb確認48/48・回帰41/41・初回実装回帰83項目中81は再実行せず、既存の検証結果を維持**
+* この回に実行した確認：任意の `npx tsc --noEmit`（合格。コード無変更の確認目的）／`git diff --check`（作業ツリー・`d1a0600..HEAD` とも exit 0）／古い表現の再検索／章番号・内部参照の存在確認
+
+### 未実施
+
+Codex**最終文書確認**／Expo Go事前確認／EAS APK更新／更新APKでのPixel最終確認／`33` Gate D／`32` Gate D／PR作成／mainへのmerge。**Phase 16Cは最終完了としない**。コード・DB・schema・migration・依存・lockfile・`app.json`・`eas.json`・versionCode・`35`（未承認・未実装の将来構想）はいずれも無変更。
+
+（この後、上記HEAD `78625c4` に対してCodex最終文書確認を実施。結果は本ファイル冒頭のセクション「Codex最終文書確認の結果と文書Low 2件の修正」を参照）
+
+## Phase 16C：Codex再レビュー指摘の修正（2026-08-02）
+
+対象HEAD＝`c541ab12bf702c3c6c795a69b44124090f9383f7`（初回レビュー対応コミット）。再レビュー結果＝Critical 0／**High 1**／Medium 0／**Low 1**／Note 4、判定「要修正・再レビュー」。**2件とも修正**し、既存2コミットはamendせず追加コミットとした。対応表は `33` §22。
+
+### H1：本文編集後も守秘3チェックが維持される
+
+* 原因：`app/share/confirm.tsx` の本文変更処理が `checked` を維持していたため、守秘3項目を確認した後に本文へ顧客名・社内URL・非公開情報などを追記しても、**編集後の最終文章を再確認しないままコピー・共有できた**
+* 修正：本文が**実際に変わった場合のみ**（`next === text` は何もしない）、現場適応系（`workplace_question`／`workplace_report`）に限り守秘3チェックを全解除。全項目falseならstate更新もしない。通常系（prompt／memo）は対象外
+* 解除後はコピー・共有が `disabled`（`aria-disabled=true`）へ戻り、既存の必須確認文「3項目すべてを確認するまで、コピーと共有はできません。」を再表示。3項目を再確認すれば再び有効
+* **保存は守秘チェックと連動させない**（現場適応保存はprivate・Git候補falseを強制する内部保存。`33` §20.5の範囲を拡大しない）
+* 既存挙動（`copy.reset()`・共有結果解除・保存状態解除・保存後の再編集・保存中の編集不可・用途変更・通常系の操作・5経路の遷移ロック）は維持
+* 付随修正：Web確認の過程で **react-native-web が `accessibilityState.checked` を `aria-checked` へ反映しない**ことを実測で確認したため、チェックボックスへ `aria-checked` を明示追加（nativeは従来どおり `accessibilityState`）。表示グリフ（☑／☐）は従来から状態を表しており、色だけに依存していない
+* 仕様側：`33` §8.4.1 として「守秘確認後に本文を編集した場合は確認済み状態を破棄し、コピー・共有前に3項目を再確認させる」を明文化（新機能・新Phaseではなく、既存守秘チェックが最終文章へ適用されるための安全補強）
+
+### L1：Gate・現在状態の文書不一致
+
+* `10` 16C-3のAndroid実機確認欄から **Gate E（Web確認・確認済み）を除外**し、Gate D（Android共有）のみ未確認とした
+* 現在状態を案内する文書を更新：`00_START_HERE.md`／`CLAUDE.md`・`AGENTS.md`（Phase 16案内行を同一内容へ）／`docs/flowdock_mvp_design.md` §4.4.1（MVP当時の本文は残し、後続仕様は「コード実装済み・16CはAndroid最終確認待ち」へ）／`01` §1.8（進捗は転記せず状態の正本を参照）／`35` §1.2（優先順位を現在へ・16Cはコード実装済みだが最終完了ではない）／`08`・`14`・`16`・`21`・`29` のPhase 16追記見出し（「未着手」→状態の正本参照）
+* 過去時点の作業履歴・レビュー記録（本ファイルの各回記録、`current-tasks.md` の過去エントリ、`31` §16の凡例など）は**歴史記録として変更しない**
+
+### 検証（再レビュー修正後）
+
+* `npx tsc --noEmit` 合格／`npx expo export --platform web` 成功（`dist` 使用中のため出力先はリポジトリ外）／`npx expo-doctor` 17/18（既存の `expo` パッチ差のみ）／`git diff --check` 合格（作業ツリー・`d1a0600..HEAD` とも exit 0）
+* 単体確認＝**43/43合格**（42件維持・ID重複なし・5用途・ID取得失敗の結果型）
+* H1のWeb確認（パターンA〜F＋回帰）＝**48/48合格**。質問・報告の両方で「3項目選択→有効→本文編集→全解除→コピー/共有無効→再選択で有効」、部分選択（1項目）でも編集で解除、全未選択のまま編集してもエラーなし、**同じ文字列の再通知では解除しない**、編集でコピー結果・共有結果・保存状態も同時に解除、保存後の編集で再保存可・再共有には再確認が必要、通常系（プロンプト・さくっとメモ）は編集後もコピー・共有が有効で守秘チェック処理の影響を受けない
+* 既存Web確認の回帰＝初回レビュー修正分 **41/41合格**、初回実装分 **83項目中81合格**（不合格2件はコピー成功経路のみ＝ヘッドレスChromeの `clipboard-write` 拒否という既知の環境制約。コピー成功は確認できていない）
+* console.error・pageerror・unhandledrejection いずれも 0
+
+### 未実施
+
+Codex**再々レビュー**／Expo Go事前確認／EAS APK更新／更新APKでのPixel最終確認／`33` Gate D／`32` Gate D／PR作成／mainへのmerge。**Phase 16Cは最終完了としない**。DB・schema・migration・依存・lockfile・`app.json`・`eas.json`・versionCodeは無変更。`35` は未承認・未実装の将来構想のまま（新Phase番号なし）。
+
+## Phase 16C：Codex初回レビュー指摘の修正（2026-08-02）
+
+対象＝初回実装コミット `5e76a291a0eebad57b5e0285102ab3cedad7598b`。初回レビュー結果＝Critical 0／High 0／**Medium 4**／**Low 4**／Note 4、判定「要修正・再レビュー」。**8件すべてを修正**し、初回コミットはamendせず追加コミットとした。仕様（`33` §1〜§19）の製品判断は変更していない。詳細な対応表は `33` §21。
+
+### Medium
+
+* **M1 用途変更で編集内容を確認なしに失う**（`app/share/confirm.tsx`）：用途適用時の文章を `baseline` として保持し、`text !== baseline` で編集済みを判定。**同じ用途の再選択はno-op**（状態を一切変えない）、未編集なら確認なしで即時変更、編集済みなら既存の `confirmDialog`（Web＝`window.confirm`／Android・iOS＝`Alert.alert`）で「用途を変更／用途を変更すると、現在の編集内容は破棄されます。変更しますか？」を確認。キャンセルでは用途・文章・baseline・コピー／共有／保存表示のいずれも変更しない。用途ごとに編集文章を保持する構造は作らない（最小対応）
+* **M2 通常系保存の二重push**／**M3 4入口の遷移二重操作**：共通hook `src/hooks/useNavigationLock.ts` を新設（**同期refでロック**＝Reactの再描画を待たずに2回目を無視／UI用のboolean state／`useFocusEffect` で画面復帰時に解除／`navigate` の同期例外で解除＋`onError` 後始末／アンマウント後はstate更新しない／本文を引数・ログへ残さない）。適用は5経路＝プロンプト集・さくっとメモ詳細・現場適応の質問／報告の共有入口と、共有確認画面の通常系保存。保存は「ロック → `setNoteDraftHandoff` → `router.push('/notes/create')`」の順で、同期失敗時は `clearNoteDraftHandoff()`。各ボタンは遷移中 `disabled` ＋ `accessibilityState.disabled` / `busy` ＋処理中ラベル
+* **M4 保存後の状態が残る**（`app/share/confirm.tsx`）：現場適応の保存中は全文入力欄を `editable=false`（`accessibilityState.disabled`）にし、**保存開始時点の文章のスナップショットを保存処理へ渡す**。文章変更時は保存タイマーを解除して `idle` へ戻し、「保存しました」「保存失敗」の表示を解除して再保存できるようにした。通常系（prompt／memo）の保存は記録作成画面への遷移操作であり、現場適応のDB保存状態とは表示・無効化条件を分離した
+
+### Low
+
+* **L5 コピー結果が残る**（`src/hooks/useCopyFeedback.ts`）：`reset()` と**世代（generation）管理**を追加。文章変更時・用途変更確定時に `reset()` を呼ぶ。コピー処理中に文章が変わっても進行中の処理は中断しないが、完了時に世代が異なれば `done`／`failed` を表示せず `idle` へ戻す（古い文章の結果を新しい文章へ出さない）。`copying` 中のロックは解除しないため二重コピー防止は維持。既存利用箇所（さくっとメモ詳細・記録詳細・NoteForm・WorkplaceSceneForm）は従来どおり動作する後方互換API
+* **L6 プロンプトID取得失敗の無言フォールバック**（`src/features/share/shareTargets.ts`・`app/share/confirm.tsx`）：`ShareRequestResult` / `ShareTextResult` の判別可能ユニオンへ変更し、**用途5の「依頼文なし」と取得失敗を型で区別**。失敗時は本文だけへフォールバックせず `選択した用途の文章を準備できませんでした。別の用途を選んでください。` を表示し、コピー・共有・保存を無効化（内部ID・本文はメッセージへ含めない）。別用途を選べば復旧できる。単体確認用に `resolvePurposeRequest` を公開
+* **L7 `git diff --check`**：`33` 冒頭の変更行から末尾2スペースを外し、通常の空行で表示を維持。`33` §20.8・`current-tasks.md`・本ファイルの記述を実際の結果（初回コミットで通知1件／レビュー修正で解消）へ訂正
+* **L8 コメント不一致**（`src/features/workplace/workplaceTags.ts`）：「報告文の任意保存はPhase 16C-3で追加予定」→「実装済み」。定数値・タグ値は無変更
+
+### 検証（レビュー修正後）
+
+* `npx tsc --noEmit` 合格／`npx expo export --platform web` 成功（`dist` が別プロセス使用中のため出力先はリポジトリ外）／`npx expo-doctor` 17/18（失敗1件は既存の `expo` パッチ差＝無関係）
+* `git diff --check`：作業ツリー・`git diff --check d1a0600..HEAD` とも **exit 0**
+* 単体確認（実モジュールをコンパイルしてNode実行）＝**43/43合格**。42件維持・ID重複なし・用途1/2/4は既存本文と一致（末尾の入力待ち行のみ除去）・用途3は共有専用固定依頼文・**用途5の「依頼文なし」と取得失敗の区別**・失敗メッセージに内部IDを含まない
+* レビュー修正分のWeb確認（ヘッドレスChrome・専用ポート8117・puppeteerはscratchpad隔離）＝**41/41合格**。同一用途の再タップno-op／未編集の即時変更／編集済みの確認表示・キャンセルで文章と用途を維持・確定で再生成／5経路の高速二重押下でpushは1回・戻ると再操作可／保存中は入力不可・保存後の編集でidle復帰・再保存で新規レコード（`/notes` に2件）／文章変更でコピー・共有結果を解除・用途変更キャンセルでは解除しない／console.error・pageerror・unhandledrejection 0
+* 初回実装分のWeb確認を回帰実行＝**83項目中81合格**。不合格2件は**コピー成功経路のみ**で、ヘッドレスChromeが `clipboard-write` を拒否する既知の環境制約（アプリは失敗表示→通常状態へ復帰することを確認済み）
+
+### 未実施・次にやること
+
+Codex**再レビュー**／EAS APK更新（レビュー合格後にPhase 16全体を含む更新が必要）／Expo Go事前確認／更新APKでのPixel最終確認。`33` Gate D・`32` Gate Dは未通過のまま。**Phase 16Cは最終完了としない**。DB・schema・migration・依存・lockfile・`app.json`・`eas.json`・versionCodeは無変更。`35` は未承認・未実装の将来構想のまま（新Phase番号なし）。
+
+## Phase 16C：外部AI・共有受け渡しの実装（2026-08-02）
+
+### 前提（作業開始時のGit状態）
+
+`35` 構想文書の **PR #2 は merge済み・closed**。main／origin/main ＝ `d1a06003c89c52caa8ce8651bf9e15ee29458e06`、working tree clean、旧作業ブランチはローカル・リモートとも削除済み。この状態から作業ブランチ `feat/phase-16c-external-handoff-sharing` を作成した。PR作成・mainへのmergeは行わない。
+
+### 実装内容（正本 `33`。実装記録は `33` §20）
+
+* **16C-1 共通共有基盤**：`app/share/confirm.tsx`（route `/share/confirm`）を新設。出所表示／用途選択（さくっとメモのみ）／編集可能な全文／通常注意または現場適応の守秘3チェック／コピー／ChatGPTなどへ共有／新しい記録として保存／キャンセル。一時引き継ぎは `src/features/share/shareHandoff.ts`（共有対象 `SharePayload` と記録作成prefill `NoteDraftHandoff` を別スロットで保持。URLクエリ・DB・ログへ本文を出さない。`useState` 初期化で純粋get→初回commit後の `useEffect` でclear＝Strict Mode安全）。共有起動は `src/utils/share.ts`（native＝React Native標準 `Share`／web＝`navigator.share` の有無を検出。**新規依存なし**）
+* **16C-2 プロンプト集・さくっとメモ**：`app/prompts/index.tsx`（各カードに全幅の「ChatGPTなどへ共有」を追加。コピー・検索・絞り込み・展開・42件は無変更）、`app/memo/[id]/index.tsx`（「本文をコピー」の下に共有導線。本文が空のときは理由表示のみ）、`src/features/share/shareTargets.ts`（5用途の固定マッピングと共有文章の組み立て）、`app/notes/create.tsx`（prefill受け取り）
+* **16C-3 現場適応**：`app/workplace/question.tsx`・`app/workplace/report.tsx` に `outputAction` として共有導線を追加（既存コピー・保存・完了導線は無変更）。`src/features/workplace/workplaceService.ts` に `saveReportNote` を追加し、16B-3の module-private `saveWorkplaceNote` を共用（private・Git候補false・`workplace,workplace_report`・type=thought・`進捗報告メモ YYYY-MM-DD` を強制）。`src/components/WorkplaceSceneForm.tsx` は `onSave` 未指定時も `saveHint` を上書きできるようにした（未指定なら従来文言のまま＝他4場面は無変更）
+
+### 用途マッピングと用途3の例外
+
+* 用途1＝`thought`／用途2＝`brain_dump_to_action`／用途4＝`claude_prompt` を、`getPromptGroups()` から**IDで参照**（本文を別定数へ複製しない）。用途5は依頼文なし
+* **用途3「質問内容を整理する」だけは既存42件に意味の合う定義がないため、共有専用の固定依頼文**（`shareTargets.ts` の `QUESTION_ORGANIZE_REQUEST`）を新設。プロンプト集42件・`MOBILE_PROMPTS`・`NOTE_CATEGORIES`・Prompt Hubの検索/分類・DBテンプレート・ユーザー編集可能なプロンプト・`35` の編集対象には**含めない**。`buildQuestionText` は呼び出さない
+* 用途1・2・4では、既存プロンプト本文の**末尾に完全一致する入力待ち行**（`整理対象：` / `整理対象（説明文）：`）だけを表示用に除去し、`【依頼内容】`＋`【整理対象】` の共通形式にする。プロンプト定義・42件・生成HTMLは無変更
+
+### 判断B（守秘チェックの範囲）
+
+守秘3チェックを必須にするのは**共有確認画面内のコピー・共有のみ**。`/workplace/question`・`/workplace/report` の既存コピーには追加しない（既存機能を壊さない・既存画面には守秘注意文が常時表示。`33` §20.5）。
+
+### 検証
+
+* `npx tsc --noEmit` 合格／`npx expo export --platform web` 成功（`dist` が別プロセスに使用中だったため出力先をリポジトリ外のscratchpadへ指定）／`npx expo-doctor` 17/18（失敗1件は既存の `expo 54.0.35` vs `~54.0.36` パッチ差＝無関係・未修正）／`git diff --check` は**この時点で末尾空白の通知1件**（`33` 冒頭のMarkdownハード改行2スペース。Codexレビュー指摘L7としてレビュー修正コミットで解消）
+* 用途マッピング・末尾行除去の単体確認（実モジュールをコンパイルしてNode実行・確認後ハーネスはリポジトリ外に隔離）＝**32/32合格**
+* Web確認（ヘッドレスChrome・専用ポート8117・使い捨てuser-data-dir・puppeteerはscratchpad隔離。他スレッドのポート・`dist` を止めない）＝**82項目中80合格**。5用途と既定・共有文章の構造・元メモ非変更・空文字時の無効化・共有結果4分岐（成功／キャンセル／失敗／非対応）・禁止文言なし・6幅で横スクロールなし・記録作成prefillとリロード非復元・直アクセス空状態と戻る・42件維持・守秘3チェックの無効化と解除・報告文保存のprivate/`workplace_report`/Git候補外・質問画面の既存導線維持・console.error/pageerror/unhandledrejection 0件
+* **不合格2件はいずれもコピー成功経路**で、ヘッドレスChromeが `clipboard-write` を拒否する環境制約（`permissions.query`＝denied、`navigator.clipboard.writeText`＝NotAllowedError）。アプリ側は「コピーできませんでした」を表示し一定時間後に通常状態へ戻ることを確認（Phase 15と同じ既知事象）
+
+### 未確認・次にやること
+
+* **Codexレビュー**（実装差分）
+* **EAS APK更新**：新規ネイティブ依存はないため実装commit前のビルドは不要。ただし**Phase 16Cのコード変更を配布APKへ反映するにはCodexレビュー合格後にPhase 16全体を含むEAS APK更新が必要**（「新規依存がないため不要」ではない）
+* **Android実機確認**：Expo Go確認は**未実施**。Expo Go確認は事前確認であり、**最終確認は更新APKをPixelへインストールして行う**
+* `33` Gate D（Android共有）・`32` Gate D（共有・守秘）は**未通過**。Gate A・B・C・E・F・GはWeb範囲で確認済み
+* コピー成功経路（通常ブラウザ・実機で要確認）
+
+DB・`schema.ts`・`migrations.ts`・新規npm依存・`app.json`・`eas.json`・versionCode・既存ルート名は無変更。`35` は未承認・未実装の将来構想のまま（新Phase番号なし）。
 
 ## さくっとメモのブレインダンプ整理・外部AI受け渡し拡張構想（35）の体系整備（2026-08-02、文書のみ・Codex再々レビューPASS・PR作成待ち）
 
@@ -47,7 +251,7 @@
 
 **状態：35番文書の体系整備完了・Codex再々レビューPASS・作業ブランチpush後にPR作成待ち**（未承認・未実装・Phase 16C後に実装範囲を判断。コード・DB・依存は無変更・新Phase番号なし）。
 
-## 名称整理：利用者向け名称の MindHub／さくっとメモ統一（2026-07-27実装／2026-07-28 Codex最終再レビュー合格・main反映待ち）
+## 名称整理：利用者向け名称の MindHub／さくっとメモ統一（2026-07-27実装／2026-07-28 Codex最終再レビュー合格。**記録当時はmain反映待ち → その後 PR #1 merge済み・main反映済み**）
 
 ### 目的と正本
 利用者向けの現在の表記を、アプリ全体＝MindHub、`/memo` 系機能＝さくっとメモへ統一する。FlowDock は旧名称・内部由来・旧形式互換・歴史的記録として必要な箇所だけに残し、新しい利用者向け表示では使用しない。単純な一括置換ではなく各出現の責務を確認して判断した。**名称境界の詳細な正本は `01` §1.10**（本ログは作業状態と検証結果を中心にし、識別子一覧は §1.10 を参照）。

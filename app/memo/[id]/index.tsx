@@ -22,6 +22,11 @@ import SyncStatusBadge from '../../../src/components/SyncStatusBadge';
 import ListStateView from '../../../src/components/ListStateView';
 import { showConfirmDialog } from '../../../src/components/ConfirmDialog';
 import { useCopyFeedback } from '../../../src/hooks/useCopyFeedback';
+import {
+  setSharePayload,
+  clearSharePayload,
+} from '../../../src/features/share/shareHandoff';
+import { useNavigationLock } from '../../../src/hooks/useNavigationLock';
 import { formatDisplayDate } from '../../../src/utils/date';
 
 export default function MemoDetailScreen() {
@@ -34,6 +39,8 @@ export default function MemoDetailScreen() {
   const [reloadKey, setReloadKey] = useState(0);
   const [uploading, setUploading] = useState(false);
   const bodyCopy = useCopyFeedback();
+  // 共有確認画面への二重遷移防止（画面へ戻ると自動で解除される）。
+  const shareNavigation = useNavigationLock();
 
   // 主読み込み。例外は握りつぶさず loadError に分岐し、取得成功でnullは「該当なし」として扱う。
   // フォーカス解除・アンマウント後に古い取得が状態を更新しないよう active フラグで保護する。
@@ -82,6 +89,25 @@ export default function MemoDetailScreen() {
       setUploading(false);
       await reloadMemo();
     }
+  }
+
+  // さくっとメモ本文を共有確認画面へ渡す（用途選択・全文確認・編集はその画面で行う）。
+  // memos は読み取るだけで、共有用の編集は元メモへ書き戻さない（33 §7.2 SHARE-MEMO-04）。
+  // 高速二重押下でも遷移は1回だけ（同期ロック。画面へ戻ると解除される）。
+  function handleShare() {
+    if (!memo || !memo.body.trim()) return;
+    const body = memo.body;
+    shareNavigation.run(
+      () => {
+        setSharePayload({
+          kind: 'memo',
+          originLabel: 'さくっとメモ',
+          baseText: body,
+        });
+        router.push('/share/confirm');
+      },
+      () => clearSharePayload()
+    );
   }
 
   function handleDelete() {
@@ -134,30 +160,62 @@ export default function MemoDetailScreen() {
       <View style={styles.section}>
         <Text style={styles.bodyText}>{memo.body}</Text>
         {memo.body.trim() ? (
-          <TouchableOpacity
-            style={styles.copyBodyBtn}
-            onPress={() => bodyCopy.run(memo.body)}
-            disabled={bodyCopy.copying}
-            accessibilityRole="button"
-            accessibilityLabel="本文をコピー"
-            accessibilityState={{ disabled: bodyCopy.copying }}
-            accessibilityLiveRegion="polite"
-          >
-            <Text
-              style={[
-                styles.copyBodyBtnText,
-                bodyCopy.failed && styles.copyBodyBtnTextFailed,
-              ]}
+          <>
+            <TouchableOpacity
+              style={styles.copyBodyBtn}
+              onPress={() => bodyCopy.run(memo.body)}
+              disabled={bodyCopy.copying}
+              accessibilityRole="button"
+              accessibilityLabel="本文をコピー"
+              accessibilityState={{ disabled: bodyCopy.copying }}
+              accessibilityLiveRegion="polite"
             >
-              {bodyCopy.done
-                ? 'コピーしました ✓'
-                : bodyCopy.failed
-                  ? 'コピーできませんでした'
-                  : '本文をコピー'}
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={[
+                  styles.copyBodyBtnText,
+                  bodyCopy.failed && styles.copyBodyBtnTextFailed,
+                ]}
+              >
+                {bodyCopy.done
+                  ? 'コピーしました ✓'
+                  : bodyCopy.failed
+                    ? 'コピーできませんでした'
+                    : '本文をコピー'}
+              </Text>
+            </TouchableOpacity>
+            {/* 本文コピー（元本文をそのままコピーする既存導線）は維持し、その近くに
+                外部アプリへ渡す導線を追加する（33 §7.2 SHARE-MEMO-01）。
+                共有確認画面で用途を選び、全文を確認・編集できる。元メモは変更しない */}
+            <TouchableOpacity
+              style={[
+                styles.shareBodyBtn,
+                shareNavigation.navigating && styles.shareBodyBtnDisabled,
+              ]}
+              onPress={handleShare}
+              disabled={shareNavigation.navigating}
+              accessibilityRole="button"
+              accessibilityLabel="ChatGPTなどへ共有"
+              accessibilityState={{
+                disabled: shareNavigation.navigating,
+                busy: shareNavigation.navigating,
+              }}
+            >
+              <Text
+                style={[
+                  styles.shareBodyBtnText,
+                  shareNavigation.navigating && styles.shareBodyBtnTextDisabled,
+                ]}
+              >
+                {shareNavigation.navigating
+                  ? '共有確認画面へ移動しています…'
+                  : 'ChatGPTなどへ共有'}
+              </Text>
+            </TouchableOpacity>
+          </>
         ) : (
-          <Text style={styles.copyBodyEmptyText}>本文がありません</Text>
+          <Text style={styles.copyBodyEmptyText}>
+            本文がないため、コピーと共有はできません
+          </Text>
         )}
       </View>
 
@@ -283,6 +341,20 @@ const styles = StyleSheet.create({
   },
   copyBodyBtnText: { fontSize: 13, fontWeight: '600', color: '#2563EB' },
   copyBodyBtnTextFailed: { color: '#DC2626' },
+  shareBodyBtn: {
+    marginTop: 8,
+    paddingVertical: 10,
+    minHeight: 44,
+    justifyContent: 'center',
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#2563EB',
+    alignItems: 'center',
+  },
+  shareBodyBtnDisabled: { borderColor: '#D1D5DB' },
+  shareBodyBtnText: { fontSize: 13, fontWeight: '600', color: '#2563EB' },
+  shareBodyBtnTextDisabled: { color: '#9CA3AF' },
   copyBodyEmptyText: { marginTop: 10, fontSize: 12, color: '#9CA3AF' },
   metaSection: {
     backgroundColor: '#FFFFFF',

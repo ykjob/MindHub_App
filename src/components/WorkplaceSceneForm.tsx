@@ -26,9 +26,15 @@ export interface WorkplaceFieldDef {
 
 // 出力表示後に1件だけ追加できる操作（Phase 16B：詰まり→質問タイミング確認への導線など）。
 // render propではなく固定形式にし、現在の入力値・出力を受け取れるようにする。
+// disabled / busy / busyLabel は任意（Phase 16C：共有確認画面への遷移中に二重押下させないため）。
+// 未指定なら従来どおり常に押せる（既存の詰まり記録の導線は無変更）。
 export interface WorkplaceOutputAction {
   label: string;
   accessibilityLabel: string;
+  disabled?: boolean;
+  busy?: boolean;
+  /** busy中に表示するラベル（未指定なら label のまま） */
+  busyLabel?: string;
   onPress: (ctx: { values: Record<string, string>; output: string }) => void;
 }
 
@@ -52,7 +58,8 @@ interface Props {
   // 保存が必要な場面のみ渡す（現場適応モードでは終業前メモ・質問文）。
   onSave?: (text: string) => Promise<void>;
   saveLabel?: string;
-  // 保存ヒント文の上書き（未指定時は既存の終業前メモ向け文言を維持）。
+  // 保存ヒント文の上書き（未指定時は既存文言を維持：onSaveありは終業前メモ向け、
+  // onSaveなしは「この場面はコピーのみです」）。
   saveHint?: string;
   // 初期入力（翌朝再開・詰まり記録からの引き継ぎなど）。マウント時のみ反映する。
   initialValues?: Record<string, string>;
@@ -320,12 +327,31 @@ export default function WorkplaceSceneForm({
 
           {outputAction ? (
             <TouchableOpacity
-              style={styles.outputActionBtn}
+              style={[
+                styles.outputActionBtn,
+                (outputAction.disabled || outputAction.busy) &&
+                  styles.outputActionBtnDisabled,
+              ]}
               onPress={() => outputAction.onPress({ values, output })}
+              disabled={outputAction.disabled || outputAction.busy}
               accessibilityRole="button"
               accessibilityLabel={outputAction.accessibilityLabel}
+              accessibilityState={{
+                disabled: !!(outputAction.disabled || outputAction.busy),
+                busy: !!outputAction.busy,
+              }}
             >
-              <Text style={styles.outputActionText}>{outputAction.label}</Text>
+              <Text
+                style={[
+                  styles.outputActionText,
+                  (outputAction.disabled || outputAction.busy) &&
+                    styles.outputActionTextDisabled,
+                ]}
+              >
+                {outputAction.busy
+                  ? (outputAction.busyLabel ?? outputAction.label)
+                  : outputAction.label}
+              </Text>
             </TouchableOpacity>
           ) : null}
 
@@ -336,7 +362,7 @@ export default function WorkplaceSceneForm({
             </Text>
           ) : (
             <Text style={styles.saveHint}>
-              この場面はコピーのみです（保存はしません）。
+              {saveHint ?? 'この場面はコピーのみです（保存はしません）。'}
             </Text>
           )}
 
@@ -463,7 +489,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  outputActionBtnDisabled: { borderColor: '#D1D5DB' },
   outputActionText: { fontSize: 14, fontWeight: '600', color: '#2563EB' },
+  outputActionTextDisabled: { color: '#9CA3AF' },
   saveHint: { fontSize: 12, color: '#6B7280', lineHeight: 17 },
   // 完了後の移動：内容操作と分けるため上に区切り線を入れ、全幅ボタンを縦配置する。
   completionSection: {

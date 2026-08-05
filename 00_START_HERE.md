@@ -131,7 +131,7 @@ JSONエクスポート・インポート（PC⇔Android移行）を触る場合�
 * docs/memo-app/22-workplace-adaptation-data-and-integration.md
 * docs/memo-app/23-workplace-adaptation-security-and-portfolio.md
 
-Phase 16（未着手。文書のみ承認済み・実装前）を触る場合。
+Phase 16（正本は31〜33。16A・16Bは実装済み、16Cもコード実装済みで、Codexレビューと更新APKでのAndroid最終確認が残っている）を触る場合。実装・確認状態の正本は `docs/memo-app/09-roadmap.md` Phase 16 と `docs/memo-app/10-tasks.md` §21。
 
 * さくっとメモ入力・ホーム操作性（Phase 16A）：docs/memo-app/31-quick-memo-usability-improvement.md
 * 質問タイミング判断支援（Phase 16B）：docs/memo-app/32-workplace-question-timing-rules.md ＋ docs/memo-app/20〜23
