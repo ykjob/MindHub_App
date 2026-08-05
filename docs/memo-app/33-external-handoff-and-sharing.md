@@ -6,7 +6,7 @@
 対象Phase：Phase 16C  
 対象リポジトリ：`ykjob/MindHub_App`
 
-実装状態（2026-08-05）：**コード実装済み・Web確認済み。製品コードのCodex指摘はすべて解消済み**（初回レビューMedium 4・Low 4／再レビューHigh 1・Low 1を修正。再々レビューでH1解消・初回8件の非回帰・`aria-checked` 問題なし・製品コード上の追加指摘なしを確認）。その後の**Codex最終文書確認（対象HEAD `78625c4`）で文書Low 2件**を確認し、`c1828b5` と本コミットで修正済み（詳細は §23.4 と `docs/worklog/current.md`）。現在は**Codex最終文書再確認待ち・Expo Go事前確認待ち・EAS APK更新待ち・更新APKでのPixel最終確認待ち**で、`33` Gate D・`32` Gate D は未通過、PR作成・mainへのmergeも未実施。**Phase 16Cは最終完了ではない**。
+実装状態（2026-08-05）：**コード実装済み・Web確認済み。製品コードのCodex指摘はすべて解消済みで、Codex最終文書再確認＝PASS**（対象HEAD `c387df13ac94193ed56a21e9bbede7db810770ff`／Critical 0・High 0・Medium 0・Low 0・Note 0。経緯は §21〜§23）。**PR作成・main反映へ進めるレビュー状態**。ただし**Expo Go事前確認・EAS APK更新・更新APKでのPixel最終確認は未実施**で、`33` Gate D・`32` Gate D は**未通過**。**Phase 16Cは最終完了ではない**（Android受入後に最終完了を判定する）。
 
 詳細は §20（初回実装）・§21（初回レビュー対応）・§22（再レビュー対応）・§23（再々レビュー結果と文書修正）。当初の製品判断・責務分担は維持しており、Codex再レビュー対応として、守秘3チェックを編集後の最終文章へ適用する安全補強を §8.4.1 に追加した（保存を守秘チェック必須へ拡張する等の製品範囲変更はしていない）。
 
@@ -723,6 +723,32 @@ Codex**最終文書確認待ち**／Expo Go事前確認待ち／EAS APK更新待
 
 あわせて `docs/worklog/current.md` に今回の記録を追加した。`10-tasks.md` は今回のCodex確認で合格しているため変更していない。**コード・DB・schema・migration・依存・lockfile・`app.json`・`eas.json`・versionCode は変更なし**。
 
-#### 現在状態
+#### 状態（この時点）
 
 Codex**最終文書再確認待ち**／Expo Go事前確認待ち／EAS APK更新待ち／更新APKでのPixel最終確認待ち／`33` Gate D・`32` Gate D 未通過／PR作成・mainへのmerge未実施。**Phase 16Cは最終完了としない**。
+
+※上記は**この時点（`00dd897`・`c387df1` コミット時）の状態**である。その後に実施したCodex最終文書再確認の結果は §23.5 を参照し、**現在状態は本文書冒頭の「実装状態」を参照**する。
+
+### 23.5 Codex最終文書再確認PASS（2026-08-05）
+
+対象HEAD：`c387df13ac94193ed56a21e9bbede7db810770ff`。
+再確認結果：Critical 0／High 0／Medium 0／**Low 0**／Note 0／**最終判定＝PASS**。
+
+#### 確認された内容
+
+* `current-tasks.md` 先頭の現在状態が「Codex最終文書再確認待ち」に一本化されていた
+* 旧段階の「現在は Codex最終文書確認待ち」は解消済み
+* 検証時系列がコミット単位（`78625c4`／`c1828b5`／`00dd897`・`c387df1`）で整合
+* `docs/worklog/current.md` に自主確認による修正記録あり
+* `current-tasks.md`・`10-tasks.md` §21・本文書冒頭と §23.3〜§23.4・worklog の現在状態が相互に整合
+* コード・DB・依存・設定の変更なし
+
+#### PASS後の状態
+
+* **製品コードと文書のCodexレビュー工程は完了**
+* **PR作成・main反映へ進める**
+* Expo Go事前確認は**未実施**
+* EAS APK更新は**未実施**
+* 更新APKでのPixel最終確認は**未実施**
+* `33` Gate D・`32` Gate D は**未通過**
+* **Phase 16Cは最終完了ではない**（Android受入後に最終完了を判定する）
