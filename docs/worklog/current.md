@@ -30,6 +30,14 @@
 
 `npx tsc --noEmit`／`expo export`／`expo-doctor`／Webブラウザ確認／単体テスト／Expo Go再確認／EAS build／APK作成はいずれも**実行していない**。実行したのは文書更新と、`git diff --check`・状態検索・文書間の相互確認のみ。
 
+### PR #4 merge前の現在状態補足修正
+
+PR #4 のGitHub上での最終確認で**自主検出**：`current-tasks.md` 先頭の同一「現在状態」項目内に、旧段階の **「Expo Go未実施／EAS APK未更新／更新APKでのPixel未確認／`33` Gate D・`32` Gate D 未通過／PR作成・main反映前」** が残っていた。同じ項目の前半で「**PR #3でmain反映済み・Expo Go事前確認PASS**」と記録しているため矛盾する。旧段階部分は別表現へ置き換えず**重複ごと削除**した（EAS APK未更新・Pixel最終確認未実施・Gate D最終未通過・最終完了前は、同項目の前半と末尾で正しく記録済み）。
+
+正しい現在状態＝**main反映済み・Expo Go事前確認PASS・EAS APK更新待ち・更新APKでのPixel最終確認未実施・Gate D最終未通過・Phase 16C最終完了前**。
+
+`10-tasks.md`・`32`・`33` は**変更なし**。コード・DB・依存・設定・versionCode も**変更なし**。**Gate Dは最終未通過**、**Phase 16Cは最終完了前**、**PR #4 はmerge前**。
+
 ---
 
 （以下は過去の記録）
