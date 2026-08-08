@@ -309,7 +309,7 @@ MVP優先。
 
 ## Phase 16：さくっとメモ・質問タイミング・外部共有（2026-07-23 追加）
 
-ユーザー承認済みの追加仕様。正本は `31-quick-memo-usability-improvement.md`（16A）・`32-workplace-question-timing-rules.md`（16B）・`33-external-handoff-and-sharing.md`（16C）。**状態（2026-08-02）**：16A・16Bは実装済み（Android Expo Go確認済み・EAS APK未確認）、16Cは**実装済み・Web確認済み**（Codex初回レビューのMedium 4・Low 4、再レビューのHigh 1・Low 1をいずれも修正済み・**再々レビュー待ち**・EAS APK更新待ち・更新APKでのPixel最終確認待ち）。**Phase 16全体の完了は、更新APKでのAndroid確認まで行っていない**。Phase 15の完了状態・過去記録は書き換えない。
+ユーザー承認済みの追加仕様。正本は `31-quick-memo-usability-improvement.md`（16A）・`32-workplace-question-timing-rules.md`（16B）・`33-external-handoff-and-sharing.md`（16C）。**状態（2026-08-08）**：16A・16Bは実装済み（Android Expo Go確認済み。16A・16B個別のEAS受入項目は別途）、**16Cは最終完了**（CodexレビューPASS・main反映済み・Expo Go事前確認PASS・**EAS APK versionCode 10 のPixel最終受入PASS**。`33` Gate A〜G PASS・`32` Gate D PASS。詳細は `33` §23.7・`10-tasks.md` §21）。Phase 15の完了状態・過去記録は書き換えない。
 
 ### Phase 16A：さくっとメモ入力・ホーム操作性改善
 
@@ -342,7 +342,7 @@ MVP優先。
 
 完了条件：`33` の受入条件（Gate A〜G）。コピーは維持し、自動送信・共有履歴保存・元データ上書きはしない。
 
-状態（2026-08-02）：16C-1／16C-2／16C-3を実装し、機械確認（tsc・Web export・expo-doctor・diff --check）・用途マッピングの単体確認・Web確認まで完了。**Gate A・B・C・E・F・GはWeb範囲で確認済み、Gate D（Android共有）は未確認**。実装記録・未確認項目は `33` §20、Codex初回レビュー（Medium 4・Low 4）への対応は `33` §21、再レビュー（High 1・Low 1）への対応は `33` §22（守秘確認後に本文を編集した場合の再確認必須＝`33` §8.4.1）。新規ネイティブ依存はないが、配布APKへ反映するにはCodexレビュー合格後にPhase 16全体を含むEAS APK更新が必要。
+状態（2026-08-08）：**完了**。16C-1／16C-2／16C-3を実装し、機械確認・単体確認・Web確認、CodexレビューPASS、main反映（PR #3・#4）、Expo Go事前確認PASS（2026-08-05）を経て、**EAS preview APK versionCode 10（Build ID `10bedf3b-31c3-4fa7-aefe-73f62f960b5e`／対象commit `8706d7d`）をPixelへ上書きインストールし最終受入K1〜K22すべてPASS（2026-08-08）**。**`33` Gate A〜G PASS・`32` Gate D PASS**。記録は `33` §20（実装）・§21〜§23.5（レビュー対応）・§23.6（Expo Go事前確認）・**§23.7（v10最終受入・Phase 16C完了）**。Gate Dの「ChatGPT未インストール」条件は、Android標準OS共有を利用する実装に合わせて受入条件を整理した（`33` §17.4・§23.7。未インストール端末の実機テスト自体は未実施）。
 
 ### Phase 16の依存関係・実装順
 

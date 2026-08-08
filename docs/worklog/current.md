@@ -1,6 +1,42 @@
 # 最新作業ログ
 
-最終更新：2026-08-05（**Pixel＋Expo Goの実機事前確認＝PASS**。Phase 16CはPR #3でmain反映済み。次は**EAS APK更新**。**更新APKでのPixel最終確認・`33` Gate D・`32` Gate D は未実施／未通過**で、**Phase 16Cは最終完了ではない**）。前回：2026-08-05（Codex最終文書再確認＝PASS）、2026-08-05（最終文書再確認で残った文書Low 2件を修正）、2026-08-02（**Phase 16C を実装**）ほか。各回の詳細は以下のセクションを参照。
+最終更新：2026-08-08（**EAS APK versionCode 10 のPixel最終受入＝PASS。Phase 16C 最終完了**。`33` Gate A〜G PASS・`32` Gate D PASS。次の作業候補は**v11 UXレビュー**＝候補記録のみでコード変更なし）。前回：2026-08-05（Pixel＋Expo Goの実機事前確認＝PASS）、2026-08-05（Codex最終文書再確認＝PASS）、2026-08-02（**Phase 16C を実装**）ほか。各回の詳細は以下のセクションを参照。
+
+## Phase 16C：EAS APK v10最終受入PASS・最終完了（2026-08-08）
+
+### ビルド情報
+
+* Build ID：`10bedf3b-31c3-4fa7-aefe-73f62f960b5e`／Build URL：https://expo.dev/accounts/ykjob/projects/flowdock/builds/10bedf3b-31c3-4fa7-aefe-73f62f960b5e
+* APK：https://expo.dev/artifacts/eas/_fPMwwHwSgHXeHqTpmvN7iG5P6ZkeGKojNITU0WJ32o.apk （artifact期限 2026-08-19T06:54:09Z）
+* status FINISHED／ANDROID／profile preview／distribution INTERNAL／appVersion 1.0.0／**versionCode 10**／SDK 54.0.0／applicationId `com.ykjob.mindhub`
+* 対象commit：**`8706d7d3fcbfa349a1b71c4d45bb65e7e61fbb0a`**（`chore: bump android version code to 10`）。EASビルドは1回のみ
+
+### Pixel最終受入：K1〜K22 すべてPASS
+
+* K1〜K5：アプリ名「MindHub」／正常起動／**Expo Go・Metroなしの単体起動**／赤いエラー画面・クラッシュなし／**既存メモ・設定を保持**（versionCode 9 から上書き更新）
+* K6〜K10：プロンプト集・さくっとメモ・現場適応（守秘3項目確認後）からOS共有画面が開く／ChatGPTを選んでも**自動送信されない**／キャンセル・戻る操作後にMindHubへ戻り**共有文章を維持**
+* K11〜K16：日本語の文字化けなし／改行保持／**長文の先頭・中間・末尾が欠けない**／連打で多重共有画面が開かない／キャンセル後もクラッシュなし／**誤った「送信完了」「共有完了」表示なし**
+* K17〜K22：守秘3項目未確認ではコピー・共有不可／3項目確認で可能／**本文編集で3チェック全解除**／解除後は再び不可／再確認で再び可能／**K22：実機でコピー成功を確認**
+* **K22により、ヘッドレスWebでは環境制約で確認できなかった「コピー成功経路」も実機で確認済みとなった**
+
+### Gate結果とChatGPT未インストールGateの設計整理
+
+* **`33` §17 Gate A〜G：すべてPASS**（A・B・C・E・F・GはWeb確認、DはversionCode 10実機）
+* **`32` §18.4 Gate D：PASS**（Gate A・B・C・Eも既存の実装・確認記録と整合させて反映）
+* 旧Gate条件「ChatGPT未インストールでもクラッシュしない」を、**「特定の共有先アプリのインストール有無に依存せず、Android標準のOS共有画面を利用する」**へ整理した。理由：`src/utils/share.ts` はAndroid標準 `Share.share({ message })` を呼ぶだけで、**ChatGPTのpackage指定・直接起動・インストール有無の検査を行わない**。未インストールのアプリはOS共有候補に出ないだけで、候補列挙はAndroidの責務。旧条件は実装に対して特定アプリ依存のテスト条件になっていた
+* **ChatGPTをアンインストールしての実機テストは実施していない**（そのためのアンインストールも行っていない）。2026-08-05のExpo Go記録にある「ChatGPT未インストール端末は未確認」は歴史記録として残す
+
+### 判定
+
+**Phase 16C 最終完了（2026-08-08）**。`10-tasks.md` の 16C-1〜16C-3 を `[x]` にした。
+
+### 今回の作業範囲
+
+* **文書のみ**（`current-tasks.md`・`docs/memo-app/10-tasks.md`・`11-open-issues.md`・`32`・`33`・本ファイル ほか現在状態の案内文書）
+* **コード変更なし／DB・schema・migration変更なし／依存・lockfile変更なし／`app.json`・`eas.json` 変更なし（versionCodeは10のまま）／`.claude/settings.local.json` 変更なし**
+* **EAS再ビルドなし**。`tsc`・`expo export`・`expo-doctor`・Web確認・単体テスト・Expo Go再確認・Pixel再確認も**実行していない**（docs-onlyのため）。実行したのは文書検索・文書間の相互確認・`git diff --check`
+* 利用者向けボタン名 **`ChatGPTなどへ共有` はv10仕様として変更していない**（コード・UI無変更）
+* 次タスクとして **v11 UXレビュー候補**を `11-open-issues.md` §20 と `current-tasks.md` に記録（候補記録のみ・採用未確定・新Phase番号なし・versionCodeは10のまま）
 
 ## Phase 16C：Expo Go実機事前確認PASS（2026-08-05）
 
