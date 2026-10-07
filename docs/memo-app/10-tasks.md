@@ -5,7 +5,10 @@
 * [x] 現行Webビルド・型チェックと公開情報の確認
 * [x] Web公開用設定・最大480px表示・Pages workflow・README追加
 * [x] 公開用exportと通常Expo/Android設定の維持を確認
-* [ ] GitHub Pages有効化・公開URLでの操作/幅別確認
+* [x] GitHub Pages有効化・公開URLでの操作/幅別確認（HTTP 200、Actions build/deploy success、70件幅別確認＋候補名修正後の3幅再確認、保存/編集/再読込/コピー一致/Markdown表示）
+* [x] 公開専用のプロジェクト候補を汎用名へ限定、通常ビルドの既存候補維持を確認
+* [x] 直接アクセス時のHTTPキャッシュ再検証、最新版画面と公開済みService Worker/起動スクリプトの一致を確認
+* URL：https://ykjob.github.io/MindHub_App/ 。最終コード `dbad47f`、Actions run `37587288350` success。
 * Android実機・APK再ビルドは今回対象外。既存PhaseのGate判定は変更しない。
 
 ## 1. タスク状態

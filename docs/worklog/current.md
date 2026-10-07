@@ -1,6 +1,20 @@
 # 最新作業ログ
 
+最終更新：2026-10-07（就活ポートフォリオWeb公開・公開URL確認完了）
+
 ## 就活ポートフォリオWeb公開（2026-10-07）
+
+### 最終確認：公開完了
+
+* URL：https://ykjob.github.io/MindHub_App/ 。最終コードcommit `dbad47f8681d94fed1aab4b4884ea088829fc287`。Actions run `37587288350` のbuild/deployはsuccess、公開HTTP 200。GitHub PagesのSourceはGitHub Actions。
+* 公開ブラウザでホーム・SQLiteの空状態を確認。架空のさくっとメモ作成→保存→編集→保存→詳細URLを再読み込みして全文保持、コピー成功表示とクリップボード本文一致を確認。notesの架空記録作成・private/Git候補対象外・Markdown表示と詳細への直接アクセスも確認。プロンプトから共有確認画面への受け渡し・注意文・共有内容なしの直接アクセス時表示を確認。OS共有ダイアログ/外部アプリへの実送信は今回未実施。
+* 主要4画面（home/notes/workplace/prompts）×360/390/412/480/768/1024/1280＝28件、作成/詳細/編集・設定・現場適応入力・質問タイミング・共有確認の14画面×360/390/768＝42件、合計70件すべてdocument/rootの横はみ出しなし。1280幅でもrootは480pxで中央寄せ。360/390/1280の主要画面スクリーンショットを目視。ブラウザログにerror/warnなし。
+* 追加修正：記録作成画面の既存プロジェクト候補に個人の別プロジェクト名があったため、公開専用ビルドフラグでdemo/study/life/generalへ限定。通常Web/Android/プロンプトHTML生成の既存候補10件は維持。両フラグ状態を機械確認し、公開bundleに個人の別プロジェクト名なし。最新版の作成画面で汎用候補・個人候補なしを確認し、3幅を再確認。
+* 更新後の直接アクセスがHTTPキャッシュ上の古いindex.htmlを取得する事象を確認し、Service WorkerでnavigationとSPAフォールバックのHTMLをno-cacheで再検証、登録時updateViaCacheをnoneへ。公開済み2スクリプトはローカル最終版と一致、最新版の直接アクセスを確認。キャッシュへの保存やメモ送信の処理は追加していない。
+* docs/worklog/current.md・AGENTS.md・.env・docs/mobile-view/prompts.htmlの公開URLはHTTP 404。リポジトリの既存開発資料は元々publicであり今回削除しないが、公開WebのREADME導線/配布物へ内部文書を追加しない。汎用プロンプトは機能として残す。公開bundleの秘密情報パターンにも該当なし。
+* 最終差分：app.json/eas.json/依存/lockfile/DB/schema/migrationは無変更。srcは公開時候補の条件分岐のみ。通常Expo configは元の各項目と一致。Android実機・APK再作成・スマホ実機Web・Safariは未実施、推測で合格にしない。既存Phase Gateは変更しない。
+
+### 調査・初回公開の記録
 
 * ユーザーから最小変更でのWeb公開・commit・pushを明示依頼。基準mainは `124f404c8bc3df87d2ec0342e2ce748187c474d4`。新規クローンの作業ツリーはclean。既存の端末内チェックアウトは変更しない。
 * 開始時にAGENTS・00_START_HERE・current-tasks・本ログとWeb/UI/守秘仕様を確認。共通規則が指定する `docs/process/development-workflow.md` はリポジトリに存在しないため、リポジトリ規則と今回の明示依頼に従う。
@@ -9,10 +23,10 @@
 * 公開用baseUrl・最大480pxのroot・日本語ページ名/説明・404.html・distだけのworkflowを追加。ビルド時に公開ファイルの許可リストでDB・文書・source map等を拒否する。
 * READMEの未実装Google自動連携を訂正し、機能・保存先・Web制限・生成AI活用を説明。既存docsは元々publicリポジトリの開発資料であり、今回のWebサイトへ配布しない。汎用プロンプトの注意文は実データではない。
 * 追跡ファイルの秘密情報パターン・個人連絡先・データファイル候補を確認し、公開出力28ファイルにも秘密トークン/私的連絡先の該当なし。DB初期化はテーブル作成のみで、開発者のメモ・GitHub設定のseedはない。秘密情報が絶対に存在しないという保証や全Git履歴の監査ではない。
-* 公開用export・型チェック・diff check成功。通常Expo configの元app.json各項目との一致を機械確認。app.json・eas.json・DB/schema/migration・依存/lockfile・app/srcの画面コードは無変更。Android実機・EAS/APKは未実施。
-* 現段階は公開先有効化・公開環境での操作/幅別確認待ち。認証情報の転用は行わず、接続済みGitHub機能とユーザーのブラウザログインを使う。
+* 初回公開前：公開用export・型チェック・diff check成功。通常Expo configの元app.json各項目との一致を機械確認。この時点ではapp.json・eas.json・DB/schema/migration・依存/lockfile・app/srcの画面コードは無変更。Android実機・EAS/APKは未実施。以後の公開時候補の修正は上記最終確認を参照。
+* 初回公開前は公開先有効化・公開環境での操作/幅別確認待ちだった。認証情報の転用は行わず、接続済みGitHub機能とユーザーのブラウザログインで公開を完了した。
 
-最終更新：2026-08-08（**EAS APK versionCode 10 のPixel最終受入＝PASS。Phase 16C 最終完了**。`33` Gate A〜G PASS・`32` Gate D PASS。次の作業候補は**v11 UXレビュー**＝候補記録のみでコード変更なし）。前回：2026-08-05（Pixel＋Expo Goの実機事前確認＝PASS）、2026-08-05（Codex最終文書再確認＝PASS）、2026-08-02（**Phase 16C を実装**）ほか。各回の詳細は以下のセクションを参照。
+前回更新：2026-08-08（**EAS APK versionCode 10 のPixel最終受入＝PASS。Phase 16C 最終完了**。`33` Gate A〜G PASS・`32` Gate D PASS。次の作業候補は**v11 UXレビュー**＝候補記録のみでコード変更なし）。前回：2026-08-05（Pixel＋Expo Goの実機事前確認＝PASS）、2026-08-05（Codex最終文書再確認＝PASS）、2026-08-02（**Phase 16C を実装**）ほか。各回の詳細は以下のセクションを参照。
 
 ## Phase 16C：EAS APK v10最終受入PASS・最終完了（2026-08-08）
 

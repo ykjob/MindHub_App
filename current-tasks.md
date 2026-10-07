@@ -3,9 +3,10 @@
 ## 就活ポートフォリオWeb公開（2026-10-07）
 
 * ユーザー依頼によりGitHub Pages向けのWeb出力・workflow・READMEを追加。アプリ仕様や新Phaseの追加ではない。
-* 現行Expo Web export・公開用export・型チェック・公開物28ファイルの確認は成功。公開用のみ最大480px・baseUrl・SQLite用Service Workerを適用。通常Expo設定は元のapp.jsonと一致。
+* 現行Expo Web export・公開用export・型チェック・公開物28ファイルの確認は成功。公開用のみ最大480px・baseUrl・SQLite用Service Workerを適用。通常Expo設定は元のapp.jsonと一致。公開用のプロジェクト候補はdemo/study/life/generalへ限定し、通常ビルドの既存候補10件は維持。
 * 秘密トークン・個人メモ・DB・内部開発文書をWeb配布物へ含めない。READMEは公開機能・制限・生成AI活用を説明する。汎用プロンプトはアプリ機能として含む。
-* GitHub Pages有効化と公開環境での画面・保存・幅別確認は確認待ち。Android実機確認・APK再作成は今回未実施、versionCode 10を維持。
+* **公開完了**：https://ykjob.github.io/MindHub_App/ 。最終コード `dbad47f`、Actions run `37587288350` build/deployともsuccess・HTTP 200。主要4画面7幅＋他14画面3幅＝70件すべて横はみ出しなし。さくっとメモ作成/編集/再読込/コピー一致、notes作成/Markdown表示、共有確認の表示を公開URLで確認。候補名修正後の作成画面3幅と直接アクセスも再確認。
+* Androidのapp.json・eas.json・versionCode 10・依存/lockfile・DB/schema/migrationは維持。Android実機・APK再作成・スマホ実機Web・Safariは今回未確認/未実施。既存Phaseの受入判定は変更しない。
 
 ## 現在のフェーズ
 
