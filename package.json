@@ -33,6 +33,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "build:pages": "node scripts/build-pages.mjs",
     "generate:prompt-hub": "node scripts/generate_prompt_hub.mjs"
   },
   "private": true

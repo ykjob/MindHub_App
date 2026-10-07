@@ -1,5 +1,12 @@
 # Current Tasks
 
+## 就活ポートフォリオWeb公開（2026-10-07）
+
+* ユーザー依頼によりGitHub Pages向けのWeb出力・workflow・READMEを追加。アプリ仕様や新Phaseの追加ではない。
+* 現行Expo Web export・公開用export・型チェック・公開物28ファイルの確認は成功。公開用のみ最大480px・baseUrl・SQLite用Service Workerを適用。通常Expo設定は元のapp.jsonと一致。
+* 秘密トークン・個人メモ・DB・内部開発文書をWeb配布物へ含めない。READMEは公開機能・制限・生成AI活用を説明する。汎用プロンプトはアプリ機能として含む。
+* GitHub Pages有効化と公開環境での画面・保存・幅別確認は確認待ち。Android実機確認・APK再作成は今回未実施、versionCode 10を維持。
+
 ## 現在のフェーズ
 
 * **次の作業候補：v11 UXレビュー（未着手・実装開始ではない）**：versionCode 10 を実際に使った状態から、UIの文言・導線を横断レビューして次回versionCode 11の改善候補を決める。**今回はコード・UIを変更していない**。最有力候補は共有ボタン名 `ChatGPTなどへ共有`（ChatGPT専用機能に見える可能性がある一方、実装はAndroid／Web標準共有）。候補ラベル `他のアプリに共有`＋補足文 `ChatGPT、Gemini、メール、メモなど、端末の共有先から選べます`。**採用は未確定**で、他のUX課題とまとめてv11レビュー時に判断する。観点一覧と未確定事項は `11-open-issues.md` §20。**新しいPhase番号は作らない。versionCodeは10のまま**

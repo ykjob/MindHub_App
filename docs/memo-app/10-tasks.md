@@ -1,5 +1,13 @@
 # タスクリスト
 
+## 就活ポートフォリオWeb公開（2026-10-07、Phaseとは別の公開作業）
+
+* [x] 現行Webビルド・型チェックと公開情報の確認
+* [x] Web公開用設定・最大480px表示・Pages workflow・README追加
+* [x] 公開用exportと通常Expo/Android設定の維持を確認
+* [ ] GitHub Pages有効化・公開URLでの操作/幅別確認
+* Android実機・APK再ビルドは今回対象外。既存PhaseのGate判定は変更しない。
+
 ## 1. タスク状態
 
 タスクは以下の状態で管理する。

@@ -1,5 +1,17 @@
 # 最新作業ログ
 
+## 就活ポートフォリオWeb公開（2026-10-07）
+
+* ユーザーから最小変更でのWeb公開・commit・pushを明示依頼。基準mainは `124f404c8bc3df87d2ec0342e2ce748187c474d4`。新規クローンの作業ツリーはclean。既存の端末内チェックアウトは変更しない。
+* 開始時にAGENTS・00_START_HERE・current-tasks・本ログとWeb/UI/守秘仕様を確認。共通規則が指定する `docs/process/development-workflow.md` はリポジトリに存在しないため、リポジトリ規則と今回の明示依頼に従う。
+* 現行 `expo export --platform web` 成功（1153 modules）、`tsc --noEmit` 成功。
+* PagesはCOOP/COEP設定とSPAリライトを提供しない。Web出力だけに同一originの応答へヘッダーを付けるService Worker、SQLite起動前の初回1回リロード、404時のSPA再取得を追加。データアクセス・キャッシュ・自動送信処理は追加しない。
+* 公開用baseUrl・最大480pxのroot・日本語ページ名/説明・404.html・distだけのworkflowを追加。ビルド時に公開ファイルの許可リストでDB・文書・source map等を拒否する。
+* READMEの未実装Google自動連携を訂正し、機能・保存先・Web制限・生成AI活用を説明。既存docsは元々publicリポジトリの開発資料であり、今回のWebサイトへ配布しない。汎用プロンプトの注意文は実データではない。
+* 追跡ファイルの秘密情報パターン・個人連絡先・データファイル候補を確認し、公開出力28ファイルにも秘密トークン/私的連絡先の該当なし。DB初期化はテーブル作成のみで、開発者のメモ・GitHub設定のseedはない。秘密情報が絶対に存在しないという保証や全Git履歴の監査ではない。
+* 公開用export・型チェック・diff check成功。通常Expo configの元app.json各項目との一致を機械確認。app.json・eas.json・DB/schema/migration・依存/lockfile・app/srcの画面コードは無変更。Android実機・EAS/APKは未実施。
+* 現段階は公開先有効化・公開環境での操作/幅別確認待ち。認証情報の転用は行わず、接続済みGitHub機能とユーザーのブラウザログインを使う。
+
 最終更新：2026-08-08（**EAS APK versionCode 10 のPixel最終受入＝PASS。Phase 16C 最終完了**。`33` Gate A〜G PASS・`32` Gate D PASS。次の作業候補は**v11 UXレビュー**＝候補記録のみでコード変更なし）。前回：2026-08-05（Pixel＋Expo Goの実機事前確認＝PASS）、2026-08-05（Codex最終文書再確認＝PASS）、2026-08-02（**Phase 16C を実装**）ほか。各回の詳細は以下のセクションを参照。
 
 ## Phase 16C：EAS APK v10最終受入PASS・最終完了（2026-08-08）
