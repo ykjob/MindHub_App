@@ -5,10 +5,11 @@ self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim(
 self.addEventListener('fetch', (event) => {
   if (new URL(event.request.url).origin !== self.location.origin) return;
   event.respondWith((async () => {
-    let response = await fetch(event.request);
+    // Revalidate documents so an old HTTP-cached 404 cannot load an old app version.
+    let response = await fetch(event.request, event.request.mode === 'navigate' ? { cache: 'no-cache' } : undefined);
     // Serve the SPA with HTTP 200 when reloading a dynamic/local-data route.
     if (event.request.mode === 'navigate' && response.status === 404) {
-      response = await fetch(new URL('index.html', self.registration.scope));
+      response = await fetch(new URL('index.html', self.registration.scope), { cache: 'no-cache' });
     }
     if (response.status === 0) return response;
     const headers = new Headers(response.headers);

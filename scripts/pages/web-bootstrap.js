@@ -12,7 +12,7 @@
       message('このブラウザではWeb版の保存機能を利用できません。最新版のChromeやEdgeなどでお試しください。');
       return;
     }
-    await navigator.serviceWorker.register(new URL('web-isolation-sw.js', base), { scope: base.pathname });
+    await navigator.serviceWorker.register(new URL('web-isolation-sw.js', base), { scope: base.pathname, updateViaCache: 'none' });
     if (!window.crossOriginIsolated) {
       if (sessionStorage.getItem(retryKey)) {
         message('Web版を起動できませんでした。通常のブラウザで開き直してください。');
