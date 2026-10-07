@@ -4,7 +4,7 @@ import { resolve, relative } from 'node:path';
 
 const result = spawnSync(process.execPath, [
   'node_modules/expo/bin/cli', 'export', '--platform', 'web', '--output-dir', 'dist',
-], { stdio: 'inherit', env: { ...process.env, MINDHUB_PAGES: '1' } });
+], { stdio: 'inherit', env: { ...process.env, MINDHUB_PAGES: '1', EXPO_PUBLIC_MINDHUB_PORTFOLIO_WEB: '1' } });
 if (result.status !== 0) process.exit(result.status ?? 1);
 
 let html = readFileSync('dist/index.html', 'utf8');

@@ -63,7 +63,11 @@ export const NOTE_VISIBILITIES: {
   },
 ];
 
-export const SUGGESTED_PROJECTS: string[] = [
+// Only the portfolio web export substitutes generic suggestions.
+// Normal Web development, prompt HTML generation and Android keep the existing list.
+export const SUGGESTED_PROJECTS: string[] = process.env.EXPO_PUBLIC_MINDHUB_PORTFOLIO_WEB === '1'
+  ? ['demo', 'study', 'life', 'general']
+  : [
   'memo_app',
   'mindhub_app',
   'cocoro_call',
